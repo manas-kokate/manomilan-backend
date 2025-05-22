@@ -59,14 +59,6 @@ const userSchema = new Schema({
     religion: {
         type: String,
         required: true,
-        enum: ['Hindu', 'sikh', 'buddhist', 'muslim']
-    },
-    caste: {
-        type: String,
-        required: true,
-    },
-    subCaste: {
-        type: String,
     },
     motherTongue: {
         type: String,
