@@ -14,7 +14,7 @@ const userSchema = new Schema({
         type: String,
         required: true,
         enum: ['unmarried', 'divorced', 'widowed', 'being divorced'],
-        default: ['unmarried']
+        default: 'unmarried'
     },
     dateOfBirth: {
         type: Date,
@@ -30,10 +30,13 @@ const userSchema = new Schema({
         minlength: 2,
         maxlength: 30
     },
+    currentResidence: {
+        type: String,
+        required: true,
+    },
     height: {
         type: String,
         required: true,
-        default: [`5'4""`]
     },
     education: {
         type: [String],
@@ -43,7 +46,6 @@ const userSchema = new Schema({
         type: [String],
         required: true,
         enum: ['government Service', 'private sector', 'service+bussiness', 'student', 'internship'],
-        default: ['private secto']
     },
     monthlyIncome: {
         type: String,
@@ -54,7 +56,7 @@ const userSchema = new Schema({
     nationality: {
         type: String,
         required: true,
-        default: ['Indian']
+        default: 'Indian'
     },
     religion: {
         type: String,
@@ -63,7 +65,7 @@ const userSchema = new Schema({
     motherTongue: {
         type: String,
         required: true,
-        default: ['marathi']
+        default: 'marathi'
     },
     fatherFname: {
         type: String,
@@ -146,7 +148,12 @@ const userSchema = new Schema({
     profilePic: {
         type: String,
         required: true
-    }
+    },
+    profilePicStatus: {
+        type: String,
+        enum: ['Pending', 'Approved', 'Rejected'],
+        default: 'Pending'
+    },
 })
 
 userSchema.pre("save", async function (next) {

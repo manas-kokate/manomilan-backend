@@ -3,6 +3,8 @@ import bcrypt from "bcrypt"
 import sendMail from "../utils/mail.js";
 import jwt from "jsonwebtoken"
 import envCredentials from "../config/env.js";
+import expectationsModel from "../models/expectations.model.js";
+import { validationResult } from "express-validator";
 
 
 export const registerUser = async (req, res) => {
@@ -185,7 +187,7 @@ export const login = async (req, res) => {
 
     res.send({
       success: true,
-      message: "Captain Logged in successfully",
+      message: "User Logged in successfully",
       token: token
     })
 
@@ -196,9 +198,59 @@ export const login = async (req, res) => {
 }
 
 export const getUsers = async (req, res) => {
+  if (!req.id) {
+    return res.send({ message: "Unauthorized user" });
+  }
   const findUsers = await userModel.find({}, '-_id -password -email -__v',);
   if (!findUsers) {
     return res.send({ message: "No users found" })
   }
   return res.send({ users: findUsers })
+}
+
+export const addExpectations = async (req, res) => {
+  const findExpectation = await expectationsModel.findOne({ userId: req.id });
+
+  if (!findExpectation) {
+    const {
+      martialStatus,
+      currentResidence,
+      height,
+      education,
+      occupation,
+      monthlyIncome,
+      nationality,
+      religion
+    } = req.body;
+    try {
+      const expectations = new expectationsModel({
+        userId: req.id,
+        martialStatus,
+        currentResidence,
+        height,
+        education,
+        occupation,
+        monthlyIncome,
+        nationality,
+        religion
+      })
+
+      await expectations.save()
+      return res.send({ message: "Expectations Saved.Ready to match." })
+    } catch (error) {
+      return res.send({ message: "Server Error" })
+    }
+  } else {
+    return res.send({ message: "Expectation already exists.Update it and match." })
+  }
+}
+
+export const updateExpectation = async (req, res) => {
+  const errors = validationResult(req);
+  if (errors.array()) {
+    return res.send({ message: errors.array() });
+  }
+  // Assuming update logic goes here
+  return res.send({ message: 'Expectation' });
+
 }
