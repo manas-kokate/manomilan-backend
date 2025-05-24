@@ -29,10 +29,14 @@ const expectationSchema = new Schema({
         enum: ['government Service', 'private sector', 'service+bussiness', 'student', 'internship'],
     },
     monthlyIncome: {
-        type: String,
-        required: true,
-        minlength: 0,
-        maxlength: 8
+        min: {
+            type: String,
+            required: true
+        },
+        max: {
+            type: String,
+            required: true
+        }
     },
     nationality: {
         type: String,

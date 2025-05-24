@@ -10,12 +10,12 @@ const router = express.Router();
 router.post('/register', uploadMiddleware, registerUser);
 router.post('/login', login);
 router.get('/getusers', userAuth, getUsers);
-// router.post('/addexpectations', userAuth, addExpectations);
-// router.put('/editexpectation',
-//     [
-//         body('monthlyIncome').optional().isNumeric().withMessage('Monthly income must be a number')
-//     ]
-//     , updateExpectation)
+router.post('/addexpectations', userAuth, addExpectations);
+router.put('/editexpectation',
+    [
+        body('monthlyIncome').optional().isNumeric().withMessage('Monthly income must be a number')
+    ]
+    , userAuth, updateExpectation)
 
 
 export default router

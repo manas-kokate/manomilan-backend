@@ -247,10 +247,33 @@ export const addExpectations = async (req, res) => {
 
 export const updateExpectation = async (req, res) => {
   const errors = validationResult(req);
-  if (errors.array()) {
+  if (errors.array().length !== 0) {
+    console.log(errors.array())
     return res.send({ message: errors.array() });
   }
-  // Assuming update logic goes here
-  return res.send({ message: 'Expectation' });
 
+  try {
+    const updates = req.body;
+    console.log(updates)
+    console.log(req.id)
+    const userId = req.id
+
+    const exisitingExpectation = await expectationsModel.findOne({ userId })
+
+    if (!exisitingExpectation) {
+      return res.send({ message: "expectation Do not exist" })
+    }
+
+    const updatedExpectation = await expectationsModel.updateOne({ userId: exisitingExpectation.userId }, { $set: updates }, {
+      new: true,
+      runValidators: true
+    })
+
+    // console.log(updatedExpectation)
+    return res.send({ updatedData: updatedExpectation })
+
+
+  } catch (error) {
+    res.send({ message: "Data not updated.Check your update data" })
+  }
 }
