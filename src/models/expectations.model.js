@@ -26,7 +26,7 @@ const expectationSchema = new Schema({
     occupation: {
         type: [String],
         required: true,
-        enum: ['government Service', 'private sector', 'service+bussiness', 'student', 'internship'],
+        enum: ['Government Service', 'Private Sector', 'Service+bussiness', 'Student', 'Internship'],
     },
     monthlyIncome: {
         min: {

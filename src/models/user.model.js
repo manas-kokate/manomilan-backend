@@ -2,55 +2,66 @@ import { model, Schema } from "mongoose";
 import bcrypt from "bcrypt"
 
 const userSchema = new Schema({
-    name: {
-        type: String, required: true
+    usName: {
+        type: String,
+        required: true,
+        unique: true
     },
+    contactLogin: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    fsname: { type: String, required: true },
+    mdname: { type: String },
+    lsname: { type: String, required: true },
     gender: {
         type: String,
         required: true,
-        enum: ['male', 'female']
+        enum: ['male', 'female', 'other']
     },
-    martialStatus: {
-        type: String,
-        required: true,
-        enum: ['unmarried', 'divorced', 'widowed', 'being divorced'],
-        default: 'unmarried'
-    },
-    dateOfBirth: {
+    dob: {
         type: Date,
         required: true
     },
-    timeOfBirth: {
+    time: {
         type: String,
-        required: true,
+        required: true
     },
-    placeOfBirth: {
+    placeofbirth: {
         type: String,
         required: true,
         minlength: 2,
         maxlength: 30
     },
-    currentResidence: {
+    maritalsts: {
         type: String,
         required: true,
+        enum: ['unmarried', 'divorced', 'widowed', 'being divorced'],
+        default: 'unmarried'
     },
     height: {
         type: String,
-        required: true,
-    },
-    education: {
-        type: [String],
         required: true
     },
     occupation: {
-        type: [String],
-        required: true,
-        enum: ['government Service', 'private sector', 'service+bussiness', 'student', 'internship'],
-    },
-    monthlyIncome: {
         type: String,
         required: true,
-        minlength: 0,
+        enum: ['government service', 'private sector', 'service+bussiness', 'student', 'internship', 'other']
+    },
+    jobPosition: { type: String },
+    companyOrgName: { type: String },
+    designation: { type: String },
+    workaddress: { type: String },
+    workcity: { type: String },
+    workstate: { type: String },
+    monthlyinc: {
+        type: String,
+        required: false,
         maxlength: 8
     },
     nationality: {
@@ -58,103 +69,108 @@ const userSchema = new Schema({
         required: true,
         default: 'Indian'
     },
-    religion: {
-        type: String,
-        required: true,
+    caste: {
+        type: String
     },
-    motherTongue: {
+    mothertongue: {
         type: String,
         required: true,
         default: 'marathi'
     },
-    fatherFname: {
+    fathername: {
         type: String,
-        required: true,
-        minlength: 2,
-        maxlength: 50
+        required: true
     },
-    motherFname: {
+    mothername: {
         type: String,
-        required: true,
-        minlength: 2,
-        maxlength: 50
+        required: true
     },
-    maternalSurname: {
+    mamkul: {
+        type: String
+    },
+    parentnumber: {
         type: String,
-        required: true,
-        maxlength: 15,
+        minlength: 10,
+        maxlength: 10
     },
-    NumOfBrother: {
-        type: Number,
-        required: true,
-    },
-    NumOfSister: {
-        type: Number,
-        required: true,
-    },
-    otherinfo: {
+    wpno: {
         type: String,
-        maxlength: 200
+        minlength: 10,
+        maxlength: 10
     },
-    bloodGroup: {
+    alternateno: {
         type: String,
+        minlength: 10,
+        maxlength: 10
     },
-    sector: {
-        type: String,
-        required: true,
-        enum: ['mahanubhav', 'kabir panthi', 'warkari', 'malkari', 'manglik', 'non-manglik', 'maglik-non-manglik', 'partial manglik(soumya mangal)']
-    },
-    foodChoice: {
-        type: String,
-        required: true,
-        enum: ['vegetarian', 'non-vegetarian', 'mixed'],
-    },
-    spects: {
-        type: String,
-        required: true,
-        enum: ['Yes', 'No']
-    },
+    brother: { type: String },
+    sister: { type: String },
     divyang: {
         type: String,
         required: true,
         enum: ['Yes', 'No']
     },
-    email: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    parentsAddress: {
-        type: String,
-        required: true,
-        minlength: 10,
-        maxlength: 150,
-    },
-    mobile1: {
-        type: String,
-        required: true,
-        minlength: 10,
-        maxlength: 10,
-    },
-    mobile2: {
-        type: String,
-        minlength: 10,
-        maxlength: 10,
-    },
-    password: {
-        type: String,
+    education: {
+        type: [String],
         required: true
     },
+    candidateNo: {
+        type: String
+    },
+    parentaddress: {
+        type: String,
+        minlength: 10,
+        maxlength: 150
+    },
+    parentcity: { type: String },
+    parentstate: { type: String },
+    matchAgeFrom: { type: String },
+    matchAgeTo: { type: String },
+    matchHeightFrom: { type: String },
+    matchHeightTo: { type: String },
+    prefEdu: { type: String },
+    matchOccu: { type: String },
+    matchMaritalSts: { type: String },
+    matchIncome: { type: String },
+    matchCaste: { type: String },
+    matchWorkLocCitDis: { type: String },
+    franchise: { type: String },
+    PartnerDesc: {
+        type: String,
+        maxlength: 500
+    },
+    socials: { type: String },
+    sect: {
+        type: String,
+        enum: ['mahanubhav', 'kabir panthi', 'warkari', 'malkari']
+    },
+    manglik: {
+        type: String,
+        enum: ['manglik', 'non-manglik', 'partial manglik(soumya mangal)']
+    },
+    gotra: { type: String },
+    foodChoices: {
+        type: String,
+        enum: ['vegetarian', 'non-vegetarian', 'mixed']
+    },
+    spects: {
+        type: String,
+        enum: ['Yes', 'No']
+    },
+    complexion: { type: String },
+    hobbies: { type: String },
     profilePic: {
         type: String,
-        required: true
+        default: null
     },
     profilePicStatus: {
         type: String,
         enum: ['Pending', 'Approved', 'Rejected'],
         default: 'Pending'
-    },
-})
+    }
+});
+
+
 
 userSchema.pre("save", async function (next) {
     if (this.isModified('password')) {

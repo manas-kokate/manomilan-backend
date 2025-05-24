@@ -9,34 +9,66 @@ import { validationResult } from "express-validator";
 
 export const registerUser = async (req, res) => {
   const {
-    name,
+    usName,
+    contactLogin,
+    password,
+    fsname,
+    mdname,
+    lsname,
     gender,
-    martialStatus,
-    dateOfBirth,
-    timeOfBirth,
-    placeOfBirth,
+    dob,
+    time,
+    placeofbirth,
+    maritalsts,
     height,
-    education,
-    occupation,
-    monthlyIncome,
-    nationality,
-    religion,
-    caste,
-    subCaste,
-    motherTongue,
-    fatherFname,
-    motherFname,
-    maternalSurname,
-    NumOfBrother,
-    NumOfSister,
-    sector,
-    foodChoice,
+    complexion,
+    manglik,
+    gotra,
+    foodChoices,
     spects,
     divyang,
+    education,
+    occupation,
+    jobPosition,
+    companyOrgName,
+    designation,
+    monthlyinc,
+    candidateNo,
+    workaddress,
+    workcity,
+    workstate,
+    fathername,
+    mothername,
+    mamkul,
+    brother,
+    sister,
+    parentnumber,
+    wpno,
+    alternateno,
     email,
-    parentsAddress,
-    mobile1,
-    password
+    parentaddress,
+    parentcity,
+    parentstate,
+    nationality,
+    caste,
+    mothertongue,
+    sect,
+    socials,
+    hobbies,
+    matchAgeFrom,
+    matchAgeTo,
+    matchHeightFrom,
+    matchHeightTo,
+    prefEdu,
+    matchOccu,
+    matchMaritalSts,
+    matchIncome,
+    matchCaste,
+    matchWorkLocCitDis,
+    PartnerDesc,
+    franchise,
+    profilePicStatus,
+
   } = req.body
 
   const findUser = await userModel.findOne({ email: email });
@@ -50,39 +82,69 @@ export const registerUser = async (req, res) => {
     return res.send({ message: "Please Upload profile pic" })
   }
   let profilePic = req.files?.profilePic[0].filename;
-  // console.log(profilePic)
   try {
     const user = new userModel({
-      name,
-      gender,
-      martialStatus,
-      dateOfBirth,
-      timeOfBirth,
-      placeOfBirth,
-      height,
-      education,
-      occupation,
-      monthlyIncome,
-      nationality,
-      religion,
-      caste,
-      subCaste,
-      motherTongue,
-      fatherFname,
-      motherFname,
-      maternalSurname,
-      NumOfBrother,
-      NumOfSister,
-      sector,
-      foodChoice,
-      spects,
-      divyang,
-      email,
-      parentsAddress,
-      mobile1,
-      password,
-      profilePic
-    })
+      usName: usName.trim(),
+      contactLogin: contactLogin.trim(),
+      password: password.trim(),
+      fsname: fsname.trim(),
+      mdname: mdname.trim(),
+      lsname: lsname.trim(),
+      gender: gender.trim(),
+      dob, // usually a Date, so no trim
+      time: time.trim(),
+      placeofbirth: placeofbirth.trim(),
+      maritalsts: maritalsts.trim(),
+      height: height.trim(),
+      complexion: complexion.trim(),
+      manglik: manglik.trim(),
+      gotra: gotra.trim(),
+      foodChoices: foodChoices.trim(),
+      spects: spects.trim(),
+      divyang: divyang.trim(),
+      education: education.trim(),
+      occupation: occupation.trim(),
+      jobPosition: jobPosition.trim(),
+      companyOrgName: companyOrgName.trim(),
+      designation: designation.trim(),
+      monthlyinc, // Number, no trim
+      candidateNo: candidateNo.trim(),
+      workaddress: workaddress.trim(),
+      workcity: workcity.trim(),
+      workstate: workstate.trim(),
+      fathername: fathername.trim(),
+      mothername: mothername.trim(),
+      mamkul: mamkul.trim(),
+      brother, // Number, no trim
+      sister,  // Number, no trim
+      parentnumber: parentnumber.trim(),
+      wpno: wpno.trim(),
+      alternateno: alternateno.trim(),
+      email: email.trim(),
+      parentaddress: parentaddress.trim(),
+      parentcity: parentcity.trim(),
+      parentstate: parentstate.trim(),
+      nationality: nationality.trim(),
+      caste: caste.trim(),
+      mothertongue: mothertongue.trim(),
+      sect: sect.trim(),
+      socials: socials.trim(),
+      hobbies: hobbies.trim(),
+      matchAgeFrom, // Number, no trim
+      matchAgeTo,   // Number, no trim
+      matchHeightFrom: matchHeightFrom.trim(),
+      matchHeightTo: matchHeightTo.trim(),
+      prefEdu: prefEdu.trim(),
+      matchOccu: matchOccu.trim(),
+      matchMaritalSts: matchMaritalSts.trim(),
+      matchIncome: matchIncome.trim(),
+      matchCaste: matchCaste.trim(),
+      matchWorkLocCitDis: matchWorkLocCitDis.trim(),
+      PartnerDesc: PartnerDesc.trim(),
+      franchise: franchise.trim(),
+      profilePic, // Probably a file or Buffer, no trim
+      profilePicStatus: profilePicStatus.trim(),
+    });
     await user.save()
 
     await sendMail({
@@ -117,7 +179,7 @@ export const registerUser = async (req, res) => {
             </tr>
             <tr>
               <td style="color:#555555; font-size:16px; line-height:1.6;">
-                <p style="margin:0 0 20px;">Hi ${name},</p>
+                <p style="margin:0 0 20px;">Hi ${usName},</p>
                 <p style="margin:0 0 20px;">
                   Thanks for registering at manomilan! Your account has been created successfully.
                 </p>
@@ -153,7 +215,7 @@ export const registerUser = async (req, res) => {
       message: "User registered successfully."
     })
   } catch (error) {
-    console.log(error)
+    // console.log(error)
     res.send({
       success: false,
       message: "Server Error!",

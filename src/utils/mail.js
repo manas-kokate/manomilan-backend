@@ -15,7 +15,7 @@ let transporter = nodemailer.createTransport({
 export default async function sendMail({ to, subject, text, html }) {
 
     const mailOption = {
-        from: '"Manomilan" <sumedhzodape8003@gmail.com>',
+        from: '"Manomilan" <alkeshmanas0741@gmail.com>',
         to: to,
         subject: subject,
         text: text,
@@ -24,10 +24,11 @@ export default async function sendMail({ to, subject, text, html }) {
 
 
     await transporter.sendMail(mailOption, (err, info) => {
-        if (err) {
-            console.log(err)
-        } else {
-            console.log(info)
+        if (!err) {
+            return res.send({ status: true, message: "Mail Sent Successfully." })
+        }
+        else {
+            return res.send({ status: false, message: "Mail Not Sent." })
         }
     })
 
