@@ -41,8 +41,8 @@ const userSchema = new Schema({
     maritalsts: {
         type: String,
         required: true,
-        enum: ['unmarried', 'divorced', 'widowed', 'being divorced'],
-        default: 'unmarried'
+        enum: ['Unmarried', 'Divorced', 'Widowed', 'DivorceinProcess'],
+        default: 'Unmarried'
     },
     height: {
         type: String,
@@ -51,7 +51,7 @@ const userSchema = new Schema({
     occupation: {
         type: String,
         required: true,
-        enum: ['government service', 'private sector', 'service+bussiness', 'student', 'internship', 'other']
+        enum: ['government service', 'privateService', 'service+bussiness', 'business', 'internship', 'NotWorking']
     },
     jobPosition: { type: String },
     companyOrgName: { type: String },
@@ -67,7 +67,7 @@ const userSchema = new Schema({
     nationality: {
         type: String,
         required: true,
-        default: 'Indian'
+        default: 'India'
     },
     caste: {
         type: String
@@ -108,7 +108,7 @@ const userSchema = new Schema({
     divyang: {
         type: String,
         required: true,
-        enum: ['Yes', 'No']
+        enum: ['yes', 'no']
     },
     education: {
         type: [String],
@@ -158,7 +158,6 @@ const userSchema = new Schema({
         enum: ['Yes', 'No']
     },
     complexion: { type: String },
-    hobbies: { type: String },
     profilePic: {
         type: String,
         default: null
