@@ -316,8 +316,6 @@ export const updateExpectation = async (req, res) => {
 
   try {
     const updates = req.body;
-    console.log(updates)
-    console.log(req.id)
     const userId = req.id
 
     const exisitingExpectation = await expectationsModel.findOne({ userId })
