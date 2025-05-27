@@ -102,7 +102,7 @@ export const registerUser = async (req, res) => {
       foodChoices: foodChoices.trim(),
       spects: spects.trim(),
       divyang: divyang.trim(),
-      education: education.trim(),
+      education: education,
       occupation: occupation.trim(),
       jobPosition: jobPosition.trim(),
       companyOrgName: companyOrgName.trim(),
@@ -140,7 +140,7 @@ export const registerUser = async (req, res) => {
       matchIncome: matchIncome.trim(),
       matchCaste: matchCaste.trim(),
       matchWorkLocCitDis: matchWorkLocCitDis.trim(),
-      PartnerDesc: PartnerDesc.trim(),
+      // PartnerDesc: PartnerDesc.trim(),
       franchise: franchise.trim(),
       profilePic, // Probably a file or Buffer, no trim
       // profilePicStatus: profilePicStatus.trim(),

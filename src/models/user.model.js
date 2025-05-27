@@ -22,7 +22,7 @@ const userSchema = new Schema({
     gender: {
         type: String,
         required: true,
-        enum: ['male', 'female', 'other']
+        enum: ['male', 'female']
     },
     dob: {
         type: Date,
@@ -51,7 +51,7 @@ const userSchema = new Schema({
     occupation: {
         type: String,
         required: true,
-        enum: ['government service', 'privateService', 'service+bussiness', 'business', 'internship', 'NotWorking']
+        enum: ['government service', 'privateService', 'service+bussiness', 'business', 'studentInternship', 'NotWorking']
     },
     jobPosition: { type: String },
     companyOrgName: { type: String },
@@ -135,10 +135,6 @@ const userSchema = new Schema({
     matchCaste: { type: String },
     matchWorkLocCitDis: { type: String },
     franchise: { type: String },
-    PartnerDesc: {
-        type: String,
-        maxlength: 500
-    },
     socials: { type: String },
     sect: {
         type: String,
