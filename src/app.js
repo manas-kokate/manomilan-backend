@@ -1,7 +1,6 @@
 import express from "express";
 import userRouter from './routers/user.routers.js'
 import cors from 'cors'
-import userRouter from './routers/user.routers.js';
 import adminRouter from './routers/admin.router.js'
 
 const app = express();
