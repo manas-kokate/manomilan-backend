@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
 import userModel from "../models/user.model.js";
+import adminModel from "../models/admin.model.js";
+import { userInfo } from "os";
 
 
 export const userAuth = async (req, res, next) => {
@@ -22,4 +24,25 @@ export const userAuth = async (req, res, next) => {
         return res.send({ message: "Authorization Error" })
     }
 
-} 
+}
+
+export const adminAuth = async (req, res, next) => {
+    if (!req.headers.authorization) {
+        return res.send({ message: "Please Send auth token" })
+    }
+    const token = req.headers.authorization?.split(' ')[1]
+
+
+    try {
+        const decode = jwt.verify(token, envCredentials.secretKey)
+        const admin = await adminModel.findById(decode.id);
+        // console.log(user)
+        if (!admin) {
+            return res.send({ message: "Unauthorized user" });
+        }
+        req.id = decode.id;
+        next()
+    } catch (error) {
+        return res.send({ message: "Authorization Error" })
+    }
+}

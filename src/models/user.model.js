@@ -163,7 +163,7 @@ const userSchema = new Schema({
         enum: ['Pending', 'Approved', 'Rejected'],
         default: 'Pending'
     }
-});
+}, { timestamps: true });
 
 
 
