@@ -4,7 +4,6 @@ import sendMail from "../utils/mail.js";
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
 import expectationsModel from "../models/expectations.model.js";
-import { validationResult } from "express-validator";
 
 export const registerUser = async (req, res) => {
   const {
@@ -144,7 +143,7 @@ export const registerUser = async (req, res) => {
 
     await user.save();
 
-    res.send({
+    return res.send({
       status: true,
       success: true,
       message: "User registered successfully.",
@@ -202,73 +201,78 @@ export const login = async (req, res) => {
   }
 };
 
-export const getUsers = async (req, res) => {
-  if (!req.id) {
-    return res.send({ status: false, message: "Unauthorized user" });
-  }
-
-  const findUsers = await userModel.find({}, "-_id -password -email -__v");
-  if (!findUsers) {
-    return res.send({ status: false, message: "No users found" });
-  }
-
-  return res.send({ status: true, users: findUsers });
-};
-
 export const addExpectations = async (req, res) => {
   const findExpectation = await expectationsModel.findOne({ userId: req.id });
 
-  if (!findExpectation) {
-    const {
-      martialStatus,
-      currentResidence,
-      height,
-      education,
-      occupation,
-      monthlyIncome,
-      nationality,
-      religion,
-    } = req.body;
+  try {
+    if (!findExpectation) {
+      const {
+        matchAgeFrom,
+        matchAgeTo,
+        matchHeightFrom,
+        matchHeightTo,
+        prefEdu,
+        matchOccu,
+        matchMaritalSts,
+        matchIncome,
+        matchCaste,
+        matchWorkLocCitDis,
+        sect,
+        manglik,
+        gotra,
+        foodChoices,
+        spects
+      } = req.body;
 
-    try {
-      const expectations = new expectationsModel({
-        userId: req.id,
-        martialStatus,
-        currentResidence,
-        height,
-        education,
-        occupation,
-        monthlyIncome,
-        nationality,
-        religion,
-      });
+      try {
+        const expectations = new expectationsModel({
+          userId: req.id,
+          matchAgeFrom,
+          matchAgeTo,
+          matchHeightFrom,
+          matchHeightTo,
+          prefEdu,
+          matchOccu,
+          matchMaritalSts,
+          matchIncome,
+          matchCaste,
+          matchWorkLocCitDis,
+          sect,
+          manglik,
+          gotra,
+          foodChoices,
+          spects
+        });
 
-      await expectations.save();
+        await expectations.save();
+        return res.send({
+          status: true,
+          message: "Expectations Saved. Ready to match.",
+        });
+      } catch (error) {
+        return res.send({ status: false, message: "Server Error" });
+      }
+    } else {
       return res.send({
-        status: true,
-        message: "Expectations Saved. Ready to match.",
+        status: false,
+        message: "Expectation already exists. Update it and match.",
       });
-    } catch (error) {
-      return res.send({ status: false, message: "Server Error" });
     }
-  } else {
-    return res.send({
-      status: false,
-      message: "Expectation already exists. Update it and match.",
-    });
+  } catch (error) {
+    return res.send({ status: false, message: "Something went wrong.Check your req data." })
   }
 };
 
 export const updateExpectation = async (req, res) => {
-  const errors = validationResult(req);
-  if (errors.array().length !== 0) {
-    return res.send({ status: false, message: errors.array() });
+
+  const { updates } = req.body;
+  if (!updates) {
+    return res.send({ status: false, message: "No updates found for expectations." })
   }
 
-  try {
-    const updates = req.body;
-    const userId = req.id;
+  const userId = req.id;
 
+  try {
     const exisitingExpectation = await expectationsModel.findOne({ userId });
 
     if (!exisitingExpectation) {
@@ -278,7 +282,8 @@ export const updateExpectation = async (req, res) => {
       });
     }
 
-    const updatedExpectation = await expectationsModel.updateOne(
+
+    await expectationsModel.updateOne(
       { userId: exisitingExpectation.userId },
       { $set: updates },
       {
@@ -286,6 +291,11 @@ export const updateExpectation = async (req, res) => {
         runValidators: true,
       }
     );
+
+    const updatedExpectation = await expectationsModel.findOne({ userId }, '-_id -userId -createdAt -updatedAt -__v')
+    if (!updatedExpectation) {
+      console.log(updateExpectation)
+    }
 
     return res.send({ status: true, updatedData: updatedExpectation });
   } catch (error) {
@@ -295,3 +305,40 @@ export const updateExpectation = async (req, res) => {
     });
   }
 };
+
+export const getLoggedInUser = async (req, res) => {
+  const userId = req.id;
+
+  if (!userId) {
+    return res.send({ status: false, message: "Please send login credentials or token" });
+  }
+
+  const findUser = await userModel.findOne({ _id: userId });
+
+  if (!findUser) {
+    return res.send({ status: false, message: "User not found" });
+  }
+
+  return res.send({ status: true, result: findUser });
+
+}
+
+export const mutualMatching = async (req, res) => {
+  const userId = req.id;
+  if (!userId) {
+    return res.send({ status: false, message: "User Id not found" });
+  }
+  const CurrentExpectation = await expectationsModel.findOne({ userId })
+
+  const userLoggedIn = await userModel.findOne({ _id: userId })
+
+  const expectatedUser = await userModel.findOne({
+    maritalsts: CurrentExpectation.matchMaritalSts,
+    height: (CurrentExpectation.matchHeightFrom < CurrentExpectation.matchHeightTo),
+    occupation: CurrentExpectation.matchOccu,
+    monthlyinc: CurrentExpectation.matchIncome,
+    caste: CurrentExpectation.matchCaste,
+  })
+
+  console.log(expectatedUser)
+}

@@ -1,51 +1,36 @@
 import { Schema, model } from "mongoose";
-import mongoose from "mongoose";
 
 const expectationSchema = new Schema({
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'user'
     },
-    martialStatus: {
+    matchAgeFrom: { type: String },
+    matchAgeTo: { type: String },
+    matchHeightFrom: { type: String },
+    matchHeightTo: { type: String },
+    prefEdu: { type: String },
+    matchOccu: { type: String },
+    matchMaritalSts: { type: String },
+    matchIncome: { type: String },
+    matchCaste: { type: String },
+    matchWorkLocCitDis: { type: String },
+    sect: {
         type: String,
-        enum: ['unmarried', 'divorced', 'widowed', 'being divorced'],
-        required: true
+        enum: ['mahanubhav', 'kabir panthi', 'warkari', 'malkari']
     },
-    currentResidence: {
+    manglik: {
         type: String,
-        required: true
+        enum: ['manglik', 'non-manglik', 'partial manglik(soumya mangal)']
     },
-    height: {
+    gotra: { type: String },
+    foodChoices: {
         type: String,
-        required: true
+        enum: ['vegetarian', 'non-vegetarian', 'mixed']
     },
-    education: {
-        type: [String],
-        required: true
-    },
-    occupation: {
-        type: [String],
-        required: true,
-        enum: ['Government Service', 'Private Sector', 'Service+bussiness', 'Student', 'Internship'],
-    },
-    monthlyIncome: {
-        min: {
-            type: String,
-            required: true
-        },
-        max: {
-            type: String,
-            required: true
-        }
-    },
-    nationality: {
+    spects: {
         type: String,
-        required: true,
-        default: 'Indian'
-    },
-    religion: {
-        type: String,
-        required: true,
+        enum: ['Yes', 'No']
     }
 }, { timestamps: true });
 

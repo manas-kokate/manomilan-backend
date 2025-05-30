@@ -51,7 +51,7 @@ const userSchema = new Schema({
     occupation: {
         type: String,
         required: true,
-        enum: ['government service', 'privateService', 'service+bussiness', 'business', 'studentInternship', 'NotWorking']
+        enum: ['government service', 'privateService', 'service+bussiness', 'business', 'studentInternship', 'notWorking']
     },
     jobPosition: { type: String },
     companyOrgName: { type: String },
