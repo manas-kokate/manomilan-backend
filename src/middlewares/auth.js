@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
 import userModel from "../models/user.model.js";
-
+import adminModel from "../models/admin.model.js";
 
 export const userAuth = async (req, res, next) => {
     if (!req.headers.authorization) {

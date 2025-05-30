@@ -4,7 +4,7 @@ import bcrypt from "bcrypt"
 import envCredentials from "../config/env.js";
 import userModel from "../models/user.model.js";
 import expectationsModel from "../models/expectations.model.js";
-
+import locationModel from "../models/locationtable.js";
 
 
 export const registerAdmin = async (req, res) => {
@@ -111,5 +111,60 @@ export const deleteUser = async (req, res) => {
     }
     else {
         return res.send({ status: false, message: "Wrong delete status" })
+    }
+}
+
+export const getLocations = async (req, res) => {
+    try {
+        const locations = await locationModel.find();
+        if (!locations) {
+            return res.send({ status: false, message: "No locations found.Add new locations." });
+        }
+        return res.send({ status: true, location: locations })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error." })
+    }
+}
+
+export const addlocation = async (req, res) => {
+    try {
+        const { state, city, district, country, pincode } = req.body;
+
+        if (!state || !city || !country) {
+            return res.send({ status: false, message: "all fields required" });
+        }
+
+        const existingLocations = await locationModel.find();
+
+        let srNo = 1;
+        if (existingLocations.length !== 0) {
+            srNo = existingLocations[existingLocations.length - 1].srNo + 1;
+        }
+
+        const newLocation = new locationModel({
+            srNo,
+            state,
+            city,
+            district,
+            country,
+            pincode
+        })
+
+        await newLocation.save()
+
+        return res.send({ status: true, message: "location added successfully." })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+
+}
+
+export const deletelocation = async (req, res) => {
+    try {
+        const { srNo } = req.body;
+        const findlocation = await locationModel.findOneAndDelete({ srNo })
+        return res.send({ status: true, message: "location deleted" });
+    } catch (error) {
+        return res.send({ status: false, message: "server Error" })
     }
 }

@@ -332,13 +332,24 @@ export const mutualMatching = async (req, res) => {
 
   const userLoggedIn = await userModel.findOne({ _id: userId })
 
-  const expectatedUser = await userModel.findOne({
-    maritalsts: CurrentExpectation.matchMaritalSts,
-    height: (CurrentExpectation.matchHeightFrom < CurrentExpectation.matchHeightTo),
-    occupation: CurrentExpectation.matchOccu,
-    monthlyinc: CurrentExpectation.matchIncome,
-    caste: CurrentExpectation.matchCaste,
-  })
+  // console.log(userLoggedIn)
 
+  const {
+    matchMaritalSts,
+    matchHeightFrom,
+    matchHeightTo,
+    matchOccu,
+    matchIncome,
+    matchCaste
+  } = CurrentExpectation
+
+  const expectatedUser = await userModel.findOne({
+    maritalsts: matchMaritalSts,
+    height: { $gte: matchHeightFrom, $lte: matchHeightTo },
+    occupation: matchOccu,
+    monthlyinc: matchIncome,
+    caste: matchCaste,
+  })
   console.log(expectatedUser)
+
 }
