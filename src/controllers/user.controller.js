@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import sendMail from "../utils/mail.js";
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
+import locationModel from '../models/locationtable.js'
 import expectationsModel from "../models/expectations.model.js";
 
 export const registerUser = async (req, res) => {
@@ -158,6 +159,18 @@ export const registerUser = async (req, res) => {
     });
   }
 };
+
+export const getlocations = async (req, res) => {
+  try {
+    const locations = await locationModel.find().select('-_id  -__v');
+    if (!locations) {
+      return res.send({ status: false, message: "No locations found.Add new locations." });
+    }
+    return res.send({ status: true, location: locations })
+  } catch (error) {
+    return res.send({ status: false, message: "Server error." })
+  }
+}
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
