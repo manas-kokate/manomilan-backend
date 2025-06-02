@@ -162,7 +162,7 @@ export const addlocation = async (req, res) => {
 export const deletelocation = async (req, res) => {
     try {
         const { srNo } = req.body;
-        const findlocation = await locationModel.findOneAndDelete({ srNo })
+        await locationModel.findOneAndDelete({ srNo });
         return res.send({ status: true, message: "location deleted" });
     } catch (error) {
         return res.send({ status: false, message: "server Error" })
