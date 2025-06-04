@@ -14,4 +14,6 @@ app.use("/api/admin", adminRouter);
 
 // mutual matching,[(city,state,country)(category,caste,subcaste)]API,user can edit education table OR profile, login details (create user without filling form)  
 
+// findOne({ userId }, '-_id -userId -createdAt -updatedAt -__v')
+
 export default app

@@ -6,163 +6,189 @@ import envCredentials from "../config/env.js";
 import locationModel from '../models/locationtable.js'
 import expectationsModel from "../models/expectations.model.js";
 
+
 export const registerUser = async (req, res) => {
-  const {
-    usName,
-    contactLogin,
-    password,
-    fsname,
-    mdname,
-    lsname,
-    gender,
-    dob,
-    time,
-    placeofbirth,
-    maritalsts,
-    height,
-    complexion,
-    manglik,
-    gotra,
-    foodChoices,
-    spects,
-    divyang,
-    education,
-    occupation,
-    jobPosition,
-    companyOrgName,
-    designation,
-    monthlyinc,
-    candidateNo,
-    workaddress,
-    workcity,
-    workstate,
-    fathername,
-    mothername,
-    mamkul,
-    brother,
-    sister,
-    parentnumber,
-    wpno,
-    alternateno,
-    email,
-    parentaddress,
-    parentcity,
-    parentstate,
-    nationality,
-    caste,
-    mothertongue,
-    sect,
-    socials,
-    hobbies,
-    matchAgeFrom,
-    matchAgeTo,
-    matchHeightFrom,
-    matchHeightTo,
-    prefEdu,
-    matchOccu,
-    matchMaritalSts,
-    matchIncome,
-    matchCaste,
-    matchWorkLocCitDis,
-    PartnerDesc,
-    franchise,
-    profilePicStatus,
-  } = req.body;
-
-  const findUser = await userModel.findOne({ email: email });
-
-  if (findUser) {
-    return res.send({ status: false, message: "User already exists!" });
-  }
-
-  if (!req.files?.profilePic) {
-    return res.send({ status: false, message: "Please Upload profile pic" });
-  }
-
-  let profilePic = req.files?.profilePic[0].filename;
-
   try {
-    const user = new userModel({
-      usName: usName.trim(),
-      contactLogin: contactLogin.trim(),
-      password: password.trim(),
-      fsname: fsname.trim(),
-      mdname: mdname.trim(),
-      lsname: lsname.trim(),
-      gender: gender.trim(),
+    const {
+      loginEmail,
+      loginNumber,
+      password,
+      firstName,
+      middleName,
+      lastName,
+      gender,
       dob,
-      time: time.trim(),
-      placeofbirth: placeofbirth.trim(),
-      maritalsts: maritalsts.trim(),
-      height: height.trim(),
-      complexion: complexion.trim(),
-      manglik: manglik.trim(),
-      gotra: gotra.trim(),
-      foodChoices: foodChoices.trim(),
-      spects: spects.trim(),
-      divyang: divyang.trim(),
-      education: education,
-      occupation: occupation.trim(),
-      jobPosition: jobPosition.trim(),
-      companyOrgName: companyOrgName.trim(),
-      designation: designation.trim(),
-      monthlyinc,
-      candidateNo: candidateNo.trim(),
-      workaddress: workaddress.trim(),
-      workcity: workcity.trim(),
-      workstate: workstate.trim(),
-      fathername: fathername.trim(),
-      mothername: mothername.trim(),
-      mamkul: mamkul.trim(),
+      birthTime,
+      placeOfBirth,
+      maritalStatus,
+      height,
+      occupation,
+      designation,
+      companyName,
+      personalNo,
+      workcity,
+      workstate,
+      monthlyIncome,
+      nationality,
+      caste,
+      motherTongue,
+      fatherName,
+      motherName,
+      mamkul,
+      parentNumber,
+      wpNo,
+      alternateNo,
       brother,
+      brotherText,
       sister,
-      parentnumber: parentnumber.trim(),
-      wpno: wpno.trim(),
-      alternateno: alternateno.trim(),
-      parentaddress: parentaddress.trim(),
-      parentcity: parentcity.trim(),
-      parentstate: parentstate.trim(),
-      nationality: nationality.trim(),
-      caste: caste.trim(),
-      mothertongue: mothertongue.trim(),
-      sect: sect.trim(),
-      socials: socials.trim(),
-      hobbies: hobbies,
-      matchAgeFrom,
-      matchAgeTo,
-      matchHeightFrom: matchHeightFrom.trim(),
-      matchHeightTo: matchHeightTo.trim(),
-      prefEdu: prefEdu.trim(),
-      matchOccu: matchOccu.trim(),
-      matchMaritalSts: matchMaritalSts.trim(),
-      matchIncome: matchIncome.trim(),
-      matchCaste: matchCaste.trim(),
-      matchWorkLocCitDis: matchWorkLocCitDis.trim(),
-      franchise: franchise.trim(),
-      profilePic,
+      sisterText,
+      divyang,
+      education,
+      addressHome,
+      homecity,
+      otherInfo,
+      sect,
+      manglik,
+      gotra,
+      foodChoices,
+      spectacles,
+      bloodGroup,
+      complexion,
+      profilePicStatus,
+      // Partner Preferences
+      ageFrom,
+      ageTo,
+      heightFrom,
+      heightTo,
+      partnerIncome,
+      abroad,
+      issue,
+      partnerMaritalStatus,
+      partnerNationality,
+      partnerOccupation,
+      partnerEducation,
+      nativePlaceCities,
+      nativePlaceStates,
+      nativePlaceCountries,
+      workingLocationCountries,
+      workingLocationStates,
+      workingLocationCities,
+      religion,
+      subCaste
+    } = req.body;
+
+    // Check if user already exists by email or number
+    const existingUser = await userModel.findOne({
+      $or: [{ loginEmail }, { loginNumber }]
+    });
+
+    if (existingUser) {
+      return res.status(400).send({
+        status: false,
+        message: "User already exists with this email or number.",
+      });
+    }
+
+    // Handle profile pic
+    let userPhoto = '';
+    try {
+      if (req.files?.profilePic || req.files.profilePic.length !== 0) {
+        userPhoto = req.files.profilePic[0].filename
+      }
+    } catch (err) {
+      userPhoto = '';
+    }
+
+    // Create user document
+    const user = new userModel({
+      loginEmail,
+      loginNumber,
+      password,
+      firstName,
+      middleName,
+      lastName,
+      gender,
+      dob,
+      birthTime,
+      placeOfBirth,
+      maritalStatus,
+      height,
+      occupation,
+      designation,
+      companyName,
+      personalNo,
+      workcity,
+      workstate,
+      monthlyIncome,
+      nationality,
+      caste,
+      motherTongue,
+      fatherName,
+      motherName,
+      mamkul,
+      parentNumber,
+      wpNo,
+      alternateNo,
+      brother,
+      brotherText,
+      sister,
+      sisterText,
+      divyang,
+      education,
+      addressHome,
+      homecity,
+      otherInfo,
+      sect,
+      manglik,
+      gotra,
+      foodChoices,
+      spectacles,
+      bloodGroup,
+      complexion,
+      userPhoto,
+      profilePicStatus,
+      // Partner Preferences
+      ageFrom,
+      ageTo,
+      heightFrom,
+      heightTo,
+      partnerIncome,
+      abroad,
+      issue,
+      partnerMaritalStatus,
+      partnerNationality,
+      partnerOccupation,
+      partnerEducation,
+      nativePlaceCities,
+      nativePlaceStates,
+      nativePlaceCountries,
+      workingLocationCountries,
+      workingLocationStates,
+      workingLocationCities,
+      religion,
+      subCaste
     });
 
     await user.save();
 
-    return res.send({
+    return res.status(201).send({
       status: true,
-      success: true,
       message: "User registered successfully.",
     });
+
   } catch (error) {
-    console.log(error);
-    res.send({
+    console.error("Registration Error:", error);
+    return res.status(500).send({
       status: false,
-      success: false,
-      message: "Server Error!",
-      error: error,
+      message: "Server Error",
+      error: error.message,
     });
   }
 };
 
 export const getlocations = async (req, res) => {
   try {
-    const locations = await locationModel.find().select('-_id  -__v');
+    const locations = await locationModel.find({}, { _id: 0, __v: 0 });
     if (!locations) {
       return res.send({ status: false, message: "No locations found.Add new locations." });
     }
@@ -173,9 +199,9 @@ export const getlocations = async (req, res) => {
 }
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { emailOrNum, password } = req.body;
 
-  if (!email || !password) {
+  if (!emailOrNum || !password) {
     return res.send({
       status: false,
       message: "Invalid Credentials. All Fields Required.",
@@ -183,12 +209,15 @@ export const login = async (req, res) => {
   }
 
   try {
-    const findUser = await userModel.findOne({ contactLogin: email });
+    let findUser = await userModel.findOne({ loginEmail: emailOrNum });
     if (!findUser) {
-      return res.send({
-        status: false,
-        message: "User Not Found. Check username and password again",
-      });
+      findUser = await userModel.findOne({ loginNumber: emailOrNum });
+      if (!findUser) {
+        return res.send({
+          status: false,
+          message: "User Not Found. Check username and password again",
+        });
+      }
     }
 
     const PasswordValidate = await bcrypt.compare(password, findUser.password);
@@ -220,41 +249,49 @@ export const addExpectations = async (req, res) => {
   try {
     if (!findExpectation) {
       const {
-        matchAgeFrom,
-        matchAgeTo,
-        matchHeightFrom,
-        matchHeightTo,
-        prefEdu,
-        matchOccu,
-        matchMaritalSts,
-        matchIncome,
-        matchCaste,
-        matchWorkLocCitDis,
-        sect,
-        manglik,
-        gotra,
-        foodChoices,
-        spects
+        ageFrom,
+        ageTo,
+        heightFrom,
+        heightTo,
+        partnerIncome,
+        abroad,
+        issue,
+        partnerMaritalStatus,
+        partnerNationality,
+        partnerOccupation,
+        partnerEducation,
+        nativePlaceCities,
+        nativePlaceStates,
+        nativePlaceCountries,
+        workingLocationCountries,
+        workingLocationStates,
+        workingLocationCities,
+        religion,
+        subCaste,
       } = req.body;
 
       try {
         const expectations = new expectationsModel({
           userId: req.id,
-          matchAgeFrom,
-          matchAgeTo,
-          matchHeightFrom,
-          matchHeightTo,
-          prefEdu,
-          matchOccu,
-          matchMaritalSts,
-          matchIncome,
-          matchCaste,
-          matchWorkLocCitDis,
-          sect,
-          manglik,
-          gotra,
-          foodChoices,
-          spects
+          ageFrom,
+          ageTo,
+          heightFrom,
+          heightTo,
+          partnerIncome,
+          abroad,
+          issue,
+          partnerMaritalStatus,
+          partnerNationality,
+          partnerOccupation,
+          partnerEducation,
+          nativePlaceCities,
+          nativePlaceStates,
+          nativePlaceCountries,
+          workingLocationCountries,
+          workingLocationStates,
+          workingLocationCities,
+          religion,
+          subCaste,
         });
 
         await expectations.save();

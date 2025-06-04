@@ -1,13 +1,13 @@
 import { model, Schema } from "mongoose";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
 
 const userSchema = new Schema({
-    usName: {
+    loginEmail: {
         type: String,
         required: true,
         unique: true
     },
-    contactLogin: {
+    loginNumber: {
         type: String,
         required: true,
         unique: true
@@ -16,126 +16,95 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
-    fsname: { type: String, required: true },
-    mdname: { type: String },
-    lsname: { type: String, required: true },
+    firstName: { type: String },
+    middleName: { type: String },
+    lastName: { type: String },
     gender: {
         type: String,
-        required: true,
         enum: ['male', 'female']
     },
-    dob: {
-        type: Date,
-        required: true
-    },
-    time: {
+    dob: { type: Date },
+    birthTime: { type: String },
+    placeOfBirth: {
         type: String,
-        required: true
-    },
-    placeofbirth: {
-        type: String,
-        required: true,
         minlength: 2,
         maxlength: 30
     },
-    maritalsts: {
+    maritalStatus: {
         type: String,
-        required: true,
         enum: ['Unmarried', 'Divorced', 'Widowed', 'DivorceinProcess'],
         default: 'Unmarried'
     },
-    height: {
-        type: String,
-        required: true
+    childrenNum: {
+        type: Number,
     },
+    childGender: {
+        type: [String],
+    },
+    childDob: {
+        type: [String],
+    },
+    livingWith: {
+        type: String,
+    },
+    height: { type: String },
     occupation: {
         type: String,
-        required: true,
         enum: ['government service', 'privateService', 'service+bussiness', 'business', 'studentInternship', 'notWorking']
     },
-    jobPosition: { type: String },
-    companyOrgName: { type: String },
     designation: { type: String },
-    workaddress: { type: String },
+    companyName: { type: String },
+    personalNo: { type: String },
     workcity: { type: String },
     workstate: { type: String },
-    monthlyinc: {
+    monthlyIncome: {
         type: String,
-        required: false,
         maxlength: 8
     },
     nationality: {
         type: String,
-        required: true,
         default: 'India'
     },
-    caste: {
-        type: String
-    },
-    mothertongue: {
+    caste: { type: String },
+    motherTongue: {
         type: String,
-        required: true,
-        default: 'marathi'
+        default: 'Marathi'
     },
-    fathername: {
-        type: String,
-        required: true
-    },
-    mothername: {
-        type: String,
-        required: true
-    },
-    mamkul: {
-        type: String
-    },
-    parentnumber: {
+    fatherName: { type: String },
+    motherName: { type: String },
+    mamkul: { type: String },
+    parentNumber: {
         type: String,
         minlength: 10,
         maxlength: 10
     },
-    wpno: {
+    wpNo: {
         type: String,
         minlength: 10,
         maxlength: 10
     },
-    alternateno: {
+    alternateNo: {
         type: String,
         minlength: 10,
         maxlength: 10
     },
     brother: { type: String },
+    brotherText: { type: String },
     sister: { type: String },
+    sisterText: { type: String },
     divyang: {
         type: String,
-        required: true,
-        enum: ['yes', 'no']
+        enum: ['yes', 'no'],
+        default: 'no'
     },
-    education: {
-        type: [String],
-        required: true
-    },
-    candidateNo: {
-        type: String
-    },
-    parentaddress: {
+    education: { type: [String] },
+    addressHome: {
         type: String,
         minlength: 10,
         maxlength: 150
     },
-    parentcity: { type: String },
-    parentstate: { type: String },
-    matchAgeFrom: { type: String },
-    matchAgeTo: { type: String },
-    matchHeightFrom: { type: String },
-    matchHeightTo: { type: String },
-    prefEdu: { type: String },
-    matchOccu: { type: String },
-    matchMaritalSts: { type: String },
-    matchIncome: { type: String },
-    matchCaste: { type: String },
-    matchWorkLocCitDis: { type: String },
-    franchise: { type: String },
-    socials: { type: String },
+    homecity: { type: String },
+    otherInfo: { type: String },
     sect: {
         type: String,
         enum: ['mahanubhav', 'kabir panthi', 'warkari', 'malkari']
@@ -149,33 +118,49 @@ const userSchema = new Schema({
         type: String,
         enum: ['vegetarian', 'non-vegetarian', 'mixed']
     },
-    spects: {
+    spectacles: {
         type: String,
         enum: ['Yes', 'No']
     },
+    bloodGroup: { type: String },
     complexion: { type: String },
-    profilePic: {
-        type: String,
-        default: null
-    },
+    userPhoto: { type: String },
     profilePicStatus: {
         type: String,
         enum: ['Pending', 'Approved', 'Rejected'],
         default: 'Pending'
-    }
+    },
+    // Partner preferences
+    ageFrom: { type: String },
+    ageTo: { type: String },
+    heightFrom: { type: String },
+    heightTo: { type: String },
+    partnerIncome: { type: String },
+    abroad: { type: String, default: 'no' },
+    issue: { type: String },
+    partnerMaritalStatus: { type: String },
+    partnerNationality: { type: String },
+    partnerOccupation: { type: String },
+    partnerEducation: { type: [String] },
+    nativePlaceCities: { type: [String] },
+    nativePlaceStates: { type: [String] },
+    nativePlaceCountries: { type: [String] },
+    workingLocationCountries: { type: [String] },
+    workingLocationStates: { type: [String] },
+    workingLocationCities: { type: [String] },
+    religion: { type: [String] },
+    subCaste: { type: [String] },
 }, { timestamps: true });
-
-
 
 userSchema.pre("save", async function (next) {
     if (this.isModified('password')) {
-        this.password = await bcrypt.hash(this.password, 10)
+        this.password = await bcrypt.hash(this.password, 10);
     }
-    next()
-})
+    next();
+});
 
 userSchema.method.comparePassword = async function (password) {
-    return await bcrypt.compare(this.password, password)
-}
+    return await bcrypt.compare(password, this.password);
+};
 
-export default model('user', userSchema)
+export default model('user', userSchema);

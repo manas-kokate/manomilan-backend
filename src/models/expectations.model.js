@@ -5,33 +5,25 @@ const expectationSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'user'
     },
-    matchAgeFrom: { type: String },
-    matchAgeTo: { type: String },
-    matchHeightFrom: { type: String },
-    matchHeightTo: { type: String },
-    prefEdu: { type: String },
-    matchOccu: { type: String },
-    matchMaritalSts: { type: String },
-    matchIncome: { type: String },
-    matchCaste: { type: String },
-    matchWorkLocCitDis: { type: String },
-    sect: {
-        type: String,
-        enum: ['mahanubhav', 'kabir panthi', 'warkari', 'malkari']
-    },
-    manglik: {
-        type: String,
-        enum: ['manglik', 'non-manglik', 'partial manglik(soumya mangal)']
-    },
-    gotra: { type: String },
-    foodChoices: {
-        type: String,
-        enum: ['vegetarian', 'non-vegetarian', 'mixed']
-    },
-    spects: {
-        type: String,
-        enum: ['Yes', 'No']
-    }
+    ageFrom: { type: String },
+    ageTo: { type: String },
+    heightFrom: { type: String },
+    heightTo: { type: String },
+    partnerIncome: { type: String },
+    abroad: { type: String, default: 'no' },
+    issue: { type: String },
+    partnerMaritalStatus: { type: String },
+    partnerNationality: { type: String },
+    partnerOccupation: { type: String },
+    partnerEducation: { type: [String] },
+    nativePlaceCities: { type: [String] },
+    nativePlaceStates: { type: [String] },
+    nativePlaceCountries: { type: [String] },
+    workingLocationCountries: { type: [String] },
+    workingLocationStates: { type: [String] },
+    workingLocationCities: { type: [String] },
+    religion: { type: [String] },
+    subCaste: { type: [String] }
 }, { timestamps: true });
 
 export default model('expectation', expectationSchema)
