@@ -3,8 +3,10 @@ import bcrypt from "bcrypt";
 import sendMail from "../utils/mail.js";
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
-import locationModel from '../models/locationtable.js'
 import expectationsModel from "../models/expectations.model.js";
+import countryModel from "../models/country.model.js";
+import stateModel from "../models/state.model.js";
+import locationEntryModel from "../models/location.entry.js";
 
 
 export const registerUser = async (req, res) => {
@@ -186,18 +188,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-export const getlocations = async (req, res) => {
-  try {
-    const locations = await locationModel.find({}, { _id: 0, __v: 0 });
-    if (!locations) {
-      return res.send({ status: false, message: "No locations found.Add new locations." });
-    }
-    return res.send({ status: true, location: locations })
-  } catch (error) {
-    return res.send({ status: false, message: "Server error." })
-  }
-}
-
 export const login = async (req, res) => {
   const { emailOrNum, password } = req.body;
 
@@ -242,6 +232,31 @@ export const login = async (req, res) => {
     return res.send({ status: false, message: "Server Error" });
   }
 };
+
+
+export const getcountries = async (req, res) => {
+  const countries = await countryModel.find();
+  if (countries.length == 0) {
+    return res.send({ status: false, message: "No countries found. Contact admin to add." })
+  }
+  return res.send({ status: true, result: countries })
+}
+
+export const getStates = async (req, res) => {
+  const States = await stateModel.find();
+  if (States.length == 0) {
+    return res.send({ status: false, message: "No States found. Contact admin to add." })
+  }
+  return res.send({ status: true, result: States })
+}
+
+export const getLocationEntry = async (req, res) => {
+  const locationEntry = await locationEntryModel.find({}, { _id: 0, __v: 0 });
+  if (locationEntry.length == 0) {
+    return res.send({ status: false, message: "No location found. Contact admin to add." })
+  }
+  return res.send({ status: true, result: locationEntry })
+}
 
 export const addExpectations = async (req, res) => {
   const findExpectation = await expectationsModel.findOne({ userId: req.id });
