@@ -15,7 +15,11 @@ const userSchema = new Schema({
     dob: { type: Date },
     timeOfBirth: { type: String },
     placeOfBirth: { type: String },
-    maritalStatus: { type: String, enum: ["Unmarried", "Divorced", "Widowed", "DivorceinProcess"], default: "Unmarried" },
+    maritalStatus: {
+        type: String,
+        // enum: ["Unmarried", "Divorced", "Widowed", "DivorceinProcess"],
+        default: "Unmarried"
+    },
     children: [{
         dob: String,
         gender: String

@@ -8,11 +8,11 @@ import { getCasteEntry } from "../controllers/admin.controller.js";
 const router = express.Router();
 
 router.post('/register', uploadMiddleware, registerUser);
+router.post('/login', login);
 router.get('/getcountries', userAuth, getcountries);
 router.get('/getstates', userAuth, getStates);
 router.get('/getlocationEntry', userAuth, getLocationEntry);
 router.get('/getcasteEntry', userAuth, getCasteEntry)
-router.post('/login', login);
 router.get('/getcurrentuser', userAuth, getLoggedInUser);
 router.get('/mutual-matching', userAuth, mutualMatching)
 router.post('/addexpectations', userAuth, addExpectations);
