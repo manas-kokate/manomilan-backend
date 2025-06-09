@@ -18,7 +18,7 @@ const userSchema = new Schema({
     maritalStatus: {
         type: String,
         // enum: ["Unmarried", "Divorced", "Widowed", "DivorceinProcess"],
-        default: "Unmarried"
+        // default: "Unmarried"
     },
     children: [{
         dob: String,
@@ -27,13 +27,13 @@ const userSchema = new Schema({
     height: { type: String, default: "5' 4\"" },
     occupation: {
         type: String,
-        enum: ["government service", "privateService", "service+bussiness", "business", "studentInternship", "notWorking", "Private Service"],
-        default: "Private Service"
+        // enum: ["government service", "privateService", "service+bussiness", "business", "studentInternship", "notWorking", "Private Service"],
+        // default: "Private Service"
     },
     monthlyIncome: { type: String },
     nationality: { type: [String], default: ["India"] },
     caste: { type: String },
-    motherTongue: { type: String, default: "Marathi" },
+    motherTongue: { type: String },
     divyang: { type: String, enum: ["yes", "no"], default: "no" },
     mothersName: { type: String },
     fathersName: { type: String },
@@ -64,10 +64,10 @@ const userSchema = new Schema({
     heightFrom: { type: String },
     heightTo: { type: String },
     expectedEducation: { type: [String] },
-    expectedOccupation: { type: String, default: "Private Service" },
+    expectedOccupation: { type: String },
     expectedIncome: { type: String },
     workAbroad: { type: String, default: "no" },
-    expectedMaritalStatus: { type: String, default: "Unmarried" },
+    expectedMaritalStatus: { type: String },
     expectedNationality: { type: [String] },
     childAccepted: { type: String },
     religion: { type: [String] },
@@ -76,11 +76,11 @@ const userSchema = new Schema({
     userPhotoOne: { type: String },
 
     // Special info
-    sect: { type: String, enum: ["mahanubhav", "kabir panthi", "warkari", "malkari", ""] },
-    manglik: { type: String, enum: ["manglik", "non-manglik", "partial manglik(soumya mangal)", ""] },
-    foodPreference: { type: String, enum: ["vegetarian", "non-vegetarian", "mixed", ""] },
+    sect: { type: String },
+    manglik: { type: String },
+    foodPreference: { type: String },
     bloodGroup: { type: String },
-    specs: { type: String, enum: ["Yes", "No", ""] },
+    specs: { type: String },
     gotra: { type: String },
     userPhoto: { type: String }
 }, { timestamps: true });
