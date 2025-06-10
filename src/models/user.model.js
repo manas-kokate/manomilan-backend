@@ -17,18 +17,14 @@ const userSchema = new Schema({
     placeOfBirth: { type: String },
     maritalStatus: {
         type: String,
-        // enum: ["Unmarried", "Divorced", "Widowed", "DivorceinProcess"],
-        // default: "Unmarried"
     },
-    children: [{
-        dob: String,
-        gender: String
-    }],
+    children: {
+        dob: { type: String },
+        gender: { type: String }
+    },
     height: { type: String, default: "5' 4\"" },
     occupation: {
         type: String,
-        // enum: ["government service", "privateService", "service+bussiness", "business", "studentInternship", "notWorking", "Private Service"],
-        // default: "Private Service"
     },
     monthlyIncome: { type: String },
     nationality: { type: [String], default: ["India"] },
@@ -40,13 +36,13 @@ const userSchema = new Schema({
     mamkul: { type: String },
     parentsResidence: { type: String },
     parentsCity: { type: String },
-    parentsContact: { type: String, minlength: 10, maxlength: 10 },
-    whatsApp: { type: String, minlength: 10, maxlength: 10 },
-    alternateNumber: { type: String, minlength: 10, maxlength: 10 },
-    brothersCount: { type: String },
+    parentsContact: { type: Number },
+    whatsApp: { type: Number },
+    alternateNumber: { type: String },
+    brothersCount: { type: Number },
     brothers: { type: String },
     sisters: { type: String },
-    sistersExactCount: { type: String },
+    sistersExactCount: { type: Number },
     otherInfo: { type: String },
 
     // Education & Career
@@ -82,7 +78,8 @@ const userSchema = new Schema({
     bloodGroup: { type: String },
     specs: { type: String },
     gotra: { type: String },
-    userPhoto: { type: String }
+    userPhoto: { type: String },
+    userPhotoStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }
 }, { timestamps: true });
 
 // Hash password before saving

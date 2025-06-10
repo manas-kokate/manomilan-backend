@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 import sendMail from "../utils/mail.js";
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
-import expectationsModel from "../models/expectations.model.js";
 import countryModel from "../models/country.model.js";
 import stateModel from "../models/state.model.js";
 import locationEntryModel from "../models/location.entry.js";
@@ -12,72 +11,76 @@ import locationEntryModel from "../models/location.entry.js";
 export const registerUser = async (req, res) => {
   try {
     const {
+      // Login credentials
       loginEmail,
       loginNumber,
       password,
+
+      // Personal Info
       firstName,
-      middleName,
       lastName,
+      midname,
       gender,
       dob,
-      birthTime,
+      timeOfBirth,
       placeOfBirth,
       maritalStatus,
+      children,
       height,
       occupation,
-      designation,
-      companyName,
-      personalNo,
-      workcity,
-      workstate,
       monthlyIncome,
       nationality,
       caste,
       motherTongue,
-      fatherName,
-      motherName,
-      mamkul,
-      parentNumber,
-      wpNo,
-      alternateNo,
-      brother,
-      brotherText,
-      sister,
-      sisterText,
       divyang,
-      education,
-      addressHome,
-      homecity,
+      mothersName,
+      fathersName,
+      mamkul,
+      parentsResidence,
+      parentsCity,
+      parentsContact,
+      whatsApp,
+      alternateNumber,
+      brothersCount,
+      brothers,
+      sisters,
+      sistersExactCount,
       otherInfo,
-      sect,
-      manglik,
-      gotra,
-      foodChoices,
-      spectacles,
-      bloodGroup,
-      complexion,
-      profilePicStatus,
-      // Partner Preferences
+
+      // Education & Career
+      education,
+      companyName,
+      designation,
+      candidateNumber,
+      candidateEmail,
+      workLocation,
+      isWorking,
+
+      // Expectations
       ageFrom,
       ageTo,
       heightFrom,
       heightTo,
-      partnerIncome,
-      abroad,
-      issue,
-      partnerMaritalStatus,
-      partnerNationality,
-      partnerOccupation,
-      partnerEducation,
-      nativePlaceCities,
-      nativePlaceStates,
-      nativePlaceCountries,
-      workingLocationCountries,
-      workingLocationStates,
-      workingLocationCities,
+      expectedEducation,
+      expectedOccupation,
+      expectedIncome,
+      workAbroad,
+      expectedMaritalStatus,
+      expectedNationality,
+      childAccepted,
       religion,
-      subCaste
+      nativeLocation,
+      workingLocation,
+
+      // Special Info
+      sect,
+      manglik,
+      gotra,
+      foodPreference,
+      specs,
+      bloodGroup,
     } = req.body;
+
 
     // Check if user already exists by email or number
     const existingUser = await userModel.findOne({
@@ -103,72 +106,74 @@ export const registerUser = async (req, res) => {
 
     // Create user document
     const user = new userModel({
+      // Login credentials
       loginEmail,
       loginNumber,
       password,
+
+      // Personal Info
       firstName,
-      middleName,
       lastName,
+      midname,
       gender,
       dob,
-      birthTime,
+      timeOfBirth,
       placeOfBirth,
       maritalStatus,
+      children,
       height,
       occupation,
-      designation,
-      companyName,
-      personalNo,
-      workcity,
-      workstate,
       monthlyIncome,
       nationality,
       caste,
       motherTongue,
-      fatherName,
-      motherName,
-      mamkul,
-      parentNumber,
-      wpNo,
-      alternateNo,
-      brother,
-      brotherText,
-      sister,
-      sisterText,
       divyang,
-      education,
-      addressHome,
-      homecity,
+      mothersName,
+      fathersName,
+      mamkul,
+      parentsResidence,
+      parentsCity,
+      parentsContact,
+      whatsApp,
+      alternateNumber,
+      brothersCount,
+      brothers,
+      sisters,
+      sistersExactCount,
       otherInfo,
-      sect,
-      manglik,
-      gotra,
-      foodChoices,
-      spectacles,
-      bloodGroup,
-      complexion,
-      userPhoto,
-      profilePicStatus,
-      // Partner Preferences
+
+      // Education & Career
+      education,
+      companyName,
+      designation,
+      candidateNumber,
+      candidateEmail,
+      workLocation,
+      isWorking,
+
+      // Expectations
       ageFrom,
       ageTo,
       heightFrom,
       heightTo,
-      partnerIncome,
-      abroad,
-      issue,
-      partnerMaritalStatus,
-      partnerNationality,
-      partnerOccupation,
-      partnerEducation,
-      nativePlaceCities,
-      nativePlaceStates,
-      nativePlaceCountries,
-      workingLocationCountries,
-      workingLocationStates,
-      workingLocationCities,
+      expectedEducation,
+      expectedOccupation,
+      expectedIncome,
+      workAbroad,
+      expectedMaritalStatus,
+      expectedNationality,
+      childAccepted,
       religion,
-      subCaste
+      nativeLocation,
+      workingLocation,
+
+      // Special Info
+      sect,
+      manglik,
+      gotra,
+      foodPreference,
+      specs,
+      bloodGroup,
     });
 
     await user.save();
@@ -258,118 +263,26 @@ export const getLocationEntry = async (req, res) => {
   return res.send({ status: true, result: locationEntry })
 }
 
-export const addExpectations = async (req, res) => {
-  const findExpectation = await expectationsModel.findOne({ userId: req.id });
-
-  try {
-    if (!findExpectation) {
-      const {
-        ageFrom,
-        ageTo,
-        heightFrom,
-        heightTo,
-        partnerIncome,
-        abroad,
-        issue,
-        partnerMaritalStatus,
-        partnerNationality,
-        partnerOccupation,
-        partnerEducation,
-        nativePlaceCities,
-        nativePlaceStates,
-        nativePlaceCountries,
-        workingLocationCountries,
-        workingLocationStates,
-        workingLocationCities,
-        religion,
-        subCaste,
-      } = req.body;
-
-      try {
-        const expectations = new expectationsModel({
-          userId: req.id,
-          ageFrom,
-          ageTo,
-          heightFrom,
-          heightTo,
-          partnerIncome,
-          abroad,
-          issue,
-          partnerMaritalStatus,
-          partnerNationality,
-          partnerOccupation,
-          partnerEducation,
-          nativePlaceCities,
-          nativePlaceStates,
-          nativePlaceCountries,
-          workingLocationCountries,
-          workingLocationStates,
-          workingLocationCities,
-          religion,
-          subCaste,
-        });
-
-        await expectations.save();
-        return res.send({
-          status: true,
-          message: "Expectations Saved. Ready to match.",
-        });
-      } catch (error) {
-        return res.send({ status: false, message: "Server Error" });
-      }
-    } else {
-      return res.send({
-        status: false,
-        message: "Expectation already exists. Update it and match.",
-      });
-    }
-  } catch (error) {
-    return res.send({ status: false, message: "Something went wrong.Check your req data." })
-  }
-};
-
-export const updateExpectation = async (req, res) => {
-
-  const { updates } = req.body;
-  if (!updates) {
-    return res.send({ status: false, message: "No updates found for expectations." })
+export const editProfile = async (req, res) => {
+  const { newUpdates } = req.body;
+  const userId = req.id
+  if (!newUpdates) {
+    return res.send({ status: false, message: "No data found to update" })
   }
 
-  const userId = req.id;
-
-  try {
-    const exisitingExpectation = await expectationsModel.findOne({ userId });
-
-    if (!exisitingExpectation) {
-      return res.send({
-        status: false,
-        message: "Expectation does not exist",
-      });
-    }
-
-
-    await expectationsModel.updateOne(
-      { userId: exisitingExpectation.userId },
-      { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-
-    const updatedExpectation = await expectationsModel.findOne({ userId }, '-_id -userId -createdAt -updatedAt -__v')
-    if (!updatedExpectation) {
-      console.log(updateExpectation)
-    }
-
-    return res.send({ status: true, updatedData: updatedExpectation });
-  } catch (error) {
-    res.send({
-      status: false,
-      message: "Data not updated. Check your update data",
-    });
+  const ExistingUser = await userModel.findOne({ _id: req.id });
+  if (!ExistingUser) {
+    return res.send({ status: false, message: "Something went wrong user not found." })
   }
-};
+
+  const update = await userModel.findByIdAndUpdate(userId, newUpdates);
+
+  const finUpdatedUser = await userModel.findById(userId, '-_id -__v -updatedAt -createdAt');
+  if (update && finUpdatedUser) {
+    return res.send({ status: true, message: "user updated successfully", updatedData: finUpdatedUser })
+  }
+
+}
 
 export const getLoggedInUser = async (req, res) => {
   const userId = req.id;
@@ -389,32 +302,4 @@ export const getLoggedInUser = async (req, res) => {
 }
 
 export const mutualMatching = async (req, res) => {
-  const userId = req.id;
-  if (!userId) {
-    return res.send({ status: false, message: "User Id not found" });
-  }
-  const CurrentExpectation = await expectationsModel.findOne({ userId })
-
-  const userLoggedIn = await userModel.findOne({ _id: userId })
-
-  // console.log(userLoggedIn)
-
-  const {
-    matchMaritalSts,
-    matchHeightFrom,
-    matchHeightTo,
-    matchOccu,
-    matchIncome,
-    matchCaste
-  } = CurrentExpectation
-
-  const expectatedUser = await userModel.findOne({
-    maritalsts: matchMaritalSts,
-    height: { $gte: matchHeightFrom, $lte: matchHeightTo },
-    occupation: matchOccu,
-    monthlyinc: matchIncome,
-    caste: matchCaste,
-  })
-  console.log(expectatedUser)
-
 }

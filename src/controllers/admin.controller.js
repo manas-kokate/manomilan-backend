@@ -3,13 +3,12 @@ import adminModel from "../models/admin.model.js";
 import bcrypt from "bcrypt"
 import envCredentials from "../config/env.js";
 import userModel from "../models/user.model.js";
-import expectationsModel from "../models/expectations.model.js";
 import locationEntryModel from "../models/location.entry.js";
 import stateModel from "../models/state.model.js";
 import countryModel from "../models/country.model.js";
 import religionModel from "../models/religion.model.js";
 import casteModel from "../models/caste.model.js";
-import casteEntry from "../models/casteEntry.model.js"
+import casteEntryModel from "../models/casteEntry.model.js";
 
 
 
@@ -322,7 +321,7 @@ export const addCastes = async (req, res) => {
 
 export const getCasteEntry = async (req, res) => {
     try {
-        const findCasteEntries = await casteModel.find()
+        const findCasteEntries = await casteEntryModel.find()
 
         if (findCasteEntries.length == 0) {
             return res.send({ status: false, message: "No caste entry found" });
