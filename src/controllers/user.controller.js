@@ -239,30 +239,6 @@ export const login = async (req, res) => {
 };
 
 
-export const getcountries = async (req, res) => {
-  const countries = await countryModel.find();
-  if (countries.length == 0) {
-    return res.send({ status: false, message: "No countries found. Contact admin to add." })
-  }
-  return res.send({ status: true, result: countries })
-}
-
-export const getStates = async (req, res) => {
-  const States = await stateModel.find();
-  if (States.length == 0) {
-    return res.send({ status: false, message: "No States found. Contact admin to add." })
-  }
-  return res.send({ status: true, result: States })
-}
-
-export const getLocationEntry = async (req, res) => {
-  const locationEntry = await locationEntryModel.find({}, { _id: 0, __v: 0 });
-  if (locationEntry.length == 0) {
-    return res.send({ status: false, message: "No location found. Contact admin to add." })
-  }
-  return res.send({ status: true, result: locationEntry })
-}
-
 export const editProfile = async (req, res) => {
   const { newUpdates } = req.body;
   const userId = req.id

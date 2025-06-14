@@ -1,8 +1,8 @@
 import express from "express"
 import { uploadMiddleware } from "../utils/upload.js";
-import { registerUser, login, getLoggedInUser, mutualMatching, getcountries, getStates, getLocationEntry, editProfile } from "../controllers/user.controller.js";
+import { registerUser, login, getLoggedInUser, mutualMatching, editProfile } from "../controllers/user.controller.js";
 import { userAuth } from "../middlewares/auth.js"
-import { getCasteEntry } from "../controllers/admin.controller.js";
+import { getCountry, getStateCountry } from "../controllers/admin.controller.js";
 
 
 const router = express.Router();
@@ -13,12 +13,12 @@ router.post('/login', login);
 router.put('/editprofile', userAuth, editProfile)
 
 // LOCATIONS
-router.get('/getcountries', userAuth, getcountries);
-router.get('/getstates', userAuth, getStates);
-router.get('/getlocationEntry', userAuth, getLocationEntry);
+router.get('/getcountries', userAuth, getCountry);
+router.get('/getstates', userAuth, getStateCountry);
+
 
 // CASTE 
-router.get('/getcasteEntry', userAuth, getCasteEntry)
+
 
 router.get('/getcurrentuser', userAuth, getLoggedInUser);
 

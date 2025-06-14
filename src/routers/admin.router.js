@@ -1,5 +1,5 @@
 import express from 'express'
-import { getUsers, loginAdmin, registerAdmin, updateUserPfp, deleteUser, getReligions, addReligion, getCastes, addCastes, getCasteEntry, addCasteEntry, getCountry, addcountry } from '../controllers/admin.controller.js';
+import { getUsers, loginAdmin, registerAdmin, updateUserPfp, deleteUser, getCountry, addcountry, getStateCountry, addStateCountry, addlocationEntry, getlocationEntry } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
 
 
@@ -15,15 +15,13 @@ router.delete('/deleteruser', adminAuth, deleteUser);
 
 // LOCATIONS 
 router.get('/getcountries', adminAuth, getCountry);
-router.post('/addcountries', adminAuth, addcountry)
+router.post('/addcountries', adminAuth, addcountry);
+router.get('/get-state-country', adminAuth, getStateCountry)
+router.post('/add-state-country', adminAuth, addStateCountry);
+router.get('/get-location', getlocationEntry)
+router.post('/add-location', addlocationEntry)
 
 //caste,subcaste,religion
-router.get('/getreligions', adminAuth, getReligions);
-router.post('/addreligion', adminAuth, addReligion);
-router.get('/getcastes', adminAuth, getCastes);
-router.post('/addcaste', adminAuth, addCastes);
-router.get('/getcasteEntry', adminAuth, getCasteEntry);
-router.post('/addcasteEntry', adminAuth, addCasteEntry);
 
 
 export default router

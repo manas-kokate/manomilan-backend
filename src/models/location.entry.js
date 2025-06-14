@@ -6,8 +6,8 @@ const LocationSchema = new mongoose.Schema({
         required: true
     },
     stateCountry: {
-        type: mongoose.Types.ObjectId,
-        ref: 'state_Country'
+        state: { type: String },
+        country: { type: String }
     }
 })
 

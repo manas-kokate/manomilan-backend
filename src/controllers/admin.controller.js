@@ -4,11 +4,9 @@ import bcrypt from "bcrypt"
 import envCredentials from "../config/env.js";
 import userModel from "../models/user.model.js";
 import locationEntryModel from "../models/location.entry.js";
-import stateModel from "../models/state.model.js";
+import stateCountryModel from "../models/state.model.js";
 import countryModel from "../models/country.model.js";
-import religionModel from "../models/religion.model.js";
-import casteModel from "../models/caste.model.js";
-import casteEntryModel from "../models/casteEntry.model.js";
+
 
 
 
@@ -153,132 +151,88 @@ export const addcountry = async (req, res) => {
 }
 
 export const getStateCountry = async (req, res) => {
+    const { country } = req.body;
+    try {
+        const StateCountry = await stateCountryModel.find({ country })
+        if (StateCountry.length == 0) {
+            return res.send({ status: false, message: "No states found for this country" });
+        }
 
+        return res.send({ status: true, result: StateCountry });
+    }
+    catch (error) {
+        return res.send({ status: false, message: "Server Error" })
+    }
 }
 
 export const addStateCountry = async (req, res) => {
+    const { state, country } = req.body;
+    if (!state || !country) {
+        return res.send({ status: false, message: "country and state required" })
+    }
+    try {
+        const newStateCountry = new stateCountryModel({
+            state,
+            country
+        })
+        await newStateCountry.save();
+        return res.send({ status: true, message: "Added successfully" });
 
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" })
+    }
+}
+
+export const getlocationEntry = async (req, res) => {
+    const { state, country } = req.body;
+    if (!state || !country) {
+        return res.send({ status: false, message: "state and country required" });
+    }
+    const stateCountry = {
+        state,
+        country
+    }
+    try {
+        const locations = await locationEntryModel.find({ stateCountry })
+        console.log(locations)
+        if (locations.length == 0) {
+            return res.send({ status: false, message: "no locations found for this entry" })
+        }
+        return res.send({ status: true, result: locations })
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
+export const addlocationEntry = async (req, res) => {
+
+    try {
+        const { state, country, city } = req.body;
+        if (!state || !country || !city) {
+            return res.send({ status: false, message: "state and country required" });
+        }
+        const stateCountry = {
+            state: state,
+            country: country
+        }
+
+        const existingEntry = await locationEntryModel.findOne({ city: city, stateCountry })
+        if (existingEntry) {
+            return res.send({ status: false, message: "Entry already exists. Try changing state or country." })
+        }
+
+        const newLocationEntry = await locationEntryModel({
+            city,
+            stateCountry
+        })
+        await newLocationEntry.save();
+
+        return res.send({ status: true, message: "new location added" })
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
 }
 
 // Caste 
-export const getReligions = async (req, res) => {
-
-    try {
-        const findReligions = await religionModel.find()
-
-        if (findReligions.length == 0) {
-            return res.send({ status: false, message: "No religion found" });
-        }
-
-        return res.send({ status: true, result: findReligions })
-
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
-    }
-}
-
-export const addReligion = async (req, res) => {
-
-    try {
-        const { religion } = req.body
-        if (!religion) {
-            return res.send({ status: false, message: "Religion is required" })
-        }
-
-        const existingReligion = await religionModel.findOne({ religion });
-        if (existingReligion) {
-            return res.send({ status: false, message: `${religion} already exists.` })
-        }
-
-        const newReligion = new religionModel({
-            religion
-        })
-
-        await newReligion.save();
-
-        return res.send({ status: true, message: "religion added successfully" })
-
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
-    }
-}
-
-export const getCastes = async (req, res) => {
-    try {
-        const findCastes = await casteModel.find()
-
-        if (findCastes.length == 0) {
-            return res.send({ status: false, message: "No castes found" });
-        }
-
-        return res.send({ status: true, result: findCastes })
-
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
-    }
-}
-
-export const addCastes = async (req, res) => {
-    try {
-        const { caste } = req.body
-        if (!caste) {
-            return res.send({ status: false, message: "caste is required" })
-        }
-
-        const existingcaste = await casteModel.findOne({ caste });
-        if (existingcaste) {
-            return res.send({ status: false, message: `${caste} already exists.` })
-        }
-
-        const newcaste = new casteModel({
-            caste
-        })
-
-        await newcaste.save();
-
-        return res.send({ status: true, message: "caste added successfully" })
-
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
-    }
-}
-
-export const getCasteEntry = async (req, res) => {
-    try {
-        const findCasteEntries = await casteEntryModel.find()
-
-        if (findCasteEntries.length == 0) {
-            return res.send({ status: false, message: "No caste entry found" });
-        }
-
-        return res.send({ status: true, result: findCasteEntries })
-
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
-    }
-}
-
-export const addCasteEntry = async (req, res) => {
-    try {
-        const { casteEntry } = req.body
-        if (!casteEntry) {
-            return res.send({ status: false, message: "casteEntry is required" })
-        }
-
-        const existingcasteEntry = await casteEntryModel.findOne({ casteEntry });
-        if (existingcasteEntry) {
-            return res.send({ status: false, message: `${casteEntry} already exists.` })
-        }
-
-        const newcasteEntry = new casteEntryModel({
-            casteEntry
-        })
-
-        await newcasteEntry.save();
-
-        return res.send({ status: true, message: "casteEntry added successfully" })
-
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
-    }
-}

@@ -6,8 +6,8 @@ const StateSchema = new mongoose.Schema({
         required: true
     },
     country: {
-        type: mongoose.Types.ObjectId,
-        ref: 'country'
+        type: String,
+        required: true
     }
 })
 
