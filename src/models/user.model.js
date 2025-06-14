@@ -18,10 +18,11 @@ const userSchema = new Schema({
     maritalStatus: {
         type: String,
     },
-    children: {
+    children: [{
         dob: { type: String },
-        gender: { type: String }
-    },
+        gender: { type: String },
+        livesWith: { type: String }
+    }],
     height: { type: String, default: "5' 4\"" },
     occupation: {
         type: String,
@@ -62,7 +63,8 @@ const userSchema = new Schema({
     expectedEducation: { type: [String] },
     expectedOccupation: { type: String },
     expectedIncome: { type: String },
-    workAbroad: { type: String, default: "no" },
+    workAbroad: { type: String },
+    divyangPrefer: { type: String },
     expectedMaritalStatus: { type: String },
     expectedNationality: { type: [String] },
     childAccepted: { type: String },

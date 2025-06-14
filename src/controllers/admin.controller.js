@@ -120,121 +120,45 @@ export const deleteUser = async (req, res) => {
 }
 
 //location  
-export const getcountries = async (req, res) => {
-
+export const getCountry = async (req, res) => {
     try {
-        const countries = await countryModel.find({}, { _id: 0, __v: 0 });
+        const countries = await countryModel.find({}, '-_id -__v')
         if (countries.length == 0) {
-            return res.send({ status: false, message: "No countries found. Contact admin to add." })
+            return res.send({ status: false, message: 'no countries found' })
         }
-        return res.send({ status: true, result: countries })
 
+        return res.send({ status: true, result: countries })
     } catch (error) {
-        return res.send({ status: false, message: "Server error" })
+        return res.send({ status: false, message: 'Something went wrong. Server error.' })
     }
 }
 
 export const addcountry = async (req, res) => {
-    try {
 
+    try {
         const { country } = req.body;
         if (!country) {
-            return res.send({ status: false, message: "Please send country to add." })
-        }
-
-        const findExistingCountry = await countryModel.findOne({ country });
-        if (findExistingCountry) {
-            return res.send({ status: false, message: `${country} already exists` })
+            return res.send({ status: false, message: "Please send country to add." });
         }
 
         const newCountry = new countryModel({
             country
         })
         await newCountry.save();
-        return res.send({ status: true, message: `${country} added successfully` })
+        return res.send({ status: true, message: "New country added" })
 
     } catch (error) {
-        return res.send({ status: false, message: "Server error" })
+        return res.send({ status: false, message: 'Something went wrong. Server error.' })
     }
 }
 
-export const getStates = async (req, res) => {
+export const getStateCountry = async (req, res) => {
 
-    try {
-        const States = await stateModel.find({}, { _id: 0, __v: 0 });
-        if (States.length == 0) {
-            return res.send({ status: false, message: "No States found. Contact admin to add." })
-        }
-        return res.send({ status: true, result: States })
-
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
-    }
 }
 
-export const addState = async (req, res) => {
-    try {
-        const { state } = req.body;
-        if (!state) {
-            return res.send({ status: false, message: "Please send state to add." })
-        }
+export const addStateCountry = async (req, res) => {
 
-        const findExistingstate = await stateModel.findOne({ state });
-        if (findExistingstate) {
-            return res.send({ status: false, message: `${state} already exists` })
-        }
-
-        const newState = new stateModel({
-            state
-        })
-        await newState.save();
-        return res.send({ status: true, message: `${state} added successfully` })
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
-    }
 }
-
-export const getLocationEntry = async (req, res) => {
-    try {
-        const locationEntry = await locationEntryModel.find({}, { _id: 0, __v: 0 });
-        if (locationEntry.length == 0) {
-            return res.send({ status: false, message: "No location found. Contact admin to add." })
-        }
-        return res.send({ status: true, result: locationEntry })
-
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
-    }
-}
-
-export const addLocationEntry = async (req, res) => {
-
-    try {
-        const { country, state, city } = req.body;
-
-        if (!country || !state || !city) {
-            return res.send({ status: false, message: "Please send all fields." })
-        }
-
-        const existingEntry = await locationEntryModel.findOne({ city });
-        if (existingEntry) {
-            return res.send({ status: false, message: `${city},${state},${country} already exists.` })
-        }
-
-        const newEntry = new locationEntryModel({
-            city,
-            state,
-            country
-        })
-
-        await newEntry.save()
-        return res.send({ status: false, message: `${newEntry.city},${newEntry.state},${newEntry.country} added successfully` })
-
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
-    }
-}
-
 
 // Caste 
 export const getReligions = async (req, res) => {

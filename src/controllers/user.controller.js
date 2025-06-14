@@ -302,4 +302,14 @@ export const getLoggedInUser = async (req, res) => {
 }
 
 export const mutualMatching = async (req, res) => {
+  const userId = req.id;
+
+  // const currentUser = await userModel.findById(userId);
+  // const {
+  //   ageFrom,
+  //   ageTo,
+  //   heightFrom,
+  //   heightTo,
+  //   expectedEducation
+  // } = currentUser 
 }
