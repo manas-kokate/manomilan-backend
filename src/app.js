@@ -14,5 +14,6 @@ app.use("/api/admin", adminRouter);
 
 
 // findOne({ userId }, '-_id -userId -createdAt -updatedAt -__v')
+// find({ userId }, '-_id -userId -createdAt -updatedAt -__v')
 
 export default app

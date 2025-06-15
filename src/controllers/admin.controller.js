@@ -170,7 +170,7 @@ export const getStateCountry = async (req, res) => {
 
 export const getAllStates = async (req, res) => {
     try {
-        const allStates = await stateCountryModel.find('-_id -__v');
+        const allStates = await stateCountryModel.find({}, '-_id -__v');
         if (allStates.length == 0) {
             return res.send({ status: false, message: "No states found" })
         }
@@ -265,3 +265,144 @@ export const addlocationEntry = async (req, res) => {
 }
 
 // Caste 
+// GET all religions
+export const getReligion = async (req, res) => {
+    try {
+        const religions = await religionModel.find({}, '-_id -__v');
+        if (religions.length === 0) {
+            return res.send({ status: false, message: 'No religions found' });
+        }
+        return res.send({ status: true, result: religions });
+    } catch (error) {
+        return res.send({ status: false, message: 'Something went wrong. Server error.' });
+    }
+};
+
+// GET all castes
+export const getAllCastes = async (req, res) => {
+    try {
+        const allCastes = await casteModel.find({}, '-_id -__v');
+        if (allCastes.length === 0) {
+            return res.send({ status: false, message: "No castes found" });
+        }
+        return res.send({ status: true, result: allCastes });
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" });
+    }
+};
+
+// GET caste by religion
+export const getCasteByReligion = async (req, res) => {
+    const { religion } = req.body;
+    try {
+        const castes = await casteModel.find({ religion });
+        if (castes.length === 0) {
+            return res.send({ status: false, message: "No castes found for this religion" });
+        }
+        return res.send({ status: true, result: castes });
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" });
+    }
+};
+
+// ADD new caste with religion
+export const addCasteReligion = async (req, res) => {
+    const { caste, religion } = req.body;
+    if (!caste || !religion) {
+        return res.send({ status: false, message: "Religion and caste required" });
+    }
+    try {
+        const exists = await casteModel.findOne({ caste, religion });
+        if (exists) {
+            return res.send({ status: false, message: "Caste already exists under this religion." });
+        }
+
+        const newCaste = new casteModel({ caste, religion });
+        await newCaste.save();
+        return res.send({ status: true, message: "Added successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" });
+    }
+};
+
+// GET all subcastes
+export const getAllSubCastes = async (req, res) => {
+    try {
+        const allSubCastes = await subCasteModel.find({}, '-_id -__v');
+        if (allSubCastes.length === 0) {
+            return res.send({ status: false, message: "No subcastes found" });
+        }
+        return res.send({ status: true, result: allSubCastes });
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" });
+    }
+};
+
+// GET subcaste by caste + religion
+export const getSubCasteEntry = async (req, res) => {
+    const { caste, religion } = req.body;
+    if (!caste || !religion) {
+        return res.send({ status: false, message: "Caste and religion required" });
+    }
+
+    const casteReligion = { caste, religion };
+
+    try {
+        const subCastes = await subCasteModel.find({ casteReligion });
+        if (subCastes.length === 0) {
+            return res.send({ status: false, message: "No subcastes found for this entry" });
+        }
+        return res.send({ status: true, result: subCastes });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+// ADD new subcaste under caste + religion
+export const addSubCasteEntry = async (req, res) => {
+    try {
+        const { caste, religion, subCaste } = req.body;
+        if (!caste || !religion || !subCaste) {
+            return res.send({ status: false, message: "Caste, religion, and subcaste required" });
+        }
+
+        const casteReligion = { caste, religion };
+
+        const existingEntry = await subCasteModel.findOne({ subCaste, casteReligion });
+        if (existingEntry) {
+            return res.send({ status: false, message: "Subcaste already exists under this caste and religion." });
+        }
+
+        const newSubCasteEntry = new subCasteModel({
+            subCaste,
+            casteReligion
+        });
+
+        await newSubCasteEntry.save();
+        return res.send({ status: true, message: "New subcaste added" });
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+// ADD new religion
+export const addReligion = async (req, res) => {
+    try {
+        const { religion } = req.body;
+        if (!religion) {
+            return res.send({ status: false, message: "Please send religion to add." });
+        }
+
+        const exists = await religionModel.findOne({ religion });
+        if (exists) {
+            return res.send({ status: false, message: "Religion already exists." });
+        }
+
+        const newReligion = new religionModel({ religion });
+        await newReligion.save();
+        return res.send({ status: true, message: "New religion added" });
+
+    } catch (error) {
+        return res.send({ status: false, message: 'Something went wrong. Server error.' });
+    }
+};
