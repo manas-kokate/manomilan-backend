@@ -4,6 +4,10 @@ const casteSchema = new mongoose.Schema({
     caste: {
         type: String,
         required: true
+    },
+    religion: {
+        type: String,
+        required: true
     }
 })
 

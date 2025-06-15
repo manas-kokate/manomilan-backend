@@ -6,6 +6,9 @@ import userModel from "../models/user.model.js";
 import locationEntryModel from "../models/location.entry.js";
 import stateCountryModel from "../models/state.model.js";
 import countryModel from "../models/country.model.js";
+import casteModel from "../models/caste.model.js";
+import religionModel from "../models/religion.model.js";
+import subcasteModel from "../models/subcaste.model.js";
 
 
 
@@ -165,6 +168,19 @@ export const getStateCountry = async (req, res) => {
     }
 }
 
+export const getAllStates = async (req, res) => {
+    try {
+        const allStates = await stateCountryModel.find('-_id -__v');
+        if (allStates.length == 0) {
+            return res.send({ status: false, message: "No states found" })
+        }
+
+        return res.send({ status: true, allStates: allStates })
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" })
+    }
+}
+
 export const addStateCountry = async (req, res) => {
     const { state, country } = req.body;
     if (!state || !country) {
@@ -178,6 +194,19 @@ export const addStateCountry = async (req, res) => {
         await newStateCountry.save();
         return res.send({ status: true, message: "Added successfully" });
 
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" })
+    }
+}
+
+export const getAllLocations = async (req, res) => {
+    try {
+        const allLocations = await locationEntryModel.find('-_id -__v');
+        if (allLocations.length == 0) {
+            return res.send({ status: false, message: "No Locations found" })
+        }
+
+        return res.send({ status: true, allLocations: allLocations })
     } catch (error) {
         return res.send({ status: false, message: "Server Error" })
     }
