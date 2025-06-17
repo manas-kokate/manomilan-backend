@@ -177,6 +177,39 @@ export const deleteCountry = async (req, res) => {
     }
 };
 
+export const updateCountry = async (req, res) => {
+    try {
+        const { oldCountry, newCountry } = req.body;
+        if (!oldCountry || !newCountry) {
+            return res.send({ status: false, message: "Please send oldCountry and newCountry to update." });
+        }
+
+        const updatedCountry = await countryModel.findOneAndUpdate(
+            { country: oldCountry },
+            { country: newCountry }
+        );
+
+        await stateCountryModel.updateMany(
+            { country: oldCountry },
+            { country: newCountry }
+        );
+
+        await locationEntryModel.updateMany(
+            { "stateCountry.country": oldCountry },
+            { "stateCountry.country": newCountry }
+        );
+
+        if (!updatedCountry) {
+            return res.send({ status: false, message: "Country not found." });
+        }
+
+        return res.send({ status: true, message: "Country updated successfully." });
+    } catch (error) {
+        return res.send({ status: false, message: 'Something went wrong. Server error.' });
+    }
+};
+
+
 //=== STATE ===
 
 export const getStateCountry = async (req, res) => {
@@ -255,6 +288,36 @@ export const deleteStateCountry = async (req, res) => {
     } catch (error) {
         console.error("Error deleting state-country:", error);
         return res.send({ status: false, message: "Server error while deleting state and country." });
+    }
+};
+
+export const updateState = async (req, res) => {
+    try {
+        const { country, oldState, newState } = req.body;
+        if (!country || !oldState || !newState) {
+            return res.send({ status: false, message: "Please send country, oldState, and newState to update." });
+        }
+
+        const updatedState = await stateCountryModel.findOneAndUpdate(
+            { country, state: oldState },
+            { state: newState }
+        );
+
+        await locationEntryModel.updateMany(
+            {
+                "stateCountry.country": country,
+                "stateCountry.state": oldState
+            },
+            { "stateCountry.state": newState }
+        );
+
+        if (!updatedState) {
+            return res.send({ status: false, message: "State not found." });
+        }
+
+        return res.send({ status: true, message: "State updated successfully." });
+    } catch (error) {
+        return res.send({ status: false, message: 'Something went wrong. Server error.' });
     }
 };
 
@@ -353,8 +416,36 @@ export const deleteCity = async (req, res) => {
     }
 }
 
+export const updateCity = async (req, res) => {
+    try {
+        const { country, state, oldCity, newCity } = req.body;
+        if (!country || !state || !oldCity || !newCity) {
+            return res.send({ status: false, message: "Please send country, state, oldCity, and newCity to update." });
+        }
+
+        const updatedCity = await locationEntryModel.findOneAndUpdate(
+            {
+                "stateCountry.country": country,
+                "stateCountry.state": state,
+                city: oldCity
+            },
+            { city: newCity }
+        );
+
+        if (!updatedCity) {
+            return res.send({ status: false, message: "City not found." });
+        }
+
+        return res.send({ status: true, message: "City updated successfully." });
+    } catch (error) {
+        return res.send({ status: false, message: 'Something went wrong. Server error.' });
+    }
+};
+
+
 // === CASTE ===
 
+// === RELIGION ===
 export const getReligion = async (req, res) => {
     try {
         const religions = await religionModel.find({}, '-_id -__v');
@@ -388,6 +479,60 @@ export const addReligion = async (req, res) => {
     }
 };
 
+export const updateReligion = async (req, res) => {
+    try {
+        const { oldReligion, newReligion } = req.body;
+        if (!oldReligion || !newReligion) {
+            return res.send({ status: false, message: "Please send oldReligion and newReligion to update." });
+        }
+
+        const updatedReligion = await religionModel.findOneAndUpdate(
+            { religion: oldReligion },
+            { religion: newReligion }
+        );
+
+        await casteModel.updateMany(
+            { religion: oldReligion },
+            { religion: newReligion }
+        );
+
+        await subcasteModel.updateMany(
+            { "casteReligion.religion": oldReligion },
+            { "casteReligion.religion": newReligion }
+        );
+
+        if (!updatedReligion) {
+            return res.send({ status: false, message: "Religion not found." });
+        }
+
+        return res.send({ status: true, message: "Religion updated successfully." });
+    } catch (error) {
+        return res.send({ status: false, message: 'Something went wrong. Server error.' });
+    }
+};
+
+export const deleteReligion = async (req, res) => {
+    try {
+        const { religion } = req.body;
+        if (!religion) {
+            return res.send({ status: false, message: "Please send religion to delete." });
+        }
+
+        const deletedReligion = await religionModel.findOneAndDelete({ religion });
+        await casteModel.deleteMany({ religion });
+        await subcasteModel.deleteMany({ "casteReligion.religion": religion });
+
+        if (!deletedReligion) {
+            return res.send({ status: false, message: "Religion not found." });
+        }
+
+        return res.send({ status: true, message: "Religion deleted successfully." });
+    } catch (error) {
+        return res.send({ status: false, message: 'Something went wrong. Server error.' });
+    }
+};
+
+// === CASTES ===
 export const getAllCastes = async (req, res) => {
     try {
         const allCastes = await casteModel.find({}, '-_id -__v');
@@ -432,6 +577,57 @@ export const addCasteReligion = async (req, res) => {
     }
 };
 
+export const updateCaste = async (req, res) => {
+    try {
+        const { religion, oldCaste, newCaste } = req.body;
+        if (!religion || !oldCaste || !newCaste) {
+            return res.send({ status: false, message: "Please send religion, oldCaste, and newCaste to update." });
+        }
+
+        const updatedCaste = await casteModel.findOneAndUpdate(
+            { religion, caste: oldCaste },
+            { caste: newCaste }
+        );
+
+        await subcasteModel.updateMany(
+            {
+                "casteReligion.religion": religion,
+                "casteReligion.caste": oldCaste
+            },
+            { "casteReligion.caste": newCaste }
+        );
+
+        if (!updatedCaste) {
+            return res.send({ status: false, message: "Caste not found." });
+        }
+
+        return res.send({ status: true, message: "Caste updated successfully." });
+    } catch (error) {
+        return res.send({ status: false, message: 'Something went wrong. Server error.' });
+    }
+};
+
+export const deleteCaste = async (req, res) => {
+    try {
+        const { religion, caste } = req.body;
+        if (!religion || !caste) {
+            return res.send({ status: false, message: "Please send religion and caste to delete." });
+        }
+
+        const deletedCaste = await casteModel.findOneAndDelete({ religion, caste });
+        await subcasteModel.deleteMany({ "casteReligion.religion": religion, "casteReligion.caste": caste });
+
+        if (!deletedCaste) {
+            return res.send({ status: false, message: "Caste not found." });
+        }
+
+        return res.send({ status: true, message: "Caste deleted successfully." });
+    } catch (error) {
+        return res.send({ status: false, message: 'Something went wrong. Server error.' });
+    }
+};
+
+//=== SUBCASTE ===
 export const getAllSubCastes = async (req, res) => {
     try {
         const allSubCastes = await subCasteModel.find({}, '-_id -__v');
@@ -490,42 +686,26 @@ export const addSubCasteEntry = async (req, res) => {
     }
 };
 
-export const deleteReligion = async (req, res) => {
+export const updateSubCaste = async (req, res) => {
     try {
-        const { religion } = req.body;
-        if (!religion) {
-            return res.send({ status: false, message: "Please send religion to delete." });
+        const { religion, caste, oldSubCaste, newSubCaste } = req.body;
+        if (!religion || !caste || !oldSubCaste || !newSubCaste) {
+            return res.send({ status: false, message: "Please send religion, caste, oldSubCaste, and newSubCaste to update." });
         }
 
-        const deletedReligion = await religionModel.findOneAndDelete({ religion });
-        await casteModel.deleteMany({ religion });
-        await subcasteModel.deleteMany({ "casteReligion.religion": religion });
+        const updatedSubCaste = await subcasteModel.findOneAndUpdate(
+            {
+                subCaste: oldSubCaste,
+                casteReligion: { religion, caste }
+            },
+            { subCaste: newSubCaste }
+        );
 
-        if (!deletedReligion) {
-            return res.send({ status: false, message: "Religion not found." });
+        if (!updatedSubCaste) {
+            return res.send({ status: false, message: "Subcaste not found." });
         }
 
-        return res.send({ status: true, message: "Religion deleted successfully." });
-    } catch (error) {
-        return res.send({ status: false, message: 'Something went wrong. Server error.' });
-    }
-};
-
-export const deleteCaste = async (req, res) => {
-    try {
-        const { religion, caste } = req.body;
-        if (!religion || !caste) {
-            return res.send({ status: false, message: "Please send religion and caste to delete." });
-        }
-
-        const deletedCaste = await casteModel.findOneAndDelete({ religion, caste });
-        await subcasteModel.deleteMany({ "casteReligion.religion": religion, "casteReligion.caste": caste });
-
-        if (!deletedCaste) {
-            return res.send({ status: false, message: "Caste not found." });
-        }
-
-        return res.send({ status: true, message: "Caste deleted successfully." });
+        return res.send({ status: true, message: "Subcaste updated successfully." });
     } catch (error) {
         return res.send({ status: false, message: 'Something went wrong. Server error.' });
     }
