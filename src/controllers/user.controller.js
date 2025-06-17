@@ -239,6 +239,7 @@ export const login = async (req, res) => {
 };
 
 
+
 export const editProfile = async (req, res) => {
   const { newUpdates } = req.body;
   const userId = req.id
