@@ -49,14 +49,14 @@ router.delete('/deleteruser', adminAuth, deleteUser);
 // === COUNTRY=== 
 router.get('/getcountries', adminAuth, getCountry);
 router.post('/addcountries', addcountry);
-router.delete('/delete-country', deleteCountry);
+router.delete('/delete-country', adminAuth, deleteCountry);
 router.put('/update-country', adminAuth, updateCountry);
 
 // ===  STATE ROUTES ===
 router.get('/get-state-country', adminAuth, getStateCountry)
 router.get('/get-all-states', adminAuth, getAllStates)
 router.post('/add-state-country', adminAuth, addStateCountry);
-router.delete('/delete-state-country', deleteStateCountry)
+router.delete('/delete-state-country', adminAuth, deleteStateCountry)
 router.put('/update-state', adminAuth, updateState);
 
 // === LOCATIONS ===
@@ -67,8 +67,8 @@ router.delete('/delete-city', adminAuth, deleteCity);
 router.put('/update-city', adminAuth, updateCity);
 
 // === RELIGION ROUTES ===
-router.get('/religion', adminAuth, getReligion);
-router.post('/religion', adminAuth, addReligion);
+router.get('/get-religion', adminAuth, getReligion);
+router.post('/add-religion', adminAuth, addReligion);
 router.delete('/delete-religion', adminAuth, deleteReligion)
 router.put('/update-religion', adminAuth, updateReligion);
 
@@ -80,9 +80,9 @@ router.delete('/delete-caste', adminAuth, deleteCaste)
 router.put('/update-caste', adminAuth, updateCaste);
 
 // === SUBCASTE ROUTES ===
-router.get('/subcaste', adminAuth, getAllSubCastes);
-router.post('/subcaste/by-caste-religion', adminAuth, getSubCasteEntry);
-router.post('/subcaste', adminAuth, addSubCasteEntry);
+router.get('/get-all-subcaste', adminAuth, getAllSubCastes);
+router.post('/get-subcaste-by-caste-religion', adminAuth, getSubCasteEntry);
+router.post('/add-subcaste', addSubCasteEntry);
 router.delete('/delete-subcaste', adminAuth, deleteSubCaste);
 router.put('/update-subcaste', adminAuth, updateSubCaste);
 

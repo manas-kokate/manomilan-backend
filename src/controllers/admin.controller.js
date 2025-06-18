@@ -213,8 +213,8 @@ export const updateCountry = async (req, res) => {
 //=== STATE ===
 
 export const getStateCountry = async (req, res) => {
-    const { country } = req.body;
     try {
+        const { country } = req.body;
         const StateCountry = await stateCountryModel.find({ country }, '-_id -__v')
         if (StateCountry.length == 0) {
             return res.send({ status: false, message: "No states found for this country" });
@@ -241,11 +241,11 @@ export const getAllStates = async (req, res) => {
 }
 
 export const addStateCountry = async (req, res) => {
-    const { state, country } = req.body;
-    if (!state || !country) {
-        return res.send({ status: false, message: "country and state required" })
-    }
     try {
+        const { state, country } = req.body;
+        if (!state || !country) {
+            return res.send({ status: false, message: "country and state required" })
+        }
         const existingState = await stateCountryModel.findOne({ state, country });
         if (existingState) {
             return res.send({ status: false, message: "This state and country already exists" })
@@ -338,15 +338,15 @@ export const getAllLocations = async (req, res) => {
 }
 
 export const getlocationEntry = async (req, res) => {
-    const { state, country } = req.body;
-    if (!state || !country) {
-        return res.send({ status: false, message: "state and country required" });
-    }
-    const stateCountry = {
-        state,
-        country
-    }
     try {
+        const { state, country } = req.body;
+        if (!state || !country) {
+            return res.send({ status: false, message: "state and country required" });
+        }
+        const stateCountry = {
+            state,
+            country
+        }
         const locations = await locationEntryModel.find({ stateCountry }, '-_id -__v')
         console.log(locations)
         if (locations.length == 0) {
@@ -360,7 +360,6 @@ export const getlocationEntry = async (req, res) => {
 }
 
 export const addlocationEntry = async (req, res) => {
-
     try {
         const { state, country, city } = req.body;
         if (!state || !country || !city) {
@@ -390,16 +389,16 @@ export const addlocationEntry = async (req, res) => {
 }
 
 export const deleteCity = async (req, res) => {
-    const { country, state, city } = req.body;
-    const stateCountry = {
-        state,
-        country
-    }
-    if (!country || !state || !city) {
-        return res.send({ status: false, message: "state,country and city required" })
-    }
 
     try {
+        const { country, state, city } = req.body;
+        const stateCountry = {
+            state,
+            country
+        }
+        if (!country || !state || !city) {
+            return res.send({ status: false, message: "state,country and city required" })
+        }
 
         const deletedCity = await locationEntryModel.findOneAndDelete({
             city,
@@ -460,7 +459,7 @@ export const getReligion = async (req, res) => {
 
 export const addReligion = async (req, res) => {
     try {
-        const { religion } = req.body;
+        let { religion } = req.body;
         if (!religion) {
             return res.send({ status: false, message: "Please send religion to add." });
         }
@@ -546,8 +545,8 @@ export const getAllCastes = async (req, res) => {
 };
 
 export const getCasteByReligion = async (req, res) => {
-    const { religion } = req.body;
     try {
+        const { religion } = req.body;
         const castes = await casteModel.find({ religion });
         if (castes.length === 0) {
             return res.send({ status: false, message: "No castes found for this religion" });
@@ -559,11 +558,11 @@ export const getCasteByReligion = async (req, res) => {
 };
 
 export const addCasteReligion = async (req, res) => {
-    const { caste, religion } = req.body;
-    if (!caste || !religion) {
-        return res.send({ status: false, message: "Religion and caste required" });
-    }
     try {
+        const { caste, religion } = req.body;
+        if (!caste || !religion) {
+            return res.send({ status: false, message: "Religion and caste required" });
+        }
         const exists = await casteModel.findOne({ caste, religion });
         if (exists) {
             return res.send({ status: false, message: "Caste already exists under this religion." });
@@ -641,14 +640,14 @@ export const getAllSubCastes = async (req, res) => {
 };
 
 export const getSubCasteEntry = async (req, res) => {
-    const { caste, religion } = req.body;
-    if (!caste || !religion) {
-        return res.send({ status: false, message: "Caste and religion required" });
-    }
-
-    const casteReligion = { caste, religion };
 
     try {
+        const { caste, religion } = req.body;
+        if (!caste || !religion) {
+            return res.send({ status: false, message: "Caste and religion required" });
+        }
+
+        const casteReligion = { caste, religion };
         const subCastes = await subCasteModel.find({ casteReligion });
         if (subCastes.length === 0) {
             return res.send({ status: false, message: "No subcastes found for this entry" });
@@ -668,12 +667,12 @@ export const addSubCasteEntry = async (req, res) => {
 
         const casteReligion = { caste, religion };
 
-        const existingEntry = await subCasteModel.findOne({ subCaste, casteReligion });
+        const existingEntry = await subcasteModel.findOne({ subCaste, casteReligion });
         if (existingEntry) {
             return res.send({ status: false, message: "Subcaste already exists under this caste and religion." });
         }
 
-        const newSubCasteEntry = new subCasteModel({
+        const newSubCasteEntry = new subcasteModel({
             subCaste,
             casteReligion
         });
