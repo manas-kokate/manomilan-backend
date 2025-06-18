@@ -31,7 +31,9 @@ import {
     updateCity,
     updateReligion,
     updateCaste,
-    updateSubCaste
+    updateSubCaste,
+    addDegree,
+    addStream
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
 
@@ -85,6 +87,13 @@ router.post('/get-subcaste-by-caste-religion', adminAuth, getSubCasteEntry);
 router.post('/add-subcaste', addSubCasteEntry);
 router.delete('/delete-subcaste', adminAuth, deleteSubCaste);
 router.put('/update-subcaste', adminAuth, updateSubCaste);
+
+
+// === EDUCATION ===
+router.post('/add-degree', addDegree)
+
+
+router.post('/add-stream', addStream)
 
 
 export default router

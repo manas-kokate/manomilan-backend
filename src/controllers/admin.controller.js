@@ -9,6 +9,8 @@ import countryModel from "../models/country.model.js";
 import casteModel from "../models/caste.model.js";
 import religionModel from "../models/religion.model.js";
 import subcasteModel from "../models/subcaste.model.js";
+import streamModel from "../models/stream.model.js";
+import degreeModel from "../models/degree.model.js";
 
 
 
@@ -729,6 +731,135 @@ export const deleteSubCaste = async (req, res) => {
         return res.send({ status: true, message: "Subcaste deleted successfully." });
     } catch (error) {
         return res.send({ status: false, message: 'Something went wrong. Server error.' });
+    }
+};
+
+
+// === EDUCATION == 
+
+// === DEGREE ===
+
+export const getAllDegrees = async (req, res) => {
+    try {
+        const degrees = await degreeModel.find({});
+        return res.send({ status: true, data: degrees });
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" });
+    }
+};
+
+export const getDegreesByStream = async (req, res) => {
+    try {
+        const { stream } = req.query;
+        if (!stream) {
+            return res.send({ status: false, message: "stream is required" });
+        }
+
+        const degrees = await degreeModel.find({ stream });
+        return res.send({ status: true, data: degrees });
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" });
+    }
+};
+
+export const addDegree = async (req, res) => {
+    try {
+        const { stream, degree } = req.body;
+        if (!degree || !stream) {
+            return res.send({ status: false, message: "degree and stream are required" });
+        }
+        const existingDegree = await degreeModel.findOne({
+            degree,
+            stream
+        });
+        if (existingDegree) {
+            return res.send({ status: false, message: "degree already exists" })
+        }
+
+        const newDegree = new degreeModel({
+            degree,
+            stream
+        })
+        await newDegree.save();
+        return res.send({ status: true, message: "degree added successfully" })
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" })
+    }
+}
+
+export const deleteDegree = async (req, res) => {
+    try {
+        const { stream, degree } = req.body;
+        if (!stream || !degree) {
+            return res.send({ status: false, message: "stream and degree are required" });
+        }
+
+        const deleted = await degreeModel.deleteOne({ stream, degree });
+
+        if (deleted.deletedCount === 0) {
+            return res.send({ status: false, message: "Degree not found" });
+        }
+
+        return res.send({ status: true, message: "Degree deleted successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" });
+    }
+};
+
+//=== STREAMS ===
+
+export const getStreams = async (req, res) => {
+    try {
+        const streams = await streamModel.find({});
+        return res.send({ status: true, data: streams });
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" });
+    }
+};
+
+export const addStream = async (req, res) => {
+    try {
+        const { stream } = req.body;
+        if (!stream) {
+            return res.send({ status: false, message: " stream is required" });
+        }
+        const existingStream = await streamModel.findOne({ stream });
+        if (existingStream) {
+            return res.send({ status: false, message: "stream already exists" })
+        }
+
+        const newStream = new streamModel({
+            stream
+        })
+        await newStream.save();
+        return res.send({ status: true, message: "stream added successfully" })
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" })
+    }
+}
+
+export const deleteStream = async (req, res) => {
+    try {
+        const { stream } = req.body;
+        if (!stream) {
+            return res.send({ status: false, message: "stream is required" });
+        }
+
+        const existingStream = await streamModel.findOne({ stream });
+        if (!existingStream) {
+            return res.send({ status: false, message: "stream not found" });
+        }
+
+        // Delete all degrees under this stream
+        await degreeModel.deleteMany({ stream });
+
+        // Delete the stream itself
+        await streamModel.deleteOne({ stream });
+
+        return res.send({ status: true, message: "stream and its degrees deleted successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" });
     }
 };
 
