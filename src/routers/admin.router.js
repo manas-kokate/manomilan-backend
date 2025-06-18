@@ -33,7 +33,10 @@ import {
     updateCaste,
     updateSubCaste,
     addDegree,
-    addStream
+    addStream,
+    getAllDegrees,
+    getDegreesByStream,
+    getStreams
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
 
@@ -49,18 +52,17 @@ router.put('/updateuserpfp', adminAuth, updateUserPfp);
 router.delete('/deleteruser', adminAuth, deleteUser);
 
 // === COUNTRY=== 
-router.get('/getcountries', adminAuth, getCountry);
+router.get('/getcountries', getCountry);
 router.post('/addcountries', addcountry);
-router.delete('/delete-country', adminAuth, deleteCountry);
-router.put('/update-country', adminAuth, updateCountry);
+router.delete('/delete-country', deleteCountry);
+router.put('/update-country', updateCountry);
 
 // ===  STATE ROUTES ===
-router.get('/get-state-country', adminAuth, getStateCountry)
-router.get('/get-all-states', adminAuth, getAllStates)
-router.post('/add-state-country', adminAuth, addStateCountry);
-router.delete('/delete-state-country', adminAuth, deleteStateCountry)
-router.put('/update-state', adminAuth, updateState);
-
+router.get('/get-state-country', getStateCountry)
+router.get('/get-all-states', getAllStates)
+router.post('/add-state-country', addStateCountry);
+router.delete('/delete-state-country', deleteStateCountry)
+router.put('/update-state', updateState)
 // === LOCATIONS ===
 router.get('/get-all-locations', adminAuth, getAllLocations);
 router.get('/get-location', adminAuth, getlocationEntry);
@@ -69,31 +71,31 @@ router.delete('/delete-city', adminAuth, deleteCity);
 router.put('/update-city', adminAuth, updateCity);
 
 // === RELIGION ROUTES ===
-router.get('/get-religion', adminAuth, getReligion);
-router.post('/add-religion', adminAuth, addReligion);
-router.delete('/delete-religion', adminAuth, deleteReligion)
-router.put('/update-religion', adminAuth, updateReligion);
+router.get('/get-religion', getReligion);
+router.post('/add-religion', addReligion);
+router.delete('/delete-religion', deleteReligion)
+router.put('/update-religion', updateReligion);
 
 // === CASTE ROUTES ===
-router.get('/caste', adminAuth, getAllCastes);
-router.post('/caste/by-religion', adminAuth, getCasteByReligion);
-router.post('/caste', adminAuth, addCasteReligion);
-router.delete('/delete-caste', adminAuth, deleteCaste)
-router.put('/update-caste', adminAuth, updateCaste);
+router.get('/caste', getAllCastes);
+router.post('/caste/by-religion', deleteCaste)
+router.put('/update-caste', updateCaste);
 
 // === SUBCASTE ROUTES ===
-router.get('/get-all-subcaste', adminAuth, getAllSubCastes);
-router.post('/get-subcaste-by-caste-religion', adminAuth, getSubCasteEntry);
+router.get('/get-all-subcaste', getAllSubCastes);
+router.post('/get-subcaste-by-caste-religion', getSubCasteEntry);
 router.post('/add-subcaste', addSubCasteEntry);
-router.delete('/delete-subcaste', adminAuth, deleteSubCaste);
-router.put('/update-subcaste', adminAuth, updateSubCaste);
+router.delete('/delete-subcaste', deleteSubCaste);
+router.put('/update-subcaste', updateSubCaste);
 
 
 // === EDUCATION ===
-router.post('/add-degree', addDegree)
+router.get('/get-degree-by-stream', getDegreesByStream)
+router.get('/get-degree', getAllDegrees);
+router.post('/add-degree', addDegree);
 
-
-router.post('/add-stream', addStream)
+router.get('/get-stream', getStreams);
+router.post('/add-stream', addStream);
 
 
 export default router
