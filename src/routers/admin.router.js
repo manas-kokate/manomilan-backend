@@ -38,7 +38,9 @@ import {
     getDegreesByStream,
     getStreams,
     deleteDegree,
-    deleteStream
+    deleteStream,
+    addFoodPref,
+    getFoodPref
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
 
@@ -107,6 +109,11 @@ router.delete('/delete-degree', deleteDegree);
 router.get('/get-streams', getStreams);
 router.post('/add-stream', addStream);
 router.delete('/delete-stream', deleteStream);
+
+// === FOOD CHOICES ===
+router.get('/get-foodPref', getFoodPref);
+router.post('/add-foodPref', addFoodPref);
+router.get('/get-foodPref', getFoodPref);
 
 
 export default router

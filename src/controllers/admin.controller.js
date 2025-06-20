@@ -11,7 +11,13 @@ import religionModel from "../models/religion.model.js";
 import subcasteModel from "../models/subcaste.model.js";
 import streamModel from "../models/stream.model.js";
 import degreeModel from "../models/degree.model.js";
-
+import foodPrefModel from "../models/foodPref.model.js";
+import bodyTypeModel from "../models/bodyTypeModel.js";
+import complexionModel from "../models/complexionModel.js";
+import familyBgModel from "../models/familyBgModel.js";
+import sectModel from "../models/sect.model.js";
+import positionsModel from "../models/positionsModel.js";
+import manglikModel from "../models/manglikModel.js";
 
 
 
@@ -860,3 +866,314 @@ export const deleteStream = async (req, res) => {
     }
 };
 
+// === FOOD CHOICE ===
+export const addFoodPref = async (req, res) => {
+    try {
+        const { foodPreference } = req.body;
+
+        if (!foodPreference) {
+            return res.send({ status: false, message: "food preference required" })
+        }
+
+        const existingFoodPref = await foodPrefModel.findOne({ foodPreference });
+        if (existingFoodPref) {
+            return res.send({ status: false, message: "Food preference already exists" })
+        }
+
+        const newFoodPref = new foodPrefModel({
+            foodPreference
+        })
+
+        await newFoodPref.save()
+
+        return res.send({ status: true, message: "New food Preference added" })
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
+export const getFoodPref = async (req, res) => {
+    try {
+
+        const findFoodChoices = await foodPrefModel.find({}, '-__id -_v')
+        return res.send({ status: false, result: findFoodChoices });
+
+    } catch (error) {
+        return res.send({ status: false, result: "Something went wrong. Server Error." });
+    }
+}
+
+export const deleteFoodPref = async (req, res) => {
+    try {
+        const { foodPref } = req.body;
+        if (!foodPref) {
+            return res.send({ status: false, result: "delete food choice required." });
+        }
+        await foodPrefModel.findOneAndDelete({ foodPreference: foodPref })
+        return res.send({ status: true, message: "Deleted successfully" })
+    } catch (error) {
+        return res.send({ status: false, result: "Something went wrong. Server Error." });
+    }
+}
+
+// === BODY TYPE ===
+export const addBodyType = async (req, res) => {
+    try {
+        const { bodyType } = req.body;
+        if (!bodyType) {
+            return res.send({ status: false, message: "bodyType is required" });
+        }
+
+        const exists = await bodyTypeModel.findOne({ bodyType });
+        if (exists) {
+            return res.send({ status: false, message: "Body Type already exists" });
+        }
+
+        const newData = new bodyTypeModel({ bodyType });
+        await newData.save();
+        return res.send({ status: true, message: "Body Type added successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+export const getBodyTypes = async (req, res) => {
+    try {
+        const data = await bodyTypeModel.find({}, '-__v -_id');
+        return res.send({ status: true, result: data });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+export const deleteBodyType = async (req, res) => {
+    try {
+        const { bodyType } = req.body;
+        if (!bodyType) {
+            return res.send({ status: false, message: "bodyType is required for deletion" });
+        }
+        await bodyTypeModel.findOneAndDelete({ bodyType });
+        return res.send({ status: true, message: "Deleted successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+// === COMPLEXION MODEL ===
+export const addComplexion = async (req, res) => {
+    try {
+        const { complexion } = req.body;
+        if (!complexion) {
+            return res.send({ status: false, message: "complexion is required" });
+        }
+
+        const exists = await complexionModel.findOne({ complexion });
+        if (exists) {
+            return res.send({ status: false, message: "Complexion already exists" });
+        }
+
+        const newData = new complexionModel({ complexion });
+        await newData.save();
+        return res.send({ status: true, message: "Complexion added successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+export const getComplexions = async (req, res) => {
+    try {
+        const data = await complexionModel.find({}, '-__v -_id');
+        return res.send({ status: true, result: data });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+export const deleteComplexion = async (req, res) => {
+    try {
+        const { complexion } = req.body;
+        if (!complexion) {
+            return res.send({ status: false, message: "complexion is required for deletion" });
+        }
+        await complexionModel.findOneAndDelete({ complexion });
+        return res.send({ status: true, message: "Deleted successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+
+// === FAMILY BG ===
+export const addFamilyBg = async (req, res) => {
+    try {
+        const { familyBg } = req.body;
+        if (!familyBg) {
+            return res.send({ status: false, message: "familyBg is required" });
+        }
+
+        const exists = await familyBgModel.findOne({ familyBg });
+        if (exists) {
+            return res.send({ status: false, message: "Family Background already exists" });
+        }
+
+        const newData = new familyBgModel({ familyBg });
+        await newData.save();
+        return res.send({ status: true, message: "Family Background added successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+export const getFamilyBgs = async (req, res) => {
+    try {
+        const data = await familyBgModel.find({}, '-__v -_id');
+        return res.send({ status: true, result: data });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+export const deleteFamilyBg = async (req, res) => {
+    try {
+        const { familyBg } = req.body;
+        if (!familyBg) {
+            return res.send({ status: false, message: "familyBg is required for deletion" });
+        }
+        await familyBgModel.findOneAndDelete({ familyBg });
+        return res.send({ status: true, message: "Deleted successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+// === SECT === 
+export const addSect = async (req, res) => {
+    try {
+        const { sect } = req.body;
+        if (!sect) {
+            return res.send({ status: false, message: "sect is required" });
+        }
+
+        const exists = await sectModel.findOne({ sect });
+        if (exists) {
+            return res.send({ status: false, message: "Sect already exists" });
+        }
+
+        const newData = new sectModel({ sect });
+        await newData.save();
+        return res.send({ status: true, message: "Sect added successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+export const getSects = async (req, res) => {
+    try {
+        const data = await sectModel.find({}, '-__v -_id');
+        return res.send({ status: true, result: data });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+export const deleteSect = async (req, res) => {
+    try {
+        const { sect } = req.body;
+        if (!sect) {
+            return res.send({ status: false, message: "sect is required for deletion" });
+        }
+        await sectModel.findOneAndDelete({ sect });
+        return res.send({ status: true, message: "Deleted successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+
+// === POSITION === 
+export const addPosition = async (req, res) => {
+    try {
+        const { position } = req.body;
+        if (!position) {
+            return res.send({ status: false, message: "position is required" });
+        }
+
+        const exists = await positionsModel.findOne({ position });
+        if (exists) {
+            return res.send({ status: false, message: "Position already exists" });
+        }
+
+        const newData = new positionsModel({ position });
+        await newData.save();
+        return res.send({ status: true, message: "Position added successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+export const getPositions = async (req, res) => {
+    try {
+        const data = await positionsModel.find({}, '-__v -_id');
+        return res.send({ status: true, result: data });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+export const deletePosition = async (req, res) => {
+    try {
+        const { position } = req.body;
+        if (!position) {
+            return res.send({ status: false, message: "position is required for deletion" });
+        }
+        await positionsModel.findOneAndDelete({ position });
+        return res.send({ status: true, message: "Deleted successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+
+// === MANGLIK MODEL ===
+export const addManglik = async (req, res) => {
+    try {
+        const { manglik } = req.body;
+        if (!manglik) {
+            return res.send({ status: false, message: "manglik value is required" });
+        }
+
+        const exists = await manglikModel.findOne({ manglik });
+        if (exists) {
+            return res.send({ status: false, message: "Manglik already exists" });
+        }
+
+        const newData = new manglikModel({ manglik });
+        await newData.save();
+        return res.send({ status: true, message: "Manglik option added successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+export const getMangliks = async (req, res) => {
+    try {
+        const data = await manglikModel.find({}, '-__v -_id');
+        return res.send({ status: true, result: data });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+export const deleteManglik = async (req, res) => {
+    try {
+        const { manglik } = req.body;
+        if (!manglik) {
+            return res.send({ status: false, message: "manglik is required for deletion" });
+        }
+        await manglikModel.findOneAndDelete({ manglik });
+        return res.send({ status: true, message: "Deleted successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
