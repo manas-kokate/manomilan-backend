@@ -896,7 +896,7 @@ export const addFoodPref = async (req, res) => {
 export const getFoodPref = async (req, res) => {
     try {
 
-        const findFoodChoices = await foodPrefModel.find({}, '-__id -_v')
+        const findFoodChoices = await foodPrefModel.find({}, '-_id -__v')
         return res.send({ status: false, result: findFoodChoices });
 
     } catch (error) {

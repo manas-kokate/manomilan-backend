@@ -1,9 +1,9 @@
 import express from "express"
 import { uploadMiddleware } from "../utils/upload.js";
-import { registerUser, login, getLoggedInUser, mutualMatching, editProfile } from "../controllers/user.controller.js";
+import { registerUser, login, getLoggedInUser, editProfile } from "../controllers/user.controller.js";
 import { userAuth } from "../middlewares/auth.js"
 import {
-    getAllDegrees, getCasteByReligion, getCountry, getDegreesByStream, getFoodPref, getlocationEntry, getReligion, getStateCountry, getStreams, getSubCasteEntry,
+    getCasteByReligion, getCountry, getDegreesByStream, getFoodPref, getlocationEntry, getReligion, getStateCountry, getStreams, getSubCasteEntry,
     addBodyType, getBodyTypes, deleteBodyType,
     addComplexion, getComplexions, deleteComplexion,
     addFamilyBg, getFamilyBgs, deleteFamilyBg,
