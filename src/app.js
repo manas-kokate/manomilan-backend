@@ -9,6 +9,13 @@ app.use(cors())
 
 app.use(express.json());
 
+app.use((err, req, res, next) => {
+    if (err) {
+        return res.send({ status: false, message: "Bad request. Check your request body and send request properly." })
+    }
+    next()
+})
+
 app.use("/api/user", userRouter);
 app.use("/api/admin", adminRouter);
 

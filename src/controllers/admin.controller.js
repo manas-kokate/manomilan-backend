@@ -221,7 +221,6 @@ export const getStateCountry = async (req, res) => {
         if (StateCountry.length == 0) {
             return res.send({ status: false, message: "No states found for this country" });
         }
-
         return res.send({ status: true, result: StateCountry });
     }
     catch (error) {
@@ -444,8 +443,6 @@ export const updateCity = async (req, res) => {
 };
 
 
-// === CASTE ===
-
 // === RELIGION ===
 export const getReligion = async (req, res) => {
     try {
@@ -533,7 +530,7 @@ export const deleteReligion = async (req, res) => {
     }
 };
 
-// === CASTES ===
+// === CASTE ===
 export const getAllCastes = async (req, res) => {
     try {
         const allCastes = await casteModel.find({}, '-_id -__v');
