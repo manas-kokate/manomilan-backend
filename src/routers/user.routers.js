@@ -15,7 +15,9 @@ import {
     addMotherTongue,
     getStateCountry,
     getlocationEntry,
-    getCasteByReligion
+    getCasteByReligion,
+    getAllStates,
+    getAllLocations
 } from "../controllers/admin.controller.js";
 
 
@@ -29,9 +31,11 @@ router.get('/getcurrentuser', userAuth, getLoggedInUser);
 
 // === LOCATIONS ====
 router.get('/get-all-countries', getCountry);
+router.get('get-all-states', getAllStates)
 router.get('/get-state-by-country', getStateCountry);
+router.get('/get-all-cities', getAllLocations)
 router.get('/get-cities-by-state', getlocationEntry);
-router.get('/get-all-cities', getlocationEntry)
+
 
 // === CASTE ===
 router.get('/get-religions', getReligion);
