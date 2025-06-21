@@ -4,9 +4,6 @@ import { registerUser, login, getLoggedInUser, editProfile } from "../controller
 import { userAuth } from "../middlewares/auth.js"
 import {
     getCountry, getDegreesByStream, getFoodPref, getReligion,
-    getAllLocations,
-    getAllCastes,
-    getAllStates,
     getAllSubCastes,
     getAllStreams,
     getBodyTypes,
@@ -15,7 +12,11 @@ import {
     getSects,
     getPositions,
     getMangliks,
-    addMotherTongue
+    addMotherTongue,
+    getStateCountry,
+    getlocationEntry,
+    getCasteByReligion,
+    getSubCasteEntry
 } from "../controllers/admin.controller.js";
 
 
@@ -29,13 +30,13 @@ router.get('/getcurrentuser', userAuth, getLoggedInUser);
 
 // === LOCATIONS ====
 router.get('/get-all-countries', getCountry);
-router.get('/get-all-state', getAllStates);
-router.get('/get-all-cities', getAllLocations);
+router.get('/get-state-by-country', getStateCountry);
+router.get('/get-cities-by-state', getlocationEntry);
 
 // === CASTE ===
 router.get('/get-religions', getReligion);
-router.get('/get-all-caste', getAllCastes);
-router.get('/get-all-subcaste', getAllSubCastes)
+router.get('/get-caste-by-religion', getCasteByReligion);
+router.get('/get-subcaste-by-caste', getSubCasteEntry)
 
 // === EDUCATION ===
 router.get('/get-all-stream', getAllStreams);

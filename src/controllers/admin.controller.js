@@ -222,7 +222,7 @@ export const updateCountry = async (req, res) => {
 
 export const getStateCountry = async (req, res) => {
     try {
-        const { country } = req.body;
+        const { country } = req.params;
         const StateCountry = await stateCountryModel.find({ country }, '-_id -__v')
         if (StateCountry.length == 0) {
             return res.send({ status: false, message: "No states found for this country" });
@@ -346,7 +346,7 @@ export const getAllLocations = async (req, res) => {
 
 export const getlocationEntry = async (req, res) => {
     try {
-        const { state, country } = req.body;
+        const { state, country } = req.params;
         if (!state || !country) {
             return res.send({ status: false, message: "state and country required" });
         }
@@ -551,7 +551,7 @@ export const getAllCastes = async (req, res) => {
 
 export const getCasteByReligion = async (req, res) => {
     try {
-        const { religion } = req.body;
+        const { religion } = req.params;
         const castes = await casteModel.find({ religion });
         if (castes.length === 0) {
             return res.send({ status: false, message: "No castes found for this religion" });
