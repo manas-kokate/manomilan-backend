@@ -8,7 +8,14 @@ import {
     getAllCastes,
     getAllStates,
     getAllSubCastes,
-    getAllStreams
+    getAllStreams,
+    getBodyTypes,
+    getComplexions,
+    getFamilyBgs,
+    getSects,
+    getPositions,
+    getMangliks,
+    addMotherTongue
 } from "../controllers/admin.controller.js";
 
 
@@ -34,6 +41,26 @@ router.get('/get-all-subcaste', getAllSubCastes)
 router.get('/get-all-stream', getAllStreams);
 router.post('/get-degree-by-stream', getDegreesByStream);
 
+// Body Type
+router.get("/get-bodytype", getBodyTypes);
+
+// Complexion
+router.get("/get-complexion", getComplexions);
+
+// Family Background
+router.get("/get-familybg", getFamilyBgs);
+
+// Sect
+router.get("/get-sect", getSects);
+
+// Position
+router.get("/get-position", getPositions);
+
+// Manglik
+router.get("/get-manglik", getMangliks);
+
+// === MOTHER TONGUE ===
+router.post('/add-mother-tongue', addMotherTongue);
 
 // === FOOD CHOICES ===
 router.get('/food-choices', getFoodPref);

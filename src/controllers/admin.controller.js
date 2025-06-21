@@ -21,7 +21,6 @@ import manglikModel from "../models/small_models/manglikModel.js";
 import motherTongueModel from "../models/small_models/motherTongue.js";
 
 
-
 export const registerAdmin = async (req, res) => {
     const { email, password } = req.body;
     if (!email) {
@@ -635,7 +634,7 @@ export const deleteCaste = async (req, res) => {
 //=== SUBCASTE ===
 export const getAllSubCastes = async (req, res) => {
     try {
-        const allSubCastes = await subCasteModel.find({}, '-_id -__v');
+        const allSubCastes = await subcasteModel.find({}, '-_id -__v');
         if (allSubCastes.length === 0) {
             return res.send({ status: false, message: "No subcastes found" });
         }
@@ -654,7 +653,7 @@ export const getSubCasteEntry = async (req, res) => {
         }
 
         const casteReligion = { caste, religion };
-        const subCastes = await subCasteModel.find({ casteReligion });
+        const subCastes = await subcasteModel.find({ casteReligion });
         if (subCastes.length === 0) {
             return res.send({ status: false, message: "No subcastes found for this entry" });
         }
@@ -723,7 +722,7 @@ export const deleteSubCaste = async (req, res) => {
             return res.send({ status: false, message: "Please send religion, caste, and subcaste to delete." });
         }
 
-        const deletedSubCaste = await subCasteModel.findOneAndDelete({
+        const deletedSubCaste = await subcasteModel.findOneAndDelete({
             subCaste,
             casteReligion: { religion, caste }
         });

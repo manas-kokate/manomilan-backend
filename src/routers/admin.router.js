@@ -72,8 +72,8 @@ router.post('/register', registerAdmin);
 router.post('/login', loginAdmin);
 
 // === USER ==== 
-router.get('/getusers', adminAuth, getUsers);
-router.put('/updateuserpfp', adminAuth, updateUserPfp);
+router.get('/get-users', adminAuth, getUsers);
+router.put('/update-userpfp', adminAuth, updateUserPfp);
 
 // === COUNTRY === 
 router.get('/get-country', getCountry);
