@@ -17,7 +17,8 @@ import {
     getlocationEntry,
     getCasteByReligion,
     getAllStates,
-    getAllLocations
+    getAllLocations,
+    getSubCasteEntry
 } from "../controllers/admin.controller.js";
 
 
@@ -40,7 +41,8 @@ router.get('/get-cities-by-state', getlocationEntry);
 // === CASTE ===
 router.get('/get-religions', getReligion);
 router.get('/get-caste-by-religion', getCasteByReligion);
-router.get('/get-all-subcaste', getAllSubCastes)
+router.get('/get-all-subcaste', getAllSubCastes);
+router.get('/get-subcaste-by-caste', getSubCasteEntry);
 
 // === EDUCATION ===
 router.get('/get-all-stream', getAllStreams);
