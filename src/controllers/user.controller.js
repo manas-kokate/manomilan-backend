@@ -3,9 +3,7 @@ import bcrypt from "bcrypt";
 import sendMail from "../utils/mail.js";
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
-import countryModel from "../models/country.model.js";
-import stateModel from "../models/state.model.js";
-import locationEntryModel from "../models/location.entry.js";
+
 
 
 export const registerUser = async (req, res) => {

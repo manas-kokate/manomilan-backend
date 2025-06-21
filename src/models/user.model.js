@@ -31,7 +31,7 @@ const userSchema = new Schema({
     nationality: { type: [String], default: ["India"] },
     caste: { type: String },
     motherTongue: { type: String },
-    divyang: { type: String, enum: ["yes", "no"], default: "no" },
+    divyang: { type: String },
     mothersName: { type: String },
     fathersName: { type: String },
     mamkul: { type: String },

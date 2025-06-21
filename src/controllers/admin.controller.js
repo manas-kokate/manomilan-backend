@@ -3,21 +3,22 @@ import adminModel from "../models/admin.model.js";
 import bcrypt from "bcrypt"
 import envCredentials from "../config/env.js";
 import userModel from "../models/user.model.js";
-import locationEntryModel from "../models/location.entry.js";
-import stateCountryModel from "../models/state.model.js";
-import countryModel from "../models/country.model.js";
-import casteModel from "../models/caste.model.js";
-import religionModel from "../models/religion.model.js";
-import subcasteModel from "../models/subcaste.model.js";
-import streamModel from "../models/stream.model.js";
-import degreeModel from "../models/degree.model.js";
-import foodPrefModel from "../models/foodPref.model.js";
-import bodyTypeModel from "../models/bodyTypeModel.js";
-import complexionModel from "../models/complexionModel.js";
-import familyBgModel from "../models/familyBgModel.js";
-import sectModel from "../models/sect.model.js";
-import positionsModel from "../models/positionsModel.js";
-import manglikModel from "../models/manglikModel.js";
+import locationEntryModel from "../models/small_models/location.entry.js";
+import stateCountryModel from "../models/small_models/state.model.js";
+import countryModel from "../models/small_models/country.model.js";
+import casteModel from "../models/small_models/caste.model.js";
+import religionModel from "../models/small_models/religion.model.js";
+import subcasteModel from "../models/small_models/subcaste.model.js";
+import streamModel from "../models/small_models/stream.model.js";
+import degreeModel from "../models/small_models/degree.model.js";
+import foodPrefModel from "../models/small_models/foodPref.model.js";
+import bodyTypeModel from "../models/small_models/bodyTypeModel.js";
+import complexionModel from "../models/small_models/complexionModel.js";
+import familyBgModel from "../models/small_models/familyBgModel.js";
+import sectModel from "../models/small_models/sect.model.js";
+import positionsModel from "../models/small_models/positionsModel.js";
+import manglikModel from "../models/small_models/manglikModel.js";
+import motherTongueModel from "../models/small_models/motherTongue.js";
 
 
 
@@ -811,7 +812,7 @@ export const deleteDegree = async (req, res) => {
 
 //=== STREAMS ===
 
-export const getStreams = async (req, res) => {
+export const getAllStreams = async (req, res) => {
     try {
         const streams = await streamModel.find({});
         return res.send({ status: true, data: streams });
@@ -1175,5 +1176,52 @@ export const deleteManglik = async (req, res) => {
         return res.send({ status: true, message: "Deleted successfully" });
     } catch (error) {
         return res.send({ status: false, message: "Server error" });
+    }
+};
+
+// === MOTHER TONGUE ===
+export const getMotherTongue = async (req, res) => {
+    try {
+        const motherTongues = await motherTongueModel.find({}, '-_id -__v');
+        if (motherTongues.length == 0) {
+            return res.send({ status: false, message: "No mother tongues found" });
+        }
+        return res.send({ status: true, result: motherTongues });
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" });
+    }
+};
+
+export const addMotherTongue = async (req, res) => {
+    try {
+        const { motherTongue } = req.body;
+        if (!motherTongue) {
+            return res.send({ status: false, message: "Mother tongue is required" });
+        }
+        const existingMotherTongue = await motherTongueModel.findOne({ motherTongue });
+        if (existingMotherTongue) {
+            return res.send({ status: false, message: "Mother tongue already exists" });
+        }
+        const newMotherTongue = new motherTongueModel({ motherTongue });
+        await newMotherTongue.save();
+        return res.send({ status: true, message: "Mother tongue added successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" });
+    }
+};
+
+export const deleteMotherTongue = async (req, res) => {
+    try {
+        const { motherTongue } = req.body;
+        if (!motherTongue) {
+            return res.send({ status: false, message: "Mother tongue is required" });
+        }
+        const deletedMotherTongue = await motherTongueModel.findOneAndDelete({ motherTongue });
+        if (!deletedMotherTongue) {
+            return res.send({ status: false, message: "Mother tongue not found" });
+        }
+        return res.send({ status: true, message: "Mother tongue deleted successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" });
     }
 };

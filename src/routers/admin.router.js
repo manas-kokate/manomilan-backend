@@ -4,7 +4,6 @@ import {
     loginAdmin,
     registerAdmin,
     updateUserPfp,
-    deleteUser,
     getCountry,
     addcountry,
     getStateCountry,
@@ -36,11 +35,33 @@ import {
     addStream,
     getAllDegrees,
     getDegreesByStream,
-    getStreams,
+    getAllStreams,
     deleteDegree,
     deleteStream,
     addFoodPref,
-    getFoodPref
+    getFoodPref,
+    addBodyType,
+    getBodyTypes,
+    deleteBodyType,
+    addComplexion,
+    getComplexions,
+    deleteComplexion,
+    addFamilyBg,
+    getFamilyBgs,
+    deleteFamilyBg,
+    addSect,
+    getSects,
+    deleteSect,
+    addPosition,
+    getPositions,
+    deletePosition,
+    addManglik,
+    getMangliks,
+    deleteManglik,
+    getMotherTongue,
+    addMotherTongue,
+    deleteMotherTongue,
+    deleteFoodPref
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
 
@@ -53,7 +74,6 @@ router.post('/login', loginAdmin);
 // === USER ==== 
 router.get('/getusers', adminAuth, getUsers);
 router.put('/updateuserpfp', adminAuth, updateUserPfp);
-router.delete('/deleteruser', adminAuth, deleteUser);
 
 // === COUNTRY === 
 router.get('/get-country', getCountry);
@@ -61,9 +81,8 @@ router.post('/add-country', addcountry);
 router.delete('/delete-country', deleteCountry);
 router.put('/update-country', updateCountry);
 
-
 // ===  STATE ROUTES ===
-router.get('/get-state-country', getStateCountry);
+router.post('/get-state-country', getStateCountry);
 router.get('/get-all-states', getAllStates);
 router.post('/add-state-country', addStateCountry);
 router.delete('/delete-state-country', deleteStateCountry);
@@ -71,7 +90,7 @@ router.put('/update-state-country', updateState);
 
 // === CITY ===
 router.get('/get-all-cities', getAllLocations);
-router.get('/get-state-city', getlocationEntry);
+router.post('/get-state-city', getlocationEntry);
 router.post('/add-state-city', addlocationEntry);
 router.delete('/delete-city', deleteCity);
 router.put('/update-city', updateCity);
@@ -106,14 +125,49 @@ router.post('/add-degree', addDegree);
 router.delete('/delete-degree', deleteDegree);
 
 // === STREAMS ===
-router.get('/get-streams', getStreams);
+router.get('/get-streams', getAllStreams);
 router.post('/add-stream', addStream);
 router.delete('/delete-stream', deleteStream);
 
 // === FOOD CHOICES ===
 router.get('/get-foodPref', getFoodPref);
 router.post('/add-foodPref', addFoodPref);
-router.get('/get-foodPref', getFoodPref);
+router.delete('/delete-foodPref', deleteFoodPref);
+
+// Body Type
+router.post("/add-bodytype", addBodyType);
+router.get("/get-bodytype", getBodyTypes);
+router.delete("/delete-bodytype", deleteBodyType);
+
+// Complexion
+router.post("/add-complexion", addComplexion);
+router.get("/get-complexion", getComplexions);
+router.delete("/delete-complexion", deleteComplexion);
+
+// Family Background
+router.post("/add-familybg", addFamilyBg);
+router.get("/get-familybg", getFamilyBgs);
+router.delete("/delete-familybg", deleteFamilyBg);
+
+// Sect
+router.post("/add-sect", addSect);
+router.get("/get-sect", getSects);
+router.delete("/delete-sect", deleteSect);
+
+// Position
+router.post("/add-position", addPosition);
+router.get("/get-position", getPositions);
+router.delete("/delete-position", deletePosition);
+
+// Manglik
+router.post("/add-manglik", addManglik);
+router.get("/get-manglik", getMangliks);
+router.delete("/delete-manglik", deleteManglik);
+
+// === MOTHER TONGUE ===
+router.get('/get-mother-tongue', getMotherTongue);
+router.post('/add-mother-tongue', addMotherTongue);
+router.delete('/delete-mother-tongue', deleteMotherTongue);
 
 
 export default router

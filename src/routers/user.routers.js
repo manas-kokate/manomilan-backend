@@ -3,13 +3,12 @@ import { uploadMiddleware } from "../utils/upload.js";
 import { registerUser, login, getLoggedInUser, editProfile } from "../controllers/user.controller.js";
 import { userAuth } from "../middlewares/auth.js"
 import {
-    getCasteByReligion, getCountry, getDegreesByStream, getFoodPref, getlocationEntry, getReligion, getStateCountry, getStreams, getSubCasteEntry,
-    addBodyType, getBodyTypes, deleteBodyType,
-    addComplexion, getComplexions, deleteComplexion,
-    addFamilyBg, getFamilyBgs, deleteFamilyBg,
-    addSect, getSects, deleteSect,
-    addPosition, getPositions, deletePosition,
-    addManglik, getMangliks, deleteManglik
+    getCountry, getDegreesByStream, getFoodPref, getReligion,
+    getAllLocations,
+    getAllCastes,
+    getAllStates,
+    getAllSubCastes,
+    getAllStreams
 } from "../controllers/admin.controller.js";
 
 
@@ -22,51 +21,24 @@ router.put('/editprofile', userAuth, editProfile)
 router.get('/getcurrentuser', userAuth, getLoggedInUser);
 
 // === LOCATIONS ====
-router.get('/get-country', getCountry);
-router.get('/get-state-by-country', getStateCountry);
-router.get('/get-city-by-state', getlocationEntry);
+router.get('/get-all-countries', getCountry);
+router.get('/get-all-state', getAllStates);
+router.get('/get-all-cities', getAllLocations);
 
 // === CASTE ===
 router.get('/get-religions', getReligion);
-router.get('/get-caste-by-religion', getCasteByReligion);
-router.get('/get-subcaste-by-caste', getSubCasteEntry)
+router.get('/get-all-caste', getAllCastes);
+router.get('/get-all-subcaste', getAllSubCastes)
 
 // === EDUCATION ===
-router.get('/get-stream', getStreams);
-router.get('/get-degree-by-stream', getDegreesByStream);
+router.get('/get-all-stream', getAllStreams);
+router.post('/get-degree-by-stream', getDegreesByStream);
+
 
 // === FOOD CHOICES ===
 router.get('/food-choices', getFoodPref);
 
-// Body Type
-router.post("/add-bodytype", addBodyType);
-router.get("/get-bodytype", getBodyTypes);
-router.delete("/delete-bodytype", deleteBodyType);
 
-// Complexion
-router.post("/add-complexion", addComplexion);
-router.get("/get-complexion", getComplexions);
-router.delete("/delete-complexion", deleteComplexion);
-
-// Family Background
-router.post("/add-familybg", addFamilyBg);
-router.get("/get-familybg", getFamilyBgs);
-router.delete("/delete-familybg", deleteFamilyBg);
-
-// Sect
-router.post("/add-sect", addSect);
-router.get("/get-sect", getSects);
-router.delete("/delete-sect", deleteSect);
-
-// Position
-router.post("/add-position", addPosition);
-router.get("/get-position", getPositions);
-router.delete("/delete-position", deletePosition);
-
-// Manglik
-router.post("/add-manglik", addManglik);
-router.get("/get-manglik", getMangliks);
-router.delete("/delete-manglik", deleteManglik);
 
 export default router
 
