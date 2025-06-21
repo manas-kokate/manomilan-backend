@@ -551,7 +551,7 @@ export const getAllCastes = async (req, res) => {
 
 export const getCasteByReligion = async (req, res) => {
     try {
-        const { religion } = req.params;
+        const { religion } = req.query;
         const castes = await casteModel.find({ religion });
         if (castes.length === 0) {
             return res.send({ status: false, message: "No castes found for this religion" });
