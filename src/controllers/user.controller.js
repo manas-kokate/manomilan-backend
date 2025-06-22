@@ -13,6 +13,8 @@ export const registerUser = async (req, res) => {
       loginEmail,
       loginNumber,
       password,
+      CreatedBy,
+      franchiseUnder,
 
       // Personal Info
       firstName,
@@ -79,6 +81,13 @@ export const registerUser = async (req, res) => {
       bloodGroup,
     } = req.body;
 
+    if (!loginEmail ||
+      !loginNumber ||
+      !password ||
+      !CreatedBy ||
+      !franchiseUnder) {
+      return res.send({ status: false, message: "Login credentials required to register" })
+    }
 
     // Check if user already exists by email or number
     const existingUser = await userModel.findOne({
@@ -102,12 +111,18 @@ export const registerUser = async (req, res) => {
       userPhoto = '';
     }
 
+    const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
+    const UserId = LastIdUser ? Number(LastIdUser.UserId) + 1 : 1;
+
     // Create user document
     const user = new userModel({
       // Login credentials
+      UserId,
       loginEmail,
       loginNumber,
       password,
+      CreatedBy,
+      franchiseUnder,
 
       // Personal Info
       firstName,

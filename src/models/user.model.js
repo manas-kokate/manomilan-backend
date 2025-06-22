@@ -3,9 +3,13 @@ import bcrypt from "bcrypt";
 
 const userSchema = new Schema({
     // Login credentials
+    UserId: { type: Number },
     loginEmail: { type: String, required: true, unique: true },
     loginNumber: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    ActiveStatus: { type: Boolean, default: true },
+    CreatedBy: { type: String, required: true },
+    franchiseUnder: { type: String, required: true },
 
     // Personal Info
     firstName: { type: String },

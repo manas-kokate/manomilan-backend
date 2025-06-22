@@ -73,12 +73,14 @@ export const loginAdmin = async (req, res) => {
 }
 
 export const getUsers = async (req, res) => {
-    const AllUsers = await userModel.find({}, { password: 0, __v: 0 });
+    const lowerLimit = parseInt(req.query.lowerLimit) || 1;
+    const upperLimit = parseInt(req.query.upperLimit) || 10;
+    const AllUsers = await userModel.find({}, '-_id -__v').skip(lowerLimit).limit(upperLimit);
     if (!AllUsers) {
         return res.send({ status: false, message: "No user Found." })
     }
 
-    return res.send({ status: true, users: AllUsers });
+    return res.send({ status: true, users: LastId });
 }
 
 export const updateUserPfp = async (req, res) => {
@@ -223,6 +225,9 @@ export const updateCountry = async (req, res) => {
 export const getStateCountry = async (req, res) => {
     try {
         const { country } = req.query;
+        if (!country) {
+            return res.send({ status: false, message: "Please send params" })
+        }
         const StateCountry = await stateCountryModel.find({ country }, '-_id -__v')
         if (StateCountry.length == 0) {
             return res.send({ status: false, message: "No states found for this country" });
@@ -348,7 +353,7 @@ export const getlocationEntry = async (req, res) => {
     try {
         const { state, country } = req.query;
         if (!state || !country) {
-            return res.send({ status: false, message: "state and country required" });
+            return res.send({ status: false, message: "state and country required in params" });
         }
         const stateCountry = {
             state,

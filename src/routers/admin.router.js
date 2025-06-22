@@ -72,7 +72,7 @@ router.post('/register', registerAdmin);
 router.post('/login', loginAdmin);
 
 // === USER ==== 
-router.get('/get-users', adminAuth, getUsers);
+router.get('/get-users', getUsers);
 router.put('/update-userpfp', adminAuth, updateUserPfp);
 
 // === COUNTRY === 

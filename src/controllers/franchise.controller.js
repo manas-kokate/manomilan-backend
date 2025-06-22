@@ -1,4 +1,4 @@
-import franchiseModel from "../models/franchise.model";
+import franchiseModel from "../models/franchise.model.js";
 
 
 export const registerFranchise = async (req, res) => {
@@ -52,6 +52,75 @@ export const registerFranchise = async (req, res) => {
         franchisePhoto,
         qrPhoto
     })
-    console.log(newSchema)
+
+    await newSchema.save()
+
+    return res.send({ status: false, message: "Franchise regisered successfully" });
 
 }
+
+export const loginFranchise = async (req, res) => {
+    const { identifier, mobileNumber } = req.body;
+
+    if (!identifier || !mobileNumber) {
+        return res.send({ status: false, message: "Mobile number and identifier are required" });
+    }
+
+    // identifier can be adharNumber, panNumber, or email
+    const franchise = await franchiseModel.findOne({
+        mobileNumber,
+        $or: [
+            { adharNumber: identifier },
+            { panNumber: identifier },
+            { email: identifier },
+            { mobileNumber: identifier }
+        ]
+    });
+
+    if (!franchise) {
+        return res.send({ status: false, message: "Invalid credentials" });
+    }
+
+    return res.send({ status: true, message: "Login successful", data: franchise });
+};
+
+export const updateFranchiseProfile = async (req, res) => {
+    const { franchiseId } = req.params;
+    const updateData = req.body;
+
+    if (!franchiseId) {
+        return res.send({ status: false, message: "Franchise ID is required" });
+    }
+
+    if (!updateData) {
+        return res.send({ status: false, message: "Please send update data" })
+    }
+
+    try {
+        const existingFranchise = await franchiseModel.findById(franchiseId);
+
+        if (!existingFranchise) {
+            return res.send({ status: false, message: "Franchise not found" });
+        }
+
+        // Handle file uploads
+        if (req.files?.franchisePhoto?.[0]) {
+            updateData.franchisePhoto = req.files.franchisePhoto[0].filename;
+        }
+
+        if (req.files?.qrPhoto?.[0]) {
+            updateData.qrPhoto = req.files.qrPhoto[0].filename;
+        }
+
+        const updatedFranchise = await franchiseModel.findByIdAndUpdate(
+            franchiseId,
+            updateData,
+            { new: true }
+        );
+
+        return res.send({ status: true, message: "Profile updated successfully", data: updatedFranchise });
+
+    } catch (error) {
+        return res.status(500).send({ status: false, message: "Something went wrong", error: error.message });
+    }
+};
