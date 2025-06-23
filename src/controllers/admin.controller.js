@@ -1229,3 +1229,4 @@ export const deleteMotherTongue = async (req, res) => {
         return res.send({ status: false, message: "Server Error" });
     }
 };
+

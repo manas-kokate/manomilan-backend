@@ -343,3 +343,19 @@ export const createMember = async (req, res) => {
         });
     }
 }
+
+export const viewMember = async (req, res) => {
+    try {
+        const franchiseId = req.id;
+        const currentFranchise = await franchiseModel.findById(franchiseId)
+
+        const lowerLimit = parseInt(req.query.lowerLimit) || 1;
+        const upperLimit = parseInt(req.query.upperLimit) || 10;
+        const AllUsers = await userModel.find({ CreatedBy: currentFranchise.franchiseName }, '-_id -__v -franchiseUnder -createdBy').skip(lowerLimit).limit(upperLimit);
+
+        return res.send({ status: true, result: AllUsers })
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" })
+    }
+}

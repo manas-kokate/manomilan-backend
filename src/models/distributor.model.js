@@ -1,12 +1,7 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose"
 
-const franchiseSchema = new mongoose.Schema({
-    franchiseName: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    ownerName: {
+const distributorSchema = new mongoose.Schema({
+    distributorName: {
         type: String,
         required: true,
         trim: true,
@@ -29,7 +24,6 @@ const franchiseSchema = new mongoose.Schema({
     panNumber: {
         type: String,
         required: true,
-        trim: true,
         match: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
     },
     password: {
@@ -46,21 +40,7 @@ const franchiseSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-    },
-    franchisePhoto: {
-        type: String
-    },
-    qrPhoto: {
-        type: String
-    },
-    socialMedia: {
-        facebook: { type: String },
-        instagram: { type: String },
-        twitter: { type: String },
-        linkedin: { type: String },
-        website: { type: String }
     }
-}, { timestamps: true });
+});
 
-
-export default mongoose.model('Franchise', franchiseSchema);
+export default mongoose.model('distributor', distributorSchema)
