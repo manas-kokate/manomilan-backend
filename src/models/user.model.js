@@ -80,6 +80,8 @@ const userSchema = new Schema({
     userPhotoTwo: { type: String },
     userPhotoThree: { type: String },
     userPhotoFour: { type: String },
+    userPhotoStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+    premium: { type: Boolean, default: false },
 
     // Special info
     sect: { type: String },
@@ -87,9 +89,7 @@ const userSchema = new Schema({
     foodPreference: { type: String },
     bloodGroup: { type: String },
     specs: { type: String },
-    gotra: { type: String },
-    userPhoto: { type: String },
-    userPhotoStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' }
+    gotra: { type: String }
 }, { timestamps: true });
 
 

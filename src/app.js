@@ -3,6 +3,7 @@ import userRouter from './routers/user.routers.js'
 import cors from 'cors'
 import adminRouter from './routers/admin.router.js'
 import franchiseRouter from "./routers/franchise.router.js"
+import distributorRouter from "./routers/distributor.router.js"
 
 const app = express();
 
@@ -20,7 +21,7 @@ app.use((err, req, res, next) => {
 app.use("/api/user", userRouter);
 app.use("/api/admin", adminRouter);
 app.use('/api/franchise', franchiseRouter);
-// app.use('/api/distributor')
+app.use('/api/distributor', distributorRouter)
 
 
 // findOne({ userId }, '-_id -userId -createdAt -updatedAt -__v')

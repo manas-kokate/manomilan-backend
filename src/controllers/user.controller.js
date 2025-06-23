@@ -128,93 +128,97 @@ export const registerUser = async (req, res) => {
     const UserId = LastIdUser ? Number(LastIdUser.UserId) + 1 : 1;
 
     // Create user document
-    const user = new userModel({
-      // Login credentials
-      UserId,
-      loginEmail,
-      loginNumber,
-      password,
-      CreatedBy: "user",
-      franchiseUnder,
+    try {
+      const user = new userModel({
+        // Login credentials
+        UserId,
+        loginEmail,
+        loginNumber,
+        password,
+        CreatedBy: "user",
+        franchiseUnder,
 
-      // Personal Info
-      firstName,
-      lastName,
-      midname,
-      gender,
-      dob,
-      timeOfBirth,
-      placeOfBirth,
-      maritalStatus,
-      children,
-      height,
-      occupation,
-      monthlyIncome,
-      nationality,
-      caste,
-      motherTongue,
-      divyang,
-      mothersName,
-      fathersName,
-      mamkul,
-      parentsResidence,
-      parentsCity,
-      parentsContact,
-      whatsApp,
-      alternateNumber,
-      brothersCount,
-      brothers,
-      sisters,
-      sistersExactCount,
-      otherInfo,
+        // Personal Info
+        firstName,
+        lastName,
+        midname,
+        gender,
+        dob,
+        timeOfBirth,
+        placeOfBirth,
+        maritalStatus,
+        children,
+        height,
+        occupation,
+        monthlyIncome,
+        nationality,
+        caste,
+        motherTongue,
+        divyang,
+        mothersName,
+        fathersName,
+        mamkul,
+        parentsResidence,
+        parentsCity,
+        parentsContact,
+        whatsApp,
+        alternateNumber,
+        brothersCount,
+        brothers,
+        sisters,
+        sistersExactCount,
+        otherInfo,
 
-      // Education & Career
-      education,
-      companyName,
-      designation,
-      candidateNumber,
-      candidateEmail,
-      workLocation,
-      isWorking,
+        // Education & Career
+        education,
+        companyName,
+        designation,
+        candidateNumber,
+        candidateEmail,
+        workLocation,
+        isWorking,
 
-      // Expectations
-      ageFrom,
-      ageTo,
-      heightFrom,
-      heightTo,
-      expectedEducation,
-      expectedOccupation,
-      expectedIncome,
-      workAbroad,
-      expectedMaritalStatus,
-      expectedNationality,
-      childAccepted,
-      religion,
-      nativeLocation,
-      workingLocation,
+        // Expectations
+        ageFrom,
+        ageTo,
+        heightFrom,
+        heightTo,
+        expectedEducation,
+        expectedOccupation,
+        expectedIncome,
+        workAbroad,
+        expectedMaritalStatus,
+        expectedNationality,
+        childAccepted,
+        religion,
+        nativeLocation,
+        workingLocation,
 
-      // Special Info
-      sect,
-      manglik,
-      gotra,
-      foodPreference,
-      specs,
-      bloodGroup,
+        // Special Info
+        sect,
+        manglik,
+        gotra,
+        foodPreference,
+        specs,
+        bloodGroup,
 
-      //Photos
-      profilePic,
-      userPhotoOne,
-      userPhotoTwo,
-      userPhotoThree,
-      userPhotoFour
-    });
+        //Photos
+        profilePic,
+        userPhotoOne,
+        userPhotoTwo,
+        userPhotoThree,
+        userPhotoFour
+      });
 
-    await user.save();
+      await user.save();
 
-    return res.status(201).send({
-      status: true,
-      message: "User registered successfully.",
-    });
+      return res.status(201).send({
+        status: true,
+        message: "User registered successfully.",
+      });
+    } catch (error) {
+      return res.send({ status: false, message: "Something went wrong. Send data properly." })
+    }
 
   } catch (error) {
     console.error("Registration Error:", error);

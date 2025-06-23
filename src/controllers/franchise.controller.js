@@ -43,24 +43,28 @@ export const registerFranchise = async (req, res) => {
         qrPhoto = '';
     }
 
-    const newSchema = new franchiseModel({
-        franchiseName,
-        ownerName,
-        mobileNumber,
-        alternateNumber,
-        adharNumber,
-        panNumber,
-        password,
-        email,
-        address,
-        socialMedia,
-        franchisePhoto,
-        qrPhoto
-    })
+    try {
+        const newSchema = new franchiseModel({
+            franchiseName,
+            ownerName,
+            mobileNumber,
+            alternateNumber,
+            adharNumber,
+            panNumber,
+            password,
+            email,
+            address,
+            socialMedia,
+            franchisePhoto,
+            qrPhoto
+        })
+        await newSchema.save()
+        return res.send({ status: false, message: "Franchise regisered successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Something went wrong. Send data properly." })
+    }
 
-    await newSchema.save()
 
-    return res.send({ status: false, message: "Franchise regisered successfully" });
 
 }
 

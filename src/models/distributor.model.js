@@ -41,11 +41,17 @@ const distributorSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    profilePhoto: {
+    distributorPhoto: {
         type: String
     },
     qrPhoto: {
         type: String
+    },
+    socialMedia: {
+        facebook: { type: String },
+        instagram: { type: String },
+        twitter: { type: String },
+        linkedin: { type: String },
     }
 });
 
