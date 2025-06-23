@@ -74,7 +74,6 @@ export const loginFranchise = async (req, res) => {
 
         // identifier can be adharNumber, panNumber, or email
         const franchise = await franchiseModel.findOne({
-            mobileNumber,
             $or: [
                 { adharNumber: identifier },
                 { panNumber: identifier },
@@ -149,6 +148,7 @@ export const createMember = async (req, res) => {
         const {
 
             //loggedIn franchise 
+            franchiseName,
 
             // Login credentials
             loginEmail,
