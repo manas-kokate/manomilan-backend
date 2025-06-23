@@ -1,5 +1,7 @@
 import franchiseModel from "../models/franchise.model.js";
 import userModel from "../models/user.model.js"
+import jwt from "jsonwebtoken";
+import envCredentials from "../config/env.js";
 
 
 export const registerFranchise = async (req, res) => {
@@ -63,28 +65,38 @@ export const registerFranchise = async (req, res) => {
 }
 
 export const loginFranchise = async (req, res) => {
-    const { identifier, mobileNumber } = req.body;
+    try {
+        const { identifier, password } = req.body;
 
-    if (!identifier || !mobileNumber) {
-        return res.send({ status: false, message: "Mobile number and identifier are required" });
+        if (!identifier || !password) {
+            return res.send({ status: false, message: "identifier and password are required" });
+        }
+
+        // identifier can be adharNumber, panNumber, or email
+        const franchise = await franchiseModel.findOne({
+            mobileNumber,
+            $or: [
+                { adharNumber: identifier },
+                { panNumber: identifier },
+                { email: identifier },
+                { mobileNumber: identifier }
+            ]
+        });
+
+        if (!franchise) {
+            return res.send({ status: false, message: "Invalid credentials" });
+        }
+
+        const token = jwt.sign(
+            { id: franchise._id },
+            envCredentials.secretKey,
+            { expiresIn: "1h" }
+        );
+
+        return res.send({ status: true, message: "Login successful", data: franchise, token: token });
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" })
     }
-
-    // identifier can be adharNumber, panNumber, or email
-    const franchise = await franchiseModel.findOne({
-        mobileNumber,
-        $or: [
-            { adharNumber: identifier },
-            { panNumber: identifier },
-            { email: identifier },
-            { mobileNumber: identifier }
-        ]
-    });
-
-    if (!franchise) {
-        return res.send({ status: false, message: "Invalid credentials" });
-    }
-
-    return res.send({ status: true, message: "Login successful", data: franchise });
 };
 
 export const updateFranchiseProfile = async (req, res) => {
