@@ -26,15 +26,19 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage }).fields([
     { name: 'profilePic', maxCount: 1 },
+    { name: 'userPhotoOne', maxCount: 1 },
+    { name: 'userPhotoTwo', maxCount: 1 },
+    { name: 'userPhotoThree', maxCount: 1 },
+    { name: 'userPhotoFour', maxCount: 1 },
     { name: 'franchisePhoto', maxCount: 1 },
-    { name: 'qrPhoto', maxCount: 1 }
+    { name: 'qrPhoto', maxCount: 1 },
+    { name: 'distributorPhoto', maxCount: 1 },
 ]);
 
 
 export const uploadMiddleware = (req, res, next) => {
     upload(req, res, (err) => {
         if (err) {
-            console.log(err)
             return res.send({ status: false, message: "file not uploaded" })
         }
         next()

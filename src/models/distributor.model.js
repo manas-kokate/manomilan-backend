@@ -40,6 +40,12 @@ const distributorSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
+    },
+    profilePhoto: {
+        type: String
+    },
+    qrPhoto: {
+        type: String
     }
 });
 

@@ -101,14 +101,27 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    let profilePic;
+    let userPhotoOne;
+    let userPhotoTwo;
+    let userPhotoThree;
+    let userPhotoFour;
+
     // Handle profile pic
-    let userPhoto = '';
-    try {
-      if (req.files?.profilePic || req.files.profilePic.length !== 0) {
-        userPhoto = req.files.profilePic[0].filename
-      }
-    } catch (err) {
-      userPhoto = '';
+    if (req.files?.profilePic || req.files.profilePic.length !== 0) {
+      profilePic = req.files.profilePic[0].filename || ""
+    }
+    if (req.files?.userPhotoOne || req.files.userPhotoOne.length !== 0) {
+      userPhotoOne = req.files.userPhotoOne[0].filename || ""
+    }
+    if (req.files?.userPhotoTwo || req.files.userPhotoTwo.length !== 0) {
+      userPhotoTwo = req.files.userPhotoTwo[0].filename || ""
+    }
+    if (req.files?.userPhotoThree || req.files.userPhotoThree.length !== 0) {
+      userPhotoThree = req.files.userPhotoThree[0].filename || ""
+    }
+    if (req.files?.userPhotoFour || req.files.userPhotoFour.length !== 0) {
+      userPhotoFour = req.files.userPhotoFour[0].filename || ""
     }
 
     const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
@@ -121,7 +134,7 @@ export const registerUser = async (req, res) => {
       loginEmail,
       loginNumber,
       password,
-      CreatedBy,
+      CreatedBy: "user",
       franchiseUnder,
 
       // Personal Info
@@ -187,6 +200,13 @@ export const registerUser = async (req, res) => {
       foodPreference,
       specs,
       bloodGroup,
+
+      //Photos
+      profilePic,
+      userPhotoOne,
+      userPhotoTwo,
+      userPhotoThree,
+      userPhotoFour
     });
 
     await user.save();
@@ -250,8 +270,6 @@ export const login = async (req, res) => {
     return res.send({ status: false, message: "Server Error" });
   }
 };
-
-
 
 export const editProfile = async (req, res) => {
   const { newUpdates } = req.body;

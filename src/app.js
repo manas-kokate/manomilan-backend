@@ -19,7 +19,8 @@ app.use((err, req, res, next) => {
 
 app.use("/api/user", userRouter);
 app.use("/api/admin", adminRouter);
-app.use('/api/franchise', franchiseRouter)
+app.use('/api/franchise', franchiseRouter);
+// app.use('/api/distributor')
 
 
 // findOne({ userId }, '-_id -userId -createdAt -updatedAt -__v')

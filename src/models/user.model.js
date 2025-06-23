@@ -75,7 +75,11 @@ const userSchema = new Schema({
     religion: { type: [String] },
     nativeLocation: { type: [String] },
     workingLocation: { type: [String] },
+    profilePic: { type: String },
     userPhotoOne: { type: String },
+    userPhotoTwo: { type: String },
+    userPhotoThree: { type: String },
+    userPhotoFour: { type: String },
 
     // Special info
     sect: { type: String },
