@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from "bcrypt"
 
 const franchiseSchema = new mongoose.Schema({
     franchiseName: {
@@ -30,6 +31,10 @@ const franchiseSchema = new mongoose.Schema({
         required: true,
         match: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
     },
+    password: {
+        type: String,
+        required: true
+    },
     email: {
         type: String,
         required: true,
@@ -56,5 +61,6 @@ const franchiseSchema = new mongoose.Schema({
         website: { type: String }
     }
 }, { timestamps: true });
+
 
 export default mongoose.model('Franchise', franchiseSchema);

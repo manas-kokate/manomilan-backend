@@ -1,4 +1,5 @@
 import franchiseModel from "../models/franchise.model.js";
+import userModel from "../models/user.model.js"
 
 
 export const registerFranchise = async (req, res) => {
@@ -9,6 +10,7 @@ export const registerFranchise = async (req, res) => {
         alternateNumber,
         adharNumber,
         panNumber,
+        password,
         email,
         address,
         socialMedia
@@ -46,6 +48,7 @@ export const registerFranchise = async (req, res) => {
         alternateNumber,
         adharNumber,
         panNumber,
+        password,
         email,
         address,
         socialMedia,
@@ -128,6 +131,9 @@ export const updateFranchiseProfile = async (req, res) => {
 export const createMember = async (req, res) => {
     try {
         const {
+
+            //loggedIn franchise 
+
             // Login credentials
             loginEmail,
             loginNumber,
@@ -230,6 +236,10 @@ export const createMember = async (req, res) => {
             userPhoto = '';
         }
 
+        //Get Currently loggedIn franchise
+        const CurrentFranchise = await franchiseModel.findOne({})
+
+        //New Unique Id 
         const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
         const UserId = LastIdUser ? Number(LastIdUser.UserId) + 1 : 1;
 
@@ -240,7 +250,7 @@ export const createMember = async (req, res) => {
             loginEmail,
             loginNumber,
             password,
-            CreatedBy,
+            CreatedBy: "",
             franchiseUnder,
 
             // Personal Info
