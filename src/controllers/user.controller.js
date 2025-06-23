@@ -201,7 +201,7 @@ export const registerUser = async (req, res) => {
     return res.status(500).send({
       status: false,
       message: "Server Error",
-      error: error.message,
+      // error: error.message,
     });
   }
 };
