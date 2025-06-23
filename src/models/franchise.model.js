@@ -32,7 +32,7 @@ const franchiseSchema = new mongoose.Schema({
         match: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
     },
     password: {
-        type: String,
+        type: Number,
         required: true
     },
     email: {

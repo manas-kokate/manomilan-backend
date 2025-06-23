@@ -82,7 +82,7 @@ export const loginFranchise = async (req, res) => {
             ]
         });
 
-        if (password !== franchise.password) {
+        if (password != franchise.password) {
             return res.send({ status: false, message: "Invalid password" })
         }
 
@@ -103,7 +103,7 @@ export const loginFranchise = async (req, res) => {
 };
 
 export const updateFranchiseProfile = async (req, res) => {
-    const { franchiseId } = req.params;
+    const { franchiseId } = req.id;
     const updateData = req.body;
 
     if (!franchiseId) {
@@ -145,17 +145,12 @@ export const updateFranchiseProfile = async (req, res) => {
 
 export const createMember = async (req, res) => {
     try {
+        const franchiseId = req.id;
         const {
-
-            //loggedIn franchise 
-            franchiseName,
-
             // Login credentials
             loginEmail,
             loginNumber,
             password,
-            CreatedBy,
-            franchiseUnder,
 
             // Personal Info
             firstName,
@@ -224,10 +219,8 @@ export const createMember = async (req, res) => {
 
         if (!loginEmail ||
             !loginNumber ||
-            !password ||
-            !CreatedBy ||
-            !franchiseUnder) {
-            return res.send({ status: false, message: "Login credentials required to register" })
+            !password) {
+            return res.send({ status: false, message: "Login credentials required to register" });
         }
 
         // Check if user already exists by email or number
@@ -253,7 +246,7 @@ export const createMember = async (req, res) => {
         }
 
         //Get Currently loggedIn franchise
-        const CurrentFranchise = await franchiseModel.findOne({})
+        const CurrentFranchise = await franchiseModel.findById(franchiseId);
 
         //New Unique Id 
         const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
@@ -266,8 +259,8 @@ export const createMember = async (req, res) => {
             loginEmail,
             loginNumber,
             password,
-            CreatedBy: "",
-            franchiseUnder,
+            CreatedBy: CurrentFranchise.franchiseName,
+            franchiseUnder: CurrentFranchise.franchiseName,
 
             // Personal Info
             firstName,
