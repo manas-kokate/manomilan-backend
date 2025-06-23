@@ -83,6 +83,10 @@ export const loginFranchise = async (req, res) => {
             ]
         });
 
+        if (password !== franchise.password) {
+            return res.send({ status: false, message: "Invalid password" })
+        }
+
         if (!franchise) {
             return res.send({ status: false, message: "Invalid credentials" });
         }
