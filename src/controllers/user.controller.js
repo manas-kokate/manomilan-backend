@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import sendMail from "../utils/mail.js";
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
+import franchiseModel from "../models/franchise.model.js";
 
 
 
@@ -241,20 +242,14 @@ export const login = async (req, res) => {
   }
 
   try {
-    let findUser = await userModel.findOne({ loginEmail: emailOrNum });
+    const findUser = await userModel.findOne({
+      $or: [{ loginEmail: emailOrNum }, { loginNumber: emailOrNum }]
+    });
     if (!findUser) {
-      findUser = await userModel.findOne({ loginNumber: emailOrNum });
-      if (!findUser) {
-        return res.send({
-          status: false,
-          message: "User Not Found. Check username and password again",
-        });
-      }
+      return res.send({ status: false, message: "Invalid email or phone number" })
     }
 
-    const PasswordValidate = await bcrypt.compare(password, findUser.password);
-
-    if (!PasswordValidate) {
+    if (Number(password) !== findUser.password) {
       return res.send({ status: false, message: "Wrong Password" });
     }
 
@@ -266,9 +261,9 @@ export const login = async (req, res) => {
 
     res.send({
       status: true,
-      success: true,
       message: "User Logged in successfully",
       token: token,
+      User: findUser
     });
   } catch (error) {
     return res.send({ status: false, message: "Server Error" });
@@ -324,4 +319,18 @@ export const mutualMatching = async (req, res) => {
   //   heightTo,
   //   expectedEducation
   // } = currentUser 
+}
+
+export const getFranchises = async (req, res) => {
+  try {
+    const allFranchise = await franchiseModel.find();
+    if (!allFranchise) {
+      return res.send({ status: false, message: "No franchises found" });
+    }
+
+    return res.send({ status: true, franchises: allFranchise });
+  }
+  catch (err) {
+    return res.send({ status: false, message: "Server error." })
+  }
 }

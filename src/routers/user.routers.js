@@ -1,6 +1,6 @@
 import express from "express"
 import { uploadMiddleware } from "../utils/upload.js";
-import { registerUser, login, getLoggedInUser, editProfile } from "../controllers/user.controller.js";
+import { registerUser, login, getLoggedInUser, editProfile, getFranchises } from "../controllers/user.controller.js";
 import { userAuth } from "../middlewares/auth.js"
 import {
     getCountry, getDegreesByStream, getFoodPref, getReligion,
@@ -29,6 +29,9 @@ router.post('/register', uploadMiddleware, registerUser);
 router.post('/login', login);
 router.put('/editprofile', userAuth, editProfile)
 router.get('/getcurrentuser', userAuth, getLoggedInUser);
+
+// === GET FRANCHISE ===
+router.get('/get-franchises', getFranchises);
 
 // === LOCATIONS ====
 router.get('/get-all-countries', getCountry);
@@ -71,6 +74,7 @@ router.post('/add-mother-tongue', addMotherTongue);
 
 // === FOOD CHOICES ===
 router.get('/food-choices', getFoodPref);
+
 
 
 

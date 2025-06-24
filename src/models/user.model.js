@@ -6,7 +6,7 @@ const userSchema = new Schema({
     UserId: { type: Number },
     loginEmail: { type: String, required: true, unique: true },
     loginNumber: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: Number, required: true },
     ActiveStatus: { type: Boolean, default: true },
     CreatedBy: { type: String, required: true },
     franchiseUnder: { type: String, required: true },
