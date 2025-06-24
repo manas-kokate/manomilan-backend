@@ -85,7 +85,6 @@ export const registerUser = async (req, res) => {
     if (!loginEmail ||
       !loginNumber ||
       !password ||
-      !CreatedBy ||
       !franchiseUnder) {
       return res.send({ status: false, message: "Login credentials required to register" })
     }
@@ -109,20 +108,40 @@ export const registerUser = async (req, res) => {
     let userPhotoFour;
 
     // Handle profile pic
-    if (req.files?.profilePic || req.files.profilePic.length !== 0) {
-      profilePic = req.files.profilePic[0].filename || ""
+    try {
+      if (req.files?.profilePic || req.files?.profilePic?.length !== 0) {
+        profilePic = req.files.profilePic[0].filename;
+      }
+    } catch (error) {
+      profilePic = ""
     }
-    if (req.files?.userPhotoOne || req.files.userPhotoOne.length !== 0) {
-      userPhotoOne = req.files.userPhotoOne[0].filename || ""
+    try {
+      if (req.files?.userPhotoOne || req.files?.userPhotoOne?.length !== 0) {
+        userPhotoOne = req.files.userPhotoOne[0].filename;
+      }
+    } catch (error) {
+      userPhotoOne = ""
     }
-    if (req.files?.userPhotoTwo || req.files.userPhotoTwo.length !== 0) {
-      userPhotoTwo = req.files.userPhotoTwo[0].filename || ""
+    try {
+      if (req.files?.userPhotoTwo || req.files?.userPhotoTwo?.length !== 0) {
+        userPhotoTwo = req.files.userPhotoTwo[0].filename;
+      }
+    } catch (error) {
+      userPhotoTwo = ""
     }
-    if (req.files?.userPhotoThree || req.files.userPhotoThree.length !== 0) {
-      userPhotoThree = req.files.userPhotoThree[0].filename || ""
+    try {
+      if (req.files?.userPhotoThree || req.files?.userPhotoThree?.length !== 0) {
+        userPhotoThree = req.files.userPhotoThree[0].filename;
+      }
+    } catch (error) {
+      userPhotoThree = ""
     }
-    if (req.files?.userPhotoFour || req.files.userPhotoFour.length !== 0) {
-      userPhotoFour = req.files.userPhotoFour[0].filename || ""
+    try {
+      if (req.files?.userPhotoFour || req.files?.userPhotoFour?.length !== 0) {
+        userPhotoFour = req.files.userPhotoFour[0].filename;
+      }
+    } catch (error) {
+      userPhotoFour = ""
     }
 
     const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
@@ -323,7 +342,7 @@ export const mutualMatching = async (req, res) => {
 
 export const getFranchises = async (req, res) => {
   try {
-    const allFranchise = await franchiseModel.find();
+    const allFranchise = await franchiseModel.find({}, '-password');
     if (!allFranchise) {
       return res.send({ status: false, message: "No franchises found" });
     }

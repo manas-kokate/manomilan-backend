@@ -355,7 +355,7 @@ export const viewMember = async (req, res) => {
 
         const lowerLimit = parseInt(req.query.lowerLimit) || 1;
         const upperLimit = parseInt(req.query.upperLimit) || 10;
-        const AllUsers = await userModel.find({ CreatedBy: currentFranchise.franchiseName }, '-_id -__v -franchiseUnder -createdBy').skip(lowerLimit).limit(upperLimit);
+        const AllUsers = await userModel.find({ CreatedBy: currentFranchise.franchiseName }, '-_id -__v -franchiseUnder -createdBy -password').skip(lowerLimit).limit(upperLimit);
 
         return res.send({ status: true, result: AllUsers })
 
