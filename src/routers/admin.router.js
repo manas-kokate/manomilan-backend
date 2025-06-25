@@ -61,7 +61,8 @@ import {
     getMotherTongue,
     addMotherTongue,
     deleteMotherTongue,
-    deleteFoodPref
+    deleteFoodPref,
+    getDistributors
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
 
@@ -168,6 +169,9 @@ router.delete("/delete-manglik", deleteManglik);
 router.get('/get-mother-tongue', getMotherTongue);
 router.post('/add-mother-tongue', addMotherTongue);
 router.delete('/delete-mother-tongue', deleteMotherTongue);
+
+// === DISTRIBUTORS ===
+router.get('/get-distributors', getDistributors);
 
 
 export default router

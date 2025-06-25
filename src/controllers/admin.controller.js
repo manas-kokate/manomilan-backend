@@ -19,6 +19,7 @@ import sectModel from "../models/small_models/sect.model.js";
 import positionsModel from "../models/small_models/positionsModel.js";
 import manglikModel from "../models/small_models/manglikModel.js";
 import motherTongueModel from "../models/small_models/motherTongue.js";
+import distributorModel from "../models/distributor.model.js";
 
 
 export const registerAdmin = async (req, res) => {
@@ -1230,3 +1231,14 @@ export const deleteMotherTongue = async (req, res) => {
     }
 };
 
+export const getDistributors = async (req, res) => {
+    try {
+        const distributors = await distributorModel.find();
+        if (!distributors) {
+            return res.send({ status: false, message: "No distributors found." })
+        }
+        return res.send({ status: true, result: distributors })
+    } catch ({ error }) {
+        return res.send({ status: false, message: "Something went wrong. Server error." })
+    }
+}
