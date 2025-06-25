@@ -23,8 +23,4 @@ app.use("/api/admin", adminRouter);
 app.use('/api/franchise', franchiseRouter);
 app.use('/api/distributor', distributorRouter)
 
-
-// findOne({ userId }, '-_id -userId -createdAt -updatedAt -__v')
-// find({ userId }, '-_id -userId -createdAt -updatedAt -__v')
-
 export default app

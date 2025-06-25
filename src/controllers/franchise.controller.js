@@ -60,7 +60,7 @@ export const registerFranchise = async (req, res) => {
             qrPhoto
         })
         await newSchema.save()
-        return res.send({ status: true, message: "Franchise regisered successfully" });
+        return res.send({ status: true, message: "Franchise registered successfully" });
     } catch (error) {
         return res.send({ status: false, message: "Something went wrong. Send data properly." })
     }

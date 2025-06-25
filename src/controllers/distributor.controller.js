@@ -27,12 +27,24 @@ export const registerDistributor = async (req, res) => {
         return res.send({ status: false, messsage: "Distributor already exists with this details." })
     }
 
-    if (req.files?.qrPhoto || req.files.qrPhoto.length !== 0) {
-        const qrPhoto = req.files.qrPhoto[0].filename;
+    let qrPhoto;
+    let distributorPhoto;
+
+
+    try {
+        if (req.files?.qrPhoto || req.files?.qrPhoto?.length !== 0) {
+            qrPhoto = req.files.qrPhoto[0].filename;
+        }
+    } catch (error) {
+        qrPhoto = ''
     }
 
-    if (req.files?.distributorPhoto || req.files.distributorPhoto.length !== 0) {
-        const distributorPhoto = req.files.distributorPhoto[0].filename
+    try {
+        if (req.files?.distributorPhoto || req.files?.distributorPhoto?.length !== 0) {
+            distributorPhoto = req.files.distributorPhoto[0].filename
+        }
+    } catch (error) {
+        distributorPhoto = ''
     }
 
     try {
@@ -66,7 +78,7 @@ export const loginDistributor = async (req, res) => {
         });
 
         if (!distributor) {
-            return res.status(401).json({ status: false, message: "Invalid mobile number" });
+            return res.status(401).json({ status: false, message: "Invalid mobile number or email" });
         }
 
         // Compare passwords
