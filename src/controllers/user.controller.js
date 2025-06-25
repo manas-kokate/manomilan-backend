@@ -232,7 +232,7 @@ export const registerUser = async (req, res) => {
 
       await user.save();
 
-      return res.status(201).send({
+      return res.send({
         status: true,
         message: "User registered successfully.",
       });

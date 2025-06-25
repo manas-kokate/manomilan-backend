@@ -18,7 +18,7 @@ export const registerFranchise = async (req, res) => {
         socialMedia
     } = req.body;
 
-    if (!franchiseName || !ownerName || !mobileNumber || !adharNumber || !panNumber || !email || !address || !socialMedia) {
+    if (!franchiseName || !ownerName || !mobileNumber || !adharNumber || !panNumber || !email || !address) {
         return res.send({ status: false, message: "All fields required" })
     }
 
@@ -43,6 +43,7 @@ export const registerFranchise = async (req, res) => {
         qrPhoto = '';
     }
 
+
     try {
         const newSchema = new franchiseModel({
             franchiseName,
@@ -59,13 +60,10 @@ export const registerFranchise = async (req, res) => {
             qrPhoto
         })
         await newSchema.save()
-        return res.send({ status: false, message: "Franchise regisered successfully" });
+        return res.send({ status: true, message: "Franchise regisered successfully" });
     } catch (error) {
         return res.send({ status: false, message: "Something went wrong. Send data properly." })
     }
-
-
-
 }
 
 export const loginFranchise = async (req, res) => {
