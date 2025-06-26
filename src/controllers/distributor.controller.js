@@ -5,6 +5,7 @@ import envCredentials from "../config/env.js";
 export const registerDistributor = async (req, res) => {
     const {
         distributorName,
+        ownerName,
         mobileNumber,
         alternateNumber,
         adharNumber,
@@ -17,6 +18,7 @@ export const registerDistributor = async (req, res) => {
 
     const ExistingDistributor = await distributorModel.findOne({
         $or: [
+            { distributorName },
             { mobileNumber },
             { adharNumber },
             { panNumber },
@@ -50,6 +52,7 @@ export const registerDistributor = async (req, res) => {
     try {
         const newDistributor = new distributorModel({
             distributorName,
+            ownerName,
             mobileNumber,
             alternateNumber,
             adharNumber,

@@ -6,6 +6,10 @@ const distributorSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    ownerName: {
+        type: String,
+        required: true,
+    },
     mobileNumber: {
         type: String,
         required: true,
