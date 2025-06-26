@@ -352,12 +352,21 @@ export const createMember = async (req, res) => {
 export const viewMember = async (req, res) => {
     try {
         const franchiseId = req.id;
-        const currentFranchise = await franchiseModel.findById(req.id)
-        const AllUsers = await userModel.find({ CreatedBy: currentFranchise.franchiseName }, '-_id -__v -franchiseUnder -createdBy -password');
+        const currentFranchise = await franchiseModel.findById(franchiseId);
 
-        return res.send({ status: true, result: AllUsers })
+        const lowerLimit = parseInt(req.query.lowerLimit) || 0;  // start from 0
+        const upperLimit = parseInt(req.query.upperLimit) || 10; // number of results
+
+        const allUsers = await userModel
+            .find({ CreatedBy: currentFranchise.franchiseName }, '-_id -__v -franchiseUnder -createdBy -password')
+            .skip(lowerLimit)
+            .limit(upperLimit);
+
+        return res.send({ status: true, result: allUsers });
 
     } catch (error) {
-        return res.send({ status: false, message: "Server Error" })
+        console.error(error);
+        return res.send({ status: false, message: "Server Error" });
     }
+
 }
