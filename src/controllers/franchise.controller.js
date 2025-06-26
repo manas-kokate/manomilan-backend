@@ -147,12 +147,12 @@ export const updateFranchiseProfile = async (req, res) => {
 
 export const createMember = async (req, res) => {
     try {
-        const franchiseId = req.id;
         const {
             // Login credentials
             loginEmail,
             loginNumber,
             password,
+            franchiseUnder,
 
             // Personal Info
             firstName,
@@ -248,7 +248,10 @@ export const createMember = async (req, res) => {
         }
 
         //Get Currently loggedIn franchise
-        const CurrentFranchise = await franchiseModel.findById(franchiseId);
+        const currentFranchise = await franchiseModel.findById(req.id)
+        if (!currentFranchise) {
+            return res.send({ status: false, message: "Franchise not found" })
+        }
 
         //New Unique Id 
         const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
@@ -261,8 +264,8 @@ export const createMember = async (req, res) => {
             loginEmail,
             loginNumber,
             password,
-            CreatedBy: CurrentFranchise.franchiseName,
-            franchiseUnder: CurrentFranchise.franchiseName,
+            CreatedBy: currentFranchise.franchiseName,
+            franchiseUnder,
 
             // Personal Info
             firstName,

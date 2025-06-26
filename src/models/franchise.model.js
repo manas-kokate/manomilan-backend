@@ -27,14 +27,14 @@ const franchiseSchema = new mongoose.Schema({
         required: true,
         trim: true,
         // unique: true,
-        match: /^\d{12}$/,
+        // match: /^\d{12}$/,
     },
     panNumber: {
         type: String,
         required: true,
         trim: true,
         // unique: true,
-        match: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+        // match: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
     },
     password: {
         type: Number,
