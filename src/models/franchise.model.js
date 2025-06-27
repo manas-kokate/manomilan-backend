@@ -52,6 +52,9 @@ const franchiseSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    location: {
+        type: String
+    },
     franchisePhoto: {
         type: String
     },

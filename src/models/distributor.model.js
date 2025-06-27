@@ -56,6 +56,12 @@ const distributorSchema = new mongoose.Schema({
         instagram: { type: String },
         twitter: { type: String },
         linkedin: { type: String },
+    },
+    address: {
+        type: String
+    },
+    location: {
+        type: String
     }
 });
 

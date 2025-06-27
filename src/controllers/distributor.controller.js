@@ -13,6 +13,7 @@ export const registerDistributor = async (req, res) => {
         password,
         email,
         address,
+        location,
         socialMedia
     } = req.body;
 
@@ -60,6 +61,7 @@ export const registerDistributor = async (req, res) => {
             password,
             email,
             address,
+            location,
             distributorPhoto,
             qrPhoto,
             socialMedia

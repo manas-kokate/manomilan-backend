@@ -15,6 +15,7 @@ export const registerFranchise = async (req, res) => {
         password,
         email,
         address,
+        location,
         socialMedia
     } = req.body;
 
@@ -55,6 +56,7 @@ export const registerFranchise = async (req, res) => {
             password,
             email,
             address,
+            location,
             socialMedia,
             franchisePhoto,
             qrPhoto
