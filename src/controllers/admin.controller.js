@@ -68,7 +68,7 @@ export const loginAdmin = async (req, res) => {
         return res.send({ status: false, message: "Incorrect password." });
     }
 
-    const token = jwt.sign({ id: ExistingAdmin._id }, envCredentials.secretKey, { expiresIn: '1h' })
+    const token = jwt.sign({ id: ExistingAdmin._id }, envCredentials.secretKey, { expiresIn: '4h' })
 
     return res.send({ status: true, message: "User Login successful.", token: token });
 }

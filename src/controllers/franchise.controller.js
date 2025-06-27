@@ -95,7 +95,7 @@ export const loginFranchise = async (req, res) => {
         const token = jwt.sign(
             { id: franchise._id },
             envCredentials.secretKey,
-            { expiresIn: "1h" }
+            { expiresIn: "4h" }
         );
 
         return res.send({ status: true, message: "Login successful", data: franchise, token: token });
@@ -152,7 +152,6 @@ export const createMember = async (req, res) => {
             loginEmail,
             loginNumber,
             password,
-            franchiseUnder,
 
             // Personal Info
             firstName,
@@ -265,7 +264,7 @@ export const createMember = async (req, res) => {
             loginNumber,
             password,
             CreatedBy: currentFranchise.franchiseName,
-            franchiseUnder,
+            franchiseUnder: currentFranchise.franchiseName,
 
             // Personal Info
             firstName,

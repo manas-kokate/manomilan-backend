@@ -93,7 +93,7 @@ export const loginDistributor = async (req, res) => {
         const token = jwt.sign(
             { id: distributor._id },
             envCredentials.secretKey,
-            { expiresIn: "1h" }
+            { expiresIn: "4h" }
         );
 
         return res.json({

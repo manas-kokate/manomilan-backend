@@ -275,7 +275,7 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       { id: findUser._id },
       envCredentials.secretKey,
-      { expiresIn: "1h" }
+      { expiresIn: "4h" }
     );
 
     res.send({
