@@ -82,17 +82,14 @@ export const loginDistributor = async (req, res) => {
         if (!distributor) {
             distributor = await distributorModel.findOne({ mobileNumber: identifier })
         }
-        if (!distributor) {
-            return res.send({ status: false, message: "Distributor not found" })
-        }
-        console.log(distributor, password)
+        console.log(distributor.password, password)
 
         if (!distributor) {
             return res.status(401).json({ status: false, message: "Invalid mobile number or email" });
         }
 
         // Compare passwords
-        if (password !== distributor.password) {
+        if (password != distributor.password) {
             return res.status(401).json({ status: false, message: "Invalid password" });
         }
 
