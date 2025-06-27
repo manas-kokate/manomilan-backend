@@ -9,7 +9,8 @@ router.post('/register', uploadMiddleware, registerFranchise)
 router.post('/login', loginFranchise);
 router.put('/update/:franchiseId', uploadMiddleware, updateFranchiseProfile);
 router.post('/create-member', franchiseAuth, uploadMiddleware, createMember);
-router.get('/view-members', franchiseAuth, viewMember)
+router.get('/view-members', franchiseAuth, viewMember);
+
 
 
 export default router

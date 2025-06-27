@@ -13,7 +13,7 @@ const distributorSchema = new mongoose.Schema({
     mobileNumber: {
         type: String,
         required: true,
-        match: /^[6-9]\d{9}$/,
+        // match: /^[6-9]\d{9}$/,
     },
     alternateNumber: {
         type: String,
@@ -23,12 +23,12 @@ const distributorSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        match: /^\d{12}$/,
+        // match: /^\d{12}$/,
     },
     panNumber: {
         type: String,
         required: true,
-        match: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+        // match: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
     },
     password: {
         type: Number,
@@ -38,7 +38,7 @@ const distributorSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+        // match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
     },
     address: {
         type: String,

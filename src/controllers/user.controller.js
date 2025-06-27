@@ -1,5 +1,4 @@
 import userModel from "../models/user.model.js";
-import bcrypt from "bcrypt";
 import sendMail from "../utils/mail.js";
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
@@ -330,14 +329,9 @@ export const getLoggedInUser = async (req, res) => {
 export const mutualMatching = async (req, res) => {
   const userId = req.id;
 
-  // const currentUser = await userModel.findById(userId);
-  // const {
-  //   ageFrom,
-  //   ageTo,
-  //   heightFrom,
-  //   heightTo,
-  //   expectedEducation
-  // } = currentUser 
+  const currentUser = await userModel.findById(userId);
+
+
 }
 
 export const getFranchises = async (req, res) => {

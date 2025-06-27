@@ -78,9 +78,14 @@ export const loginDistributor = async (req, res) => {
         const { identifier, password } = req.body;
 
         // Find distributor by mobile number
-        const distributor = await distributorModel.findOne({
-            $or: [{ mobileNumber: identifier }, { email: identifier }]
-        });
+        let distributor = await distributorModel.findOne({ email: identifier });
+        if (!distributor) {
+            distributor = await distributorModel.findOne({ mobileNumber: identifier })
+        }
+        if (!distributor) {
+            return res.send({ status: false, message: "Distributor not found" })
+        }
+        console.log(distributor, password)
 
         if (!distributor) {
             return res.status(401).json({ status: false, message: "Invalid mobile number or email" });

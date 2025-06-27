@@ -1,6 +1,6 @@
 import express from "express"
 import { uploadMiddleware } from "../utils/upload.js";
-import { registerUser, login, getLoggedInUser, editProfile, getFranchises } from "../controllers/user.controller.js";
+import { registerUser, login, getLoggedInUser, editProfile, getFranchises, mutualMatching } from "../controllers/user.controller.js";
 import { userAuth } from "../middlewares/auth.js"
 import {
     getCountry, getDegreesByStream, getFoodPref, getReligion,
@@ -75,7 +75,8 @@ router.post('/add-mother-tongue', addMotherTongue);
 // === FOOD CHOICES ===
 router.get('/food-choices', getFoodPref);
 
-
+// === MUTUAL MATCHING ===
+router.get('/mutual-matching', userAuth, mutualMatching)
 
 
 export default router

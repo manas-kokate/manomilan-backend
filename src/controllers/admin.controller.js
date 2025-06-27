@@ -81,7 +81,7 @@ export const getUsers = async (req, res) => {
         return res.send({ status: false, message: "No user Found." })
     }
 
-    return res.send({ status: true, users: LastId });
+    return res.send({ status: true, users: AllUsers });
 }
 
 export const updateUserPfp = async (req, res) => {
