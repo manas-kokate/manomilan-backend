@@ -250,9 +250,9 @@ export const registerUser = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { emailOrNum, password } = req.body;
+  const { identifier, password } = req.body;
 
-  if (!emailOrNum || !password) {
+  if (!identifier || !password) {
     return res.send({
       status: false,
       message: "Invalid Credentials. All Fields Required.",
@@ -261,7 +261,7 @@ export const login = async (req, res) => {
 
   try {
     const findUser = await userModel.findOne({
-      $or: [{ loginEmail: emailOrNum }, { loginNumber: emailOrNum }]
+      $or: [{ loginEmail: identifier }, { loginNumber: identifier }]
     });
     if (!findUser) {
       return res.send({ status: false, message: "Invalid email or phone number" })

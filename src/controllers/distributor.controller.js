@@ -1,6 +1,7 @@
 import distributorModel from "../models/distributor.model.js";
 import jwt from "jsonwebtoken"
 import envCredentials from "../config/env.js";
+import userModel from "../models/user.model.js";
 
 export const registerDistributor = async (req, res) => {
     const {
@@ -111,3 +112,22 @@ export const loginDistributor = async (req, res) => {
         return res.status(500).json({ status: false, message: "Server error" });
     }
 };
+
+export const getAllUsers = async (req, res) => {
+    try {
+        const lowerLimit = parseInt(req.params.lowerLimit) || 0;
+        const upperLimit = parseInt(req.params.upperLimit) || 20;
+
+        const users = await userModel.find().skip(lowerLimit).limit(upperLimit);
+
+        if (users.length == 0) {
+            return res.send({ status: false, message: "No users found" });
+        }
+
+        return res.send({ status: true, users })
+
+    } catch (error) {
+        return res.send({ status: false, message: "Something went wrong. Internal server error" })
+    }
+
+}

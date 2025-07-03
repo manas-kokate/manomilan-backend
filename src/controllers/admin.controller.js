@@ -74,14 +74,18 @@ export const loginAdmin = async (req, res) => {
 }
 
 export const getUsers = async (req, res) => {
-    const lowerLimit = parseInt(req.query.lowerLimit) || 1;
-    const upperLimit = parseInt(req.query.upperLimit) || 10;
-    const AllUsers = await userModel.find({}, '-_id -__v').skip(lowerLimit).limit(upperLimit);
-    if (!AllUsers) {
-        return res.send({ status: false, message: "No user Found." })
-    }
+    try {
+        const lowerLimit = parseInt(req.query.lowerLimit) || 1;
+        const upperLimit = parseInt(req.query.upperLimit) || 20;
+        const AllUsers = await userModel.find().skip(lowerLimit).limit(upperLimit);
+        if (AllUsers.length == 0) {
+            return res.send({ status: false, message: "No users Found." })
+        }
 
-    return res.send({ status: true, users: AllUsers });
+        return res.send({ status: true, users: AllUsers });
+    } catch (error) {
+        return res.send({ status: false, message: "Something went wrong. Internal server error" })
+    }
 }
 
 export const updateUserPfp = async (req, res) => {
