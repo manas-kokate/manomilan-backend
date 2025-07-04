@@ -13,7 +13,6 @@ export const registerUser = async (req, res) => {
       loginEmail,
       loginNumber,
       password,
-      CreatedBy,
       franchiseUnder,
 
       // Personal Info
@@ -46,6 +45,8 @@ export const registerUser = async (req, res) => {
       sisters,
       sistersExactCount,
       otherInfo,
+      nativeVillage,
+      nativeCity,
 
       // Education & Career
       education,

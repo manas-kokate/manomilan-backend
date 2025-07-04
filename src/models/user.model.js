@@ -48,6 +48,9 @@ const userSchema = new Schema({
     sisters: { type: String },
     sistersExactCount: { type: Number },
     otherInfo: { type: String },
+    nativeVillage: { type: String },
+    nativeCity: { type: String },
+
 
     // Education & Career
     education: { type: [String] },
