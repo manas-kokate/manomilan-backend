@@ -332,7 +332,7 @@ export const getLoggedInUser = async (req, res) => {
 
 export const mutualMatching = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.id;
 
     // Get the logged-in user's profile
     const user = await userModel.findOne({ UserId: userId, ActiveStatus: true });
