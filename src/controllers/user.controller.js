@@ -188,6 +188,8 @@ export const registerUser = async (req, res) => {
         sisters,
         sistersExactCount,
         otherInfo,
+        nativeVillage,
+        nativeCity,
 
         // Education & Career
         education,
