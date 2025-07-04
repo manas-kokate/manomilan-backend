@@ -332,182 +332,84 @@ export const getLoggedInUser = async (req, res) => {
 
 export const mutualMatching = async (req, res) => {
   try {
-    const userId = req.id; // or get from req.body if applicable
+    const userId = req.params.userId;
 
-    const currentUser = await userModel.findById(userId);
-    if (!currentUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
-    }
+    // Get the logged-in user's profile
+    const user = await userModel.findOne({ UserId: userId, ActiveStatus: true });
+    if (!user) return res.status(404).json({ status: false, message: "User not found or inactive" });
 
-    const currentUserAge = currentUser.dob
-      ? Math.floor((Date.now() - new Date(currentUser.dob).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
-      : null;
+    // Extract profile and expectations
+    const {
+      gender,
+      height,
+      ageFrom,
+      ageTo,
+      heightFrom,
+      heightTo,
+      expectedEducation,
+      expectedOccupation,
+      expectedIncome,
+      workAbroad,
+      divyangPrefer,
+      expectedMaritalStatus,
+      expectedNationality,
+      childAccepted,
+      religion,
+      nativeLocation,
+      workingLocation
+    } = user;
 
-    const matchQuery = {
-      _id: { $ne: userId },
+    // Convert height to a comparable number if needed (optional - based on how height is stored)
+    const userAge = new Date().getFullYear() - new Date(user.dob).getFullYear();
+
+    // Reverse Gender
+    const oppositeGender = gender === "male" ? "female" : "male";
+
+    // Find users where:
+    // 1. They match the current user's expectations
+    // 2. AND their expectations are matched by the current user's profile
+
+    const matchedUsers = await User.find({
       ActiveStatus: true,
-      gender: currentUser.gender === 'male' ? 'female' : 'male'
-    };
+      gender: oppositeGender,
 
-    // Age range (based on DOB)
-    if (currentUser.ageFrom || currentUser.ageTo) {
-      const ageFilter = {};
-      if (currentUser.ageFrom) {
-        const maxDob = new Date();
-        maxDob.setFullYear(maxDob.getFullYear() - parseInt(currentUser.ageFrom));
-        ageFilter.$lte = maxDob;
-      }
-      if (currentUser.ageTo) {
-        const minDob = new Date();
-        minDob.setFullYear(minDob.getFullYear() - parseInt(currentUser.ageTo));
-        ageFilter.$gte = minDob;
-      }
-      if (Object.keys(ageFilter).length > 0) {
-        matchQuery.dob = ageFilter;
-      }
-    }
+      // Match to current user's expectations
+      dob: {
+        $gte: new Date(`${new Date().getFullYear() - parseInt(ageTo)}-01-01`),
+        $lte: new Date(`${new Date().getFullYear() - parseInt(ageFrom)}-12-31`)
+      },
+      height: { $gte: heightFrom, $lte: heightTo },
+      education: { $in: expectedEducation },
+      occupation: expectedOccupation,
+      monthlyIncome: expectedIncome,
+      nationality: { $in: expectedNationality },
+      maritalStatus: expectedMaritalStatus,
+      divyang: divyangPrefer,
+      nativeCity: { $in: nativeLocation },
+      workLocation: { $in: workingLocation },
 
-    // Height
-    if (currentUser.heightFrom || currentUser.heightTo) {
-      const heightFilter = {};
-      if (currentUser.heightFrom) heightFilter.$gte = currentUser.heightFrom;
-      if (currentUser.heightTo) heightFilter.$lte = currentUser.heightTo;
-      matchQuery.height = heightFilter;
-    }
-
-    if (currentUser.expectedEducation?.length) {
-      matchQuery.education = { $in: currentUser.expectedEducation };
-    }
-
-    if (currentUser.expectedOccupation) {
-      matchQuery.occupation = new RegExp(currentUser.expectedOccupation, 'i');
-    }
-
-    if (currentUser.expectedMaritalStatus) {
-      matchQuery.maritalStatus = currentUser.expectedMaritalStatus;
-    }
-
-    if (currentUser.expectedNationality?.length) {
-      matchQuery.nationality = { $in: currentUser.expectedNationality };
-    }
-
-    if (currentUser.religion?.length) {
-      matchQuery.religion = { $in: currentUser.religion };
-    }
-
-    if (currentUser.nativeLocation?.length) {
-      matchQuery.nativeLocation = { $in: currentUser.nativeLocation };
-    }
-
-    if (currentUser.workingLocation?.length) {
-      matchQuery.workLocation = { $in: currentUser.workingLocation };
-    }
-
-    // Divyang preference
-    if (currentUser.divyangPrefer && currentUser.divyangPrefer !== 'any') {
-      matchQuery.divyang = currentUser.divyangPrefer === 'yes'
-        ? { $exists: true, $ne: null, $ne: '' }
-        : { $in: [null, ''] };
-    }
-
-    // Child acceptance
-    if (currentUser.childAccepted === 'no') {
-      matchQuery.children = { $exists: true, $size: 0 };
-    }
-
-    const potentialMatches = await userModel.find(matchQuery);
-
-    const mutualMatches = [];
-
-    for (const match of potentialMatches) {
-      let isMatch = true;
-
-      // Reverse check: does match's expectation fit currentUser?
-
-      if (match.ageFrom && currentUserAge < parseInt(match.ageFrom)) isMatch = false;
-      if (match.ageTo && currentUserAge > parseInt(match.ageTo)) isMatch = false;
-
-      if (match.heightFrom && currentUser.height < match.heightFrom) isMatch = false;
-      if (match.heightTo && currentUser.height > match.heightTo) isMatch = false;
-
-      if (match.expectedEducation?.length &&
-        (!currentUser.education || !currentUser.education.some(edu => match.expectedEducation.includes(edu)))) {
-        isMatch = false;
-      }
-
-      if (match.expectedOccupation &&
-        (!currentUser.occupation?.toLowerCase().includes(match.expectedOccupation.toLowerCase()))) {
-        isMatch = false;
-      }
-
-      if (match.expectedMaritalStatus && currentUser.maritalStatus !== match.expectedMaritalStatus) {
-        isMatch = false;
-      }
-
-      if (match.expectedNationality?.length &&
-        (!currentUser.nationality || !currentUser.nationality.some(n => match.expectedNationality.includes(n)))) {
-        isMatch = false;
-      }
-
-      if (match.religion?.length &&
-        (!currentUser.religion || !currentUser.religion.some(r => match.religion.includes(r)))) {
-        isMatch = false;
-      }
-
-      if (match.nativeLocation?.length &&
-        (!currentUser.nativeLocation || !currentUser.nativeLocation.some(loc => match.nativeLocation.includes(loc)))) {
-        isMatch = false;
-      }
-
-      if (match.workingLocation?.length &&
-        (!currentUser.workLocation || !match.workingLocation.includes(currentUser.workLocation))) {
-        isMatch = false;
-      }
-
-      if (match.divyangPrefer === 'yes' && !currentUser.divyang) isMatch = false;
-      if (match.divyangPrefer === 'no' && currentUser.divyang) isMatch = false;
-
-      if (match.childAccepted === 'no' && currentUser.children?.length > 0) isMatch = false;
-
-      if (isMatch) {
-        const {
-          _id, firstName, lastName, gender, dob, height, occupation,
-          education, maritalStatus, nationality, caste, motherTongue,
-          profilePic, userPhotoOne, userPhotoTwo, userPhotoThree, userPhotoFour,
-          workLocation, monthlyIncome, religion, sect, manglik,
-          foodPreference, bloodGroup, premium
-        } = match;
-
-        mutualMatches.push({
-          _id, firstName, lastName, gender, dob, height, occupation,
-          education, maritalStatus, nationality, caste, motherTongue,
-          profilePic, userPhotoOne, userPhotoTwo, userPhotoThree, userPhotoFour,
-          workLocation, monthlyIncome, religion, sect, manglik,
-          foodPreference, bloodGroup, premium
-        });
-      }
-    }
-
-    res.status(200).json({
-      success: true,
-      message: `Found ${mutualMatches.length} mutual matches`,
-      totalMatches: mutualMatches.length,
-      matches: mutualMatches
+      // Their expectations should match logged-in user's profile
+      ageFrom: { $lte: userAge },
+      ageTo: { $gte: userAge },
+      heightFrom: { $lte: height },
+      heightTo: { $gte: height },
+      expectedEducation: { $in: user.education },
+      expectedOccupation: user.occupation,
+      expectedIncome: user.monthlyIncome,
+      expectedNationality: { $in: user.nationality },
+      expectedMaritalStatus: user.maritalStatus,
+      divyangPrefer: user.divyang,
+      religion: { $in: user.religion || [] },
+      nativeLocation: { $in: [user.nativeCity, user.nativeVillage].filter(Boolean) },
+      workingLocation: { $in: [user.workLocation].filter(Boolean) },
     });
 
+    return res.json({ status: true, count: matchedUsers.length, result: matchedUsers });
   } catch (error) {
-    console.error("Error in mutual matching:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message
-    });
+    console.error(error);
+    return res.status(500).json({ status: false, message: "Internal server error" });
   }
 };
-
 
 export const getFranchises = async (req, res) => {
   try {
