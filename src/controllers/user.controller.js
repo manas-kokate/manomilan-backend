@@ -332,11 +332,9 @@ export const getLoggedInUser = async (req, res) => {
 
 export const mutualMatching = async (req, res) => {
   try {
-    const userId = req.id; // or req.body depending on your API design
+    const userId = req.id; // or get from req.body if applicable
 
-    // Get the current user's profile
     const currentUser = await userModel.findById(userId);
-
     if (!currentUser) {
       return res.status(404).json({
         success: false,
@@ -344,255 +342,152 @@ export const mutualMatching = async (req, res) => {
       });
     }
 
-    // Build query to find potential matches
+    const currentUserAge = currentUser.dob
+      ? Math.floor((Date.now() - new Date(currentUser.dob).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+      : null;
+
     const matchQuery = {
-      _id: { $ne: userId }, // Exclude current user
-      ActiveStatus: true, // Only active users
+      _id: { $ne: userId },
+      ActiveStatus: true,
+      gender: currentUser.gender === 'male' ? 'female' : 'male'
     };
 
-    // Gender filter - opposite gender
-    if (currentUser.gender) {
-      matchQuery.gender = currentUser.gender === 'male' ? 'female' : 'male';
-    }
-
-    // Age range filter
+    // Age range (based on DOB)
     if (currentUser.ageFrom || currentUser.ageTo) {
-      const currentUserAge = currentUser.dob ?
-        Math.floor((new Date() - new Date(currentUser.dob)) / (365.25 * 24 * 60 * 60 * 1000)) : null;
-
-      if (currentUserAge) {
-        const ageFilter = {};
-        if (currentUser.ageFrom) {
-          const maxDob = new Date();
-          maxDob.setFullYear(maxDob.getFullYear() - parseInt(currentUser.ageFrom));
-          ageFilter.$lte = maxDob;
-        }
-        if (currentUser.ageTo) {
-          const minDob = new Date();
-          minDob.setFullYear(minDob.getFullYear() - parseInt(currentUser.ageTo));
-          ageFilter.$gte = minDob;
-        }
-        if (Object.keys(ageFilter).length > 0) {
-          matchQuery.dob = ageFilter;
-        }
+      const ageFilter = {};
+      if (currentUser.ageFrom) {
+        const maxDob = new Date();
+        maxDob.setFullYear(maxDob.getFullYear() - parseInt(currentUser.ageFrom));
+        ageFilter.$lte = maxDob;
+      }
+      if (currentUser.ageTo) {
+        const minDob = new Date();
+        minDob.setFullYear(minDob.getFullYear() - parseInt(currentUser.ageTo));
+        ageFilter.$gte = minDob;
+      }
+      if (Object.keys(ageFilter).length > 0) {
+        matchQuery.dob = ageFilter;
       }
     }
 
-    // Height filter
+    // Height
     if (currentUser.heightFrom || currentUser.heightTo) {
       const heightFilter = {};
-      if (currentUser.heightFrom) {
-        heightFilter.$gte = currentUser.heightFrom;
-      }
-      if (currentUser.heightTo) {
-        heightFilter.$lte = currentUser.heightTo;
-      }
-      if (Object.keys(heightFilter).length > 0) {
-        matchQuery.height = heightFilter;
-      }
+      if (currentUser.heightFrom) heightFilter.$gte = currentUser.heightFrom;
+      if (currentUser.heightTo) heightFilter.$lte = currentUser.heightTo;
+      matchQuery.height = heightFilter;
     }
 
-    // Education filter
-    if (currentUser.expectedEducation && currentUser.expectedEducation.length > 0) {
+    if (currentUser.expectedEducation?.length) {
       matchQuery.education = { $in: currentUser.expectedEducation };
     }
 
-    // Occupation filter
     if (currentUser.expectedOccupation) {
       matchQuery.occupation = new RegExp(currentUser.expectedOccupation, 'i');
     }
 
-    // Marital status filter
     if (currentUser.expectedMaritalStatus) {
       matchQuery.maritalStatus = currentUser.expectedMaritalStatus;
     }
 
-    // Nationality filter
-    if (currentUser.expectedNationality && currentUser.expectedNationality.length > 0) {
+    if (currentUser.expectedNationality?.length) {
       matchQuery.nationality = { $in: currentUser.expectedNationality };
     }
 
-    // Religion filter
-    if (currentUser.religion && currentUser.religion.length > 0) {
+    if (currentUser.religion?.length) {
       matchQuery.religion = { $in: currentUser.religion };
     }
 
-    // Native location filter
-    if (currentUser.nativeLocation && currentUser.nativeLocation.length > 0) {
+    if (currentUser.nativeLocation?.length) {
       matchQuery.nativeLocation = { $in: currentUser.nativeLocation };
     }
 
-    // Working location filter
-    if (currentUser.workingLocation && currentUser.workingLocation.length > 0) {
+    if (currentUser.workingLocation?.length) {
       matchQuery.workLocation = { $in: currentUser.workingLocation };
     }
 
     // Divyang preference
     if (currentUser.divyangPrefer && currentUser.divyangPrefer !== 'any') {
-      if (currentUser.divyangPrefer === 'yes') {
-        matchQuery.divyang = { $exists: true, $ne: null, $ne: '' };
-      } else if (currentUser.divyangPrefer === 'no') {
-        matchQuery.$or = [
-          { divyang: { $exists: false } },
-          { divyang: null },
-          { divyang: '' }
-        ];
-      }
+      matchQuery.divyang = currentUser.divyangPrefer === 'yes'
+        ? { $exists: true, $ne: null, $ne: '' }
+        : { $in: [null, ''] };
     }
 
     // Child acceptance
-    if (currentUser.childAccepted && currentUser.childAccepted !== 'any') {
-      if (currentUser.childAccepted === 'no') {
-        matchQuery.$or = [
-          { children: { $exists: false } },
-          { children: { $size: 0 } }
-        ];
-      }
+    if (currentUser.childAccepted === 'no') {
+      matchQuery.children = { $exists: true, $size: 0 };
     }
 
-    // Get potential matches
     const potentialMatches = await userModel.find(matchQuery);
 
-    // Filter for mutual matching
     const mutualMatches = [];
-    const currentUserAge = currentUser.dob ?
-      Math.floor((new Date() - new Date(currentUser.dob)) / (365.25 * 24 * 60 * 60 * 1000)) : null;
 
     for (const match of potentialMatches) {
       let isMatch = true;
 
-      // Check if current user matches the potential match's expectations
+      // Reverse check: does match's expectation fit currentUser?
 
-      // Age check
-      if (match.ageFrom || match.ageTo) {
-        if (currentUserAge) {
-          if (match.ageFrom && currentUserAge < parseInt(match.ageFrom)) {
-            isMatch = false;
-          }
-          if (match.ageTo && currentUserAge > parseInt(match.ageTo)) {
-            isMatch = false;
-          }
-        }
+      if (match.ageFrom && currentUserAge < parseInt(match.ageFrom)) isMatch = false;
+      if (match.ageTo && currentUserAge > parseInt(match.ageTo)) isMatch = false;
+
+      if (match.heightFrom && currentUser.height < match.heightFrom) isMatch = false;
+      if (match.heightTo && currentUser.height > match.heightTo) isMatch = false;
+
+      if (match.expectedEducation?.length &&
+        (!currentUser.education || !currentUser.education.some(edu => match.expectedEducation.includes(edu)))) {
+        isMatch = false;
       }
 
-      // Height check
-      if (match.heightFrom || match.heightTo) {
-        if (currentUser.height) {
-          if (match.heightFrom && currentUser.height < match.heightFrom) {
-            isMatch = false;
-          }
-          if (match.heightTo && currentUser.height > match.heightTo) {
-            isMatch = false;
-          }
-        }
+      if (match.expectedOccupation &&
+        (!currentUser.occupation?.toLowerCase().includes(match.expectedOccupation.toLowerCase()))) {
+        isMatch = false;
       }
 
-      // Education check
-      if (match.expectedEducation && match.expectedEducation.length > 0) {
-        if (!currentUser.education || !currentUser.education.some(edu =>
-          match.expectedEducation.includes(edu))) {
-          isMatch = false;
-        }
+      if (match.expectedMaritalStatus && currentUser.maritalStatus !== match.expectedMaritalStatus) {
+        isMatch = false;
       }
 
-      // Occupation check
-      if (match.expectedOccupation) {
-        if (!currentUser.occupation ||
-          !currentUser.occupation.toLowerCase().includes(match.expectedOccupation.toLowerCase())) {
-          isMatch = false;
-        }
+      if (match.expectedNationality?.length &&
+        (!currentUser.nationality || !currentUser.nationality.some(n => match.expectedNationality.includes(n)))) {
+        isMatch = false;
       }
 
-      // Marital status check
-      if (match.expectedMaritalStatus) {
-        if (currentUser.maritalStatus !== match.expectedMaritalStatus) {
-          isMatch = false;
-        }
+      if (match.religion?.length &&
+        (!currentUser.religion || !currentUser.religion.some(r => match.religion.includes(r)))) {
+        isMatch = false;
       }
 
-      // Nationality check
-      if (match.expectedNationality && match.expectedNationality.length > 0) {
-        if (!currentUser.nationality || !currentUser.nationality.some(nat =>
-          match.expectedNationality.includes(nat))) {
-          isMatch = false;
-        }
+      if (match.nativeLocation?.length &&
+        (!currentUser.nativeLocation || !currentUser.nativeLocation.some(loc => match.nativeLocation.includes(loc)))) {
+        isMatch = false;
       }
 
-      // Religion check
-      if (match.religion && match.religion.length > 0) {
-        if (!currentUser.religion || !currentUser.religion.some(rel =>
-          match.religion.includes(rel))) {
-          isMatch = false;
-        }
+      if (match.workingLocation?.length &&
+        (!currentUser.workLocation || !match.workingLocation.includes(currentUser.workLocation))) {
+        isMatch = false;
       }
 
-      // Native location check
-      if (match.nativeLocation && match.nativeLocation.length > 0) {
-        if (!currentUser.nativeLocation || !currentUser.nativeLocation.some(loc =>
-          match.nativeLocation.includes(loc))) {
-          isMatch = false;
-        }
-      }
+      if (match.divyangPrefer === 'yes' && !currentUser.divyang) isMatch = false;
+      if (match.divyangPrefer === 'no' && currentUser.divyang) isMatch = false;
 
-      // Working location check
-      if (match.workingLocation && match.workingLocation.length > 0) {
-        if (!currentUser.workLocation || !match.workingLocation.includes(currentUser.workLocation)) {
-          isMatch = false;
-        }
-      }
-
-      // Divyang preference check
-      if (match.divyangPrefer && match.divyangPrefer !== 'any') {
-        if (match.divyangPrefer === 'yes') {
-          if (!currentUser.divyang) {
-            isMatch = false;
-          }
-        } else if (match.divyangPrefer === 'no') {
-          if (currentUser.divyang) {
-            isMatch = false;
-          }
-        }
-      }
-
-      // Child acceptance check
-      if (match.childAccepted && match.childAccepted !== 'any') {
-        if (match.childAccepted === 'no') {
-          if (currentUser.children && currentUser.children.length > 0) {
-            isMatch = false;
-          }
-        }
-      }
+      if (match.childAccepted === 'no' && currentUser.children?.length > 0) isMatch = false;
 
       if (isMatch) {
-        // Remove sensitive information before sending
-        const sanitizedMatch = {
-          _id: match._id,
-          firstName: match.firstName,
-          lastName: match.lastName,
-          gender: match.gender,
-          dob: match.dob,
-          height: match.height,
-          occupation: match.occupation,
-          education: match.education,
-          maritalStatus: match.maritalStatus,
-          nationality: match.nationality,
-          caste: match.caste,
-          motherTongue: match.motherTongue,
-          profilePic: match.profilePic,
-          userPhotoOne: match.userPhotoOne,
-          userPhotoTwo: match.userPhotoTwo,
-          userPhotoThree: match.userPhotoThree,
-          userPhotoFour: match.userPhotoFour,
-          workLocation: match.workLocation,
-          monthlyIncome: match.monthlyIncome,
-          religion: match.religion,
-          sect: match.sect,
-          manglik: match.manglik,
-          foodPreference: match.foodPreference,
-          bloodGroup: match.bloodGroup,
-          premium: match.premium
-        };
-        mutualMatches.push(sanitizedMatch);
+        const {
+          _id, firstName, lastName, gender, dob, height, occupation,
+          education, maritalStatus, nationality, caste, motherTongue,
+          profilePic, userPhotoOne, userPhotoTwo, userPhotoThree, userPhotoFour,
+          workLocation, monthlyIncome, religion, sect, manglik,
+          foodPreference, bloodGroup, premium
+        } = match;
+
+        mutualMatches.push({
+          _id, firstName, lastName, gender, dob, height, occupation,
+          education, maritalStatus, nationality, caste, motherTongue,
+          profilePic, userPhotoOne, userPhotoTwo, userPhotoThree, userPhotoFour,
+          workLocation, monthlyIncome, religion, sect, manglik,
+          foodPreference, bloodGroup, premium
+        });
       }
     }
 
@@ -604,7 +499,7 @@ export const mutualMatching = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error in mutual matching:', error);
+    console.error("Error in mutual matching:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -612,6 +507,7 @@ export const mutualMatching = async (req, res) => {
     });
   }
 };
+
 
 export const getFranchises = async (req, res) => {
   try {
