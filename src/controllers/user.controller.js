@@ -335,7 +335,7 @@ export const mutualMatching = async (req, res) => {
     const userId = req.id;
 
     // Get the logged-in user's profile
-    const user = await userModel.findOne({ UserId: userId, ActiveStatus: true });
+    const user = await userModel.findById(userId);
     if (!user) return res.status(404).json({ status: false, message: "User not found or inactive" });
 
     // Extract profile and expectations
@@ -369,7 +369,7 @@ export const mutualMatching = async (req, res) => {
     // 1. They match the current user's expectations
     // 2. AND their expectations are matched by the current user's profile
 
-    const matchedUsers = await User.find({
+    const matchedUsers = await userModel.find({
       ActiveStatus: true,
       gender: oppositeGender,
 
