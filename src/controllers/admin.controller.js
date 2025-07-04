@@ -75,7 +75,7 @@ export const loginAdmin = async (req, res) => {
 
 export const getUsers = async (req, res) => {
     try {
-        const lowerLimit = parseInt(req.query.lowerLimit) || 1;
+        const lowerLimit = parseInt(req.query.lowerLimit) || 0;
         const upperLimit = parseInt(req.query.upperLimit) || 20;
         const AllUsers = await userModel.find().skip(lowerLimit).limit(upperLimit);
         if (AllUsers.length == 0) {
