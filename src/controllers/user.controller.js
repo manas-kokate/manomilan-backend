@@ -332,82 +332,51 @@ export const getLoggedInUser = async (req, res) => {
 
 export const mutualMatching = async (req, res) => {
   try {
-    const userId = req.id;
+    const loggedInUserId = req.id; // Use req.user from auth middleware
 
-    // Get the logged-in user's profile
-    const user = await userModel.findById(userId);
-    if (!user) return res.status(404).json({ status: false, message: "User not found or inactive" });
+    const loggedInUser = await userModel.findById(loggedInUserId);
+    if (!loggedInUser) return res.status(404).json({ message: 'User not found' });
 
-    // Extract profile and expectations
-    const {
-      gender,
-      height,
-      ageFrom,
-      ageTo,
-      heightFrom,
-      heightTo,
-      expectedEducation,
-      expectedOccupation,
-      expectedIncome,
-      workAbroad,
-      divyangPrefer,
-      expectedMaritalStatus,
-      expectedNationality,
-      childAccepted,
-      religion,
-      nativeLocation,
-      workingLocation
-    } = user;
+    // Prepare query to find users matching loggedInUser's expectations
+    const matchQuery = {
+      _id: { $ne: loggedInUserId }, // Exclude self
+      gender: loggedInUser.gender === 'male' ? 'female' : 'male',
+      expectedEducation: { $in: loggedInUser.education || [] },
+      expectedOccupation: { $in: ['ANY', loggedInUser.occupation] },
+      expectedIncome: { $lte: loggedInUser.monthlyIncome || 0 },
+      expectedMaritalStatus: { $in: ['ANY', loggedInUser.maritalStatus] },
+      expectedNationality: { $in: [...(loggedInUser.nationality || []), 'ANY'] },
+      childAccepted: { $in: ['Yes', loggedInUser.children?.length ? 'Yes' : 'No', 'ANY'] },
+      divyangPrefer: { $in: ['Yes', loggedInUser.divyang === 'Yes' ? 'Yes' : 'No', 'ANY'] }
+    };
 
-    // Convert height to a comparable number if needed (optional - based on how height is stored)
-    const userAge = new Date().getFullYear() - new Date(user.dob).getFullYear();
+    // Fetch all users who match the logged-in user's expectations
+    const potentialMatches = await userModel.find(matchQuery);
 
-    // Reverse Gender
-    const oppositeGender = gender === "male" ? "female" : "male";
+    // Now filter only users whose expectations match the logged-in user
+    const mutualMatches = potentialMatches.filter(user => {
+      const userIncomeOk = !user.expectedIncome || user.expectedIncome === "ANY" || user.expectedIncome <= (loggedInUser.monthlyIncome || 0);
+      const userOccupationOk = !user.expectedOccupation || user.expectedOccupation === "ANY" || user.expectedOccupation === loggedInUser.occupation;
+      const userEducationOk = !user.expectedEducation?.length || user.expectedEducation.includes("ANY") || user.expectedEducation.some(edu => (loggedInUser.education || []).includes(edu));
+      const userNationalityOk = user.expectedNationality.includes("ANY") || user.expectedNationality.some(n => (loggedInUser.nationality || []).includes(n));
+      const userMaritalStatusOk = !user.expectedMaritalStatus || user.expectedMaritalStatus === "ANY" || user.expectedMaritalStatus === loggedInUser.maritalStatus;
+      const userChildOk = user.childAccepted === "ANY" || user.childAccepted === 'Yes' || !loggedInUser.children?.length;
+      const userDivyangOk = user.divyangPrefer === "ANY" || user.divyangPrefer === 'Yes' || loggedInUser.divyang === 'No';
 
-    // Find users where:
-    // 1. They match the current user's expectations
-    // 2. AND their expectations are matched by the current user's profile
-
-    const matchedUsers = await userModel.find({
-      ActiveStatus: true,
-      gender: oppositeGender,
-
-      // Match to current user's expectations
-      dob: {
-        $gte: new Date(`${new Date().getFullYear() - parseInt(ageTo)}-01-01`),
-        $lte: new Date(`${new Date().getFullYear() - parseInt(ageFrom)}-12-31`)
-      },
-      height: { $gte: heightFrom, $lte: heightTo },
-      education: { $in: expectedEducation },
-      occupation: expectedOccupation,
-      monthlyIncome: expectedIncome,
-      nationality: { $in: expectedNationality },
-      maritalStatus: expectedMaritalStatus,
-      divyang: divyangPrefer,
-      nativeCity: { $in: nativeLocation },
-      workLocation: { $in: workingLocation },
-
-      // Their expectations should match logged-in user's profile
-      ageFrom: { $lte: userAge },
-      ageTo: { $gte: userAge },
-      heightFrom: { $lte: height },
-      heightTo: { $gte: height },
-      expectedEducation: { $in: user.education },
-      expectedOccupation: user.occupation,
-      expectedIncome: user.monthlyIncome,
-      expectedNationality: { $in: user.nationality },
-      expectedMaritalStatus: user.maritalStatus,
-      divyangPrefer: user.divyang,
-      religion: { $in: user.religion || [] },
-      nativeLocation: { $in: [user.nativeCity, user.nativeVillage].filter(Boolean) },
-      workingLocation: { $in: [user.workLocation].filter(Boolean) },
+      return userIncomeOk &&
+        userOccupationOk &&
+        userEducationOk &&
+        userNationalityOk &&
+        userMaritalStatusOk &&
+        userChildOk &&
+        userDivyangOk;
     });
 
-    return res.json({ status: true, count: matchedUsers.length, result: matchedUsers });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ status: false, message: "Internal server error" });
+    res.json(mutualMatches);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
   }
 };
 

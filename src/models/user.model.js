@@ -26,15 +26,15 @@ const userSchema = new Schema({
         gender: { type: String },
         livesWith: { type: String }
     }],
-    height: { type: String, default: "5' 4\"" },
+    height: { type: String, default: "100" },//centimeters
     occupation: {
         type: String,
     },
-    monthlyIncome: { type: String },
+    monthlyIncome: { type: Number },
     nationality: { type: [String], default: ["India"] },
-    caste: { type: String },
+    caste: { type: String },//"Hindu,Maratha,Kunbi"
     motherTongue: { type: String },
-    divyang: { type: String },
+    divyang: { type: String },//Yes or No
     mothersName: { type: String },
     fathersName: { type: String },
     mamkul: { type: String },
@@ -68,15 +68,25 @@ const userSchema = new Schema({
     heightTo: { type: String },
     expectedEducation: { type: [String] },
     expectedOccupation: { type: String },
-    expectedIncome: { type: String },
-    workAbroad: { type: String },
-    divyangPrefer: { type: String },
+    expectedIncome: { type: Number },//10000 stored in db but while matching should match greater than or equal to this value
+    workAbroad: { type: String },//Yes or No
+    divyangPrefer: { type: String },//Yes or No
     expectedMaritalStatus: { type: String },
-    expectedNationality: { type: [String] },
-    childAccepted: { type: String },
-    religion: { type: [String] },
-    nativeLocation: { type: [String] },
-    workingLocation: { type: [String] },
+    expectedNationality: { type: [String] },// values can be ["ANY"] or ["Indian","American"]
+    childAccepted: { type: String },//Yes or No
+    expectedReligion: { type: [String] },
+    expectedNativeLocation: [{
+        country: { type: String },
+        state: { type: String },
+        city: { type: String }
+    }],//values be "ANY" also
+    expectedWorkingLocation: [
+        {
+            country: { type: String },
+            state: { type: String },
+            city: { type: String }
+        }
+    ],//values be "ANY" also
     profilePic: { type: String },
     userPhotoOne: { type: String },
     userPhotoTwo: { type: String },
