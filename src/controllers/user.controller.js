@@ -64,7 +64,7 @@ export const registerUser = async (req, res) => {
       heightTo,
       expectedEducation,
       expectedOccupation,
-      expectedIncome,
+      expectedMonthlyIncome,
       workAbroad,
       expectedMaritalStatus,
       expectedNationality,
@@ -207,7 +207,7 @@ export const registerUser = async (req, res) => {
         heightTo,
         expectedEducation,
         expectedOccupation,
-        expectedIncome,
+        expectedMonthlyIncome,
         workAbroad,
         expectedMaritalStatus,
         expectedNationality,
@@ -331,53 +331,129 @@ export const getLoggedInUser = async (req, res) => {
 
 
 export const mutualMatching = async (req, res) => {
-  try {
-    const loggedInUserId = req.id; // Use req.user from auth middleware
+  const userId = req.id;
+  const currentUser = await userModel.findById(userId);
+  const {
+    ageFrom,
+    ageTo,
+    heightFrom,
+    heightTo,
+    expectedEducation,
+    expectedOccupation,
+    expectedMonthlyIncome,
+    expectedWorkAbroad,
+    divyangPrefer,
+    expectedMaritalStatus,
+    expectedNationality,
+    childAccepted,
+    expectedReligion,
+    expectedNativeLocation,
+    expectedWorkingLocation
+  } = currentUser;
 
-    const loggedInUser = await userModel.findById(loggedInUserId);
-    if (!loggedInUser) return res.status(404).json({ message: 'User not found' });
+  // console.log(currentUser)
+  const filterObj = {}
 
-    // Prepare query to find users matching loggedInUser's expectations
-    const matchQuery = {
-      _id: { $ne: loggedInUserId }, // Exclude self
-      gender: loggedInUser.gender === 'male' ? 'female' : 'male',
-      expectedEducation: { $in: loggedInUser.education || [] },
-      expectedOccupation: { $in: ['ANY', loggedInUser.occupation] },
-      expectedIncome: { $lte: loggedInUser.monthlyIncome || 0 },
-      expectedMaritalStatus: { $in: ['ANY', loggedInUser.maritalStatus] },
-      expectedNationality: { $in: [...(loggedInUser.nationality || []), 'ANY'] },
-      childAccepted: { $in: ['Yes', loggedInUser.children?.length ? 'Yes' : 'No', 'ANY'] },
-      divyangPrefer: { $in: ['Yes', loggedInUser.divyang === 'Yes' ? 'Yes' : 'No', 'ANY'] }
-    };
-
-    // Fetch all users who match the logged-in user's expectations
-    const potentialMatches = await userModel.find(matchQuery);
-
-    // Now filter only users whose expectations match the logged-in user
-    const mutualMatches = potentialMatches.filter(user => {
-      const userIncomeOk = !user.expectedIncome || user.expectedIncome === "ANY" || user.expectedIncome <= (loggedInUser.monthlyIncome || 0);
-      const userOccupationOk = !user.expectedOccupation || user.expectedOccupation === "ANY" || user.expectedOccupation === loggedInUser.occupation;
-      const userEducationOk = !user.expectedEducation?.length || user.expectedEducation.includes("ANY") || user.expectedEducation.some(edu => (loggedInUser.education || []).includes(edu));
-      const userNationalityOk = user.expectedNationality.includes("ANY") || user.expectedNationality.some(n => (loggedInUser.nationality || []).includes(n));
-      const userMaritalStatusOk = !user.expectedMaritalStatus || user.expectedMaritalStatus === "ANY" || user.expectedMaritalStatus === loggedInUser.maritalStatus;
-      const userChildOk = user.childAccepted === "ANY" || user.childAccepted === 'Yes' || !loggedInUser.children?.length;
-      const userDivyangOk = user.divyangPrefer === "ANY" || user.divyangPrefer === 'Yes' || loggedInUser.divyang === 'No';
-
-      return userIncomeOk &&
-        userOccupationOk &&
-        userEducationOk &&
-        userNationalityOk &&
-        userMaritalStatusOk &&
-        userChildOk &&
-        userDivyangOk;
-    });
-
-    res.json(mutualMatches);
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server Error' });
+  filterObj._id = {
+    $ne: userId
   }
+
+
+  filterObj.gender = {
+    $ne: currentUser.gender.toLowerCase()
+  }
+
+
+  filterObj.ActiveStatus = true;
+
+  if (heightFrom !== 'ANY' && heightTo !== 'ANY') {
+    filterObj.height = {
+      $gte: parseInt(heightFrom),
+      $lte: parseInt(heightTo)
+    }
+  }
+
+  if (!expectedEducation.includes('ANY')) {
+    filterObj.education = {
+      $in: expectedEducation
+    }
+  }
+
+  if (expectedOccupation !== 'ANY') {
+    filterObj.occupation = expectedOccupation
+  }
+
+  if (expectedMonthlyIncome !== 'ANY') {
+    filterObj.monthlyIncome = {
+      $gte: expectedMonthlyIncome
+    }
+  }
+
+  filterObj.workAbroad = expectedWorkAbroad.toLowerCase();
+
+  filterObj.divyang = divyangPrefer;
+
+  if (expectedMaritalStatus !== 'ANY') {
+    filterObj.maritalStatus = expectedMaritalStatus;
+  }
+
+  if (!expectedNationality.includes('ANY')) {
+    filterObj.nationality = {
+      $in: expectedNationality
+    }
+  }
+
+  if (childAccepted.toLowerCase() === 'yes') {
+    filterObj.children = { $not: { $size: 0 } }
+  } else {
+    filterObj.children = { $size: 0 }
+  }
+
+  let countryArray;
+  let stateArray;
+  let cityArray;
+
+  if (expectedNativeLocation.length != 0) {
+    countryArray = expectedNativeLocation.map((ele) => {
+      return ele.country
+    })
+    stateArray =
+      expectedNativeLocation.map((ele) => {
+        return ele.state
+      })
+    cityArray = expectedNativeLocation.map((ele) => {
+      return ele.city
+    })
+
+    if (!countryArray.includes('ANY') && !stateArray.includes('ANY') && !cityArray.includes('ANY')) {
+      filterObj.nativeCity = {
+        'country': {
+          $in: countryArray
+        },
+        'state': {
+          $in: stateArray
+        },
+        'city': {
+          $in: cityArray
+        }
+      }
+    }
+    if (!countryArray.includes('ANY') && !stateArray.includes('ANY') && cityArray.includes('ANY')) {
+      filterObj.nativeCity = {
+        'country': {
+          $in: countryArray
+        },
+        'state': {
+          $in: stateArray
+        }
+      }
+    }
+  }
+
+  console.log(filterObj)
+
+  const OneWayUsers = await userModel.find(filterObj);
+  return res.send({ status: true, Matches: OneWayUsers })
 };
 
 export const getFranchises = async (req, res) => {

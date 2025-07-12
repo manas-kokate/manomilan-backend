@@ -26,13 +26,17 @@ const userSchema = new Schema({
         gender: { type: String },
         livesWith: { type: String }
     }],
-    height: { type: String, default: "100" },//centimeters
+    height: { type: Number, default: "100" },//centimeters
     occupation: {
         type: String,
     },
     monthlyIncome: { type: Number },
     nationality: { type: [String], default: ["India"] },
-    caste: { type: String },//"Hindu,Maratha,Kunbi"
+    caste: {
+        religion: String,
+        caste: String,
+        subCaste: String
+    },//"Hindu,Maratha,Kunbi"
     motherTongue: { type: String },
     divyang: { type: String },//Yes or No
     mothersName: { type: String },
@@ -48,9 +52,15 @@ const userSchema = new Schema({
     sisters: { type: String },
     sistersExactCount: { type: Number },
     otherInfo: { type: String },
-    nativeVillage: { type: String },
-    nativeCity: { type: String },
-
+    nativeVillage: {
+        type: String
+    },
+    nativeCity: {
+        country: { type: String },
+        state: { type: String },
+        city: { type: String }
+    },
+    workAbroad: { type: String },//Yes or No
 
     // Education & Career
     education: { type: [String] },
@@ -68,13 +78,23 @@ const userSchema = new Schema({
     heightTo: { type: String },
     expectedEducation: { type: [String] },
     expectedOccupation: { type: String },
-    expectedIncome: { type: Number },//10000 stored in db but while matching should match greater than or equal to this value
-    workAbroad: { type: String },//Yes or No
+    expectedMonthlyIncome: { type: Number },//10000 stored in db but while matching should match greater than or equal to this value
+    expectedWorkAbroad: { type: String },//Yes or No
     divyangPrefer: { type: String },//Yes or No
     expectedMaritalStatus: { type: String },
     expectedNationality: { type: [String] },// values can be ["ANY"] or ["Indian","American"]
     childAccepted: { type: String },//Yes or No
-    expectedReligion: { type: [String] },
+    expectedReligion: [{
+        religion: {
+            type: String
+        },
+        caste: {
+            type: String
+        },
+        subCaste: {
+            type: String
+        }
+    }],
     expectedNativeLocation: [{
         country: { type: String },
         state: { type: String },
@@ -86,7 +106,9 @@ const userSchema = new Schema({
             state: { type: String },
             city: { type: String }
         }
-    ],//values be "ANY" also
+    ],//values can be "ANY" also 
+
+    // other 
     profilePic: { type: String },
     userPhotoOne: { type: String },
     userPhotoTwo: { type: String },
@@ -103,6 +125,5 @@ const userSchema = new Schema({
     specs: { type: String },
     gotra: { type: String }
 }, { timestamps: true });
-
 
 export default model("user", userSchema);
