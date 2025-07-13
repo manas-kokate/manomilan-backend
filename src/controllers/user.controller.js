@@ -608,14 +608,14 @@ export const mutualMatching = async (req, res) => {
 
     const finalQuery = orConditions.length ? { $and: filterConditions, $or: orConditions } : { $and: filterConditions };
 
-    console.log('One-way filter:', JSON.stringify(finalQuery, null, 2));
+    // console.log('One-way filter:', JSON.stringify(finalQuery, null, 2));
     const oneWayMatches = await userModel.find(finalQuery).lean();
-    console.log('One-way matches:', oneWayMatches.map(u => ({ _id: u._id.toString(), firstName: u.firstName, expectedWorkAbroad: u.expectedWorkAbroad, education: u.education })));
+    // console.log('One-way matches:', oneWayMatches.map(u => ({ _id: u._id.toString(), firstName: u.firstName, expectedWorkAbroad: u.expectedWorkAbroad, education: u.education })));
 
     // Mutual matching
     const mutualMatches = [];
     for (const match of oneWayMatches) {
-      console.log(`Processing mutual match for user: ${match._id}, firstName: ${match.firstName}`);
+      // console.log(`Processing mutual match for user: ${match._id}, firstName: ${match.firstName}`);
       const reverseConditions = [
         { _id: userId },
         { ActiveStatus: true },
@@ -711,17 +711,17 @@ export const mutualMatching = async (req, res) => {
 
       const reverseQuery = reverseOrConditions.length ? { $and: reverseConditions, $or: reverseOrConditions } : { $and: reverseConditions };
 
-      console.log(`Mutual filter for ${match._id}:`, JSON.stringify(reverseQuery, null, 2));
+      // console.log(`Mutual filter for ${match._id}:`, JSON.stringify(reverseQuery, null, 2));
       const mutual = await userModel.findOne(reverseQuery).lean();
       if (mutual) {
         mutualMatches.push(match);
       }
     }
 
-    console.log('Mutual matches:', mutualMatches.map(u => ({ _id: u._id.toString(), firstName: u.firstName, education: u.education })));
+    // console.log('Mutual matches:', mutualMatches.map(u => ({ _id: u._id.toString(), firstName: u.firstName, education: u.education })));
     return res.status(200).send({ status: true, Matches: mutualMatches });
   } catch (err) {
-    console.error('Error in matching:', err);
+    // console.error('Error in matching:', err);
     return res.status(500).send({ status: false, message: 'Server error', error: err.message });
   }
 };
