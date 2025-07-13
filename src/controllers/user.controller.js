@@ -29,7 +29,7 @@ export const registerUser = async (req, res) => {
       occupation,
       monthlyIncome,
       nationality,
-      caste,
+      caste, // should be an object { religion, caste, subCaste }
       motherTongue,
       divyang,
       mothersName,
@@ -46,7 +46,7 @@ export const registerUser = async (req, res) => {
       sistersExactCount,
       otherInfo,
       nativeVillage,
-      nativeCity,
+      nativeCity, // should be an object { country, state, city }
 
       // Education & Career
       education,
@@ -65,13 +65,14 @@ export const registerUser = async (req, res) => {
       expectedEducation,
       expectedOccupation,
       expectedMonthlyIncome,
-      workAbroad,
+      expectedWorkAbroad,
+      divyangPrefer,
       expectedMaritalStatus,
       expectedNationality,
       childAccepted,
-      religion,
-      nativeLocation,
-      workingLocation,
+      expectedReligion, // array of { religion, caste, subCaste }
+      expectedNativeLocation, // array of { country, state, city }
+      expectedWorkingLocation, // array of { country, state, city }
 
       // Special Info
       sect,
@@ -82,16 +83,13 @@ export const registerUser = async (req, res) => {
       bloodGroup,
     } = req.body;
 
-    if (!loginEmail ||
-      !loginNumber ||
-      !password ||
-      !franchiseUnder) {
-      return res.send({ status: false, message: "Login credentials required to register" })
+    if (!loginEmail || !loginNumber || !password || !franchiseUnder) {
+      return res.status(400).send({ status: false, message: "Login credentials required to register" });
     }
 
-    // Check if user already exists by email or number
+    // Check for existing user
     const existingUser = await userModel.findOne({
-      $or: [{ loginEmail }, { loginNumber }]
+      $or: [{ loginEmail }, { loginNumber }],
     });
 
     if (existingUser) {
@@ -101,156 +99,118 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    let profilePic;
-    let userPhotoOne;
-    let userPhotoTwo;
-    let userPhotoThree;
-    let userPhotoFour;
+    // File Handling
+    let profilePic = req?.files?.profilePic?.[0]?.filename || "";
+    let userPhotoOne = req?.files?.userPhotoOne?.[0]?.filename || "";
+    let userPhotoTwo = req?.files?.userPhotoTwo?.[0]?.filename || "";
+    let userPhotoThree = req?.files?.userPhotoThree?.[0]?.filename || "";
+    let userPhotoFour = req?.files?.userPhotoFour?.[0]?.filename || "";
 
-    // Handle profile pic
-    try {
-      if (req.files?.profilePic || req.files?.profilePic?.length !== 0) {
-        profilePic = req.files.profilePic[0].filename;
-      }
-    } catch (error) {
-      profilePic = ""
-    }
-    try {
-      if (req.files?.userPhotoOne || req.files?.userPhotoOne?.length !== 0) {
-        userPhotoOne = req.files.userPhotoOne[0].filename;
-      }
-    } catch (error) {
-      userPhotoOne = ""
-    }
-    try {
-      if (req.files?.userPhotoTwo || req.files?.userPhotoTwo?.length !== 0) {
-        userPhotoTwo = req.files.userPhotoTwo[0].filename;
-      }
-    } catch (error) {
-      userPhotoTwo = ""
-    }
-    try {
-      if (req.files?.userPhotoThree || req.files?.userPhotoThree?.length !== 0) {
-        userPhotoThree = req.files.userPhotoThree[0].filename;
-      }
-    } catch (error) {
-      userPhotoThree = ""
-    }
-    try {
-      if (req.files?.userPhotoFour || req.files?.userPhotoFour?.length !== 0) {
-        userPhotoFour = req.files.userPhotoFour[0].filename;
-      }
-    } catch (error) {
-      userPhotoFour = ""
-    }
-
+    // Generate new UserId
     const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
     const UserId = LastIdUser ? Number(LastIdUser.UserId) + 1 : 1;
 
-    // Create user document
-    try {
-      const user = new userModel({
-        // Login credentials
-        UserId,
-        loginEmail,
-        loginNumber,
-        password,
-        CreatedBy: "user",
-        franchiseUnder,
+    // Prepare user object
+    const user = new userModel({
+      // Login credentials
+      UserId,
+      loginEmail,
+      loginNumber,
+      password,
+      CreatedBy: "user",
+      franchiseUnder,
 
-        // Personal Info
-        firstName,
-        lastName,
-        midname,
-        gender,
-        dob,
-        timeOfBirth,
-        placeOfBirth,
-        maritalStatus,
-        children,
-        height,
-        occupation,
-        monthlyIncome,
-        nationality,
-        caste,
-        motherTongue,
-        divyang,
-        mothersName,
-        fathersName,
-        mamkul,
-        parentsResidence,
-        parentsCity,
-        parentsContact,
-        whatsApp,
-        alternateNumber,
-        brothersCount,
-        brothers,
-        sisters,
-        sistersExactCount,
-        otherInfo,
-        nativeVillage,
-        nativeCity,
+      // Personal Info
+      firstName,
+      lastName,
+      midname,
+      gender,
+      dob,
+      timeOfBirth,
+      placeOfBirth,
+      maritalStatus,
+      children,
+      height,
+      occupation,
+      monthlyIncome,
+      nationality: nationality || ["India"],
+      caste, // assumed to be { religion, caste, subCaste }
+      motherTongue,
+      divyang,
+      mothersName,
+      fathersName,
+      mamkul,
+      parentsResidence,
+      parentsCity,
+      parentsContact,
+      whatsApp,
+      alternateNumber,
+      brothersCount,
+      brothers,
+      sisters,
+      sistersExactCount,
+      otherInfo,
+      nativeVillage,
+      nativeCity, // { country, state, city }
+      workAbroad: req.body.workAbroad || "No",
 
-        // Education & Career
-        education,
-        companyName,
-        designation,
-        candidateNumber,
-        candidateEmail,
-        workLocation,
-        isWorking,
+      // Education & Career
+      education,
+      companyName,
+      designation,
+      candidateNumber,
+      candidateEmail,
+      workLocation,
+      isWorking: isWorking !== undefined ? isWorking : true,
 
-        // Expectations
-        ageFrom,
-        ageTo,
-        heightFrom,
-        heightTo,
-        expectedEducation,
-        expectedOccupation,
-        expectedMonthlyIncome,
-        workAbroad,
-        expectedMaritalStatus,
-        expectedNationality,
-        childAccepted,
-        religion,
-        nativeLocation,
-        workingLocation,
+      // Expectations
+      ageFrom,
+      ageTo,
+      heightFrom,
+      heightTo,
+      expectedEducation,
+      expectedOccupation,
+      expectedMonthlyIncome,
+      expectedWorkAbroad,
+      divyangPrefer,
+      expectedMaritalStatus,
+      expectedNationality,
+      childAccepted,
+      expectedReligion,
+      expectedNativeLocation,
+      expectedWorkingLocation,
 
-        // Special Info
-        sect,
-        manglik,
-        gotra,
-        foodPreference,
-        specs,
-        bloodGroup,
+      // Photos
+      profilePic,
+      userPhotoOne,
+      userPhotoTwo,
+      userPhotoThree,
+      userPhotoFour,
 
-        //Photos
-        profilePic,
-        userPhotoOne,
-        userPhotoTwo,
-        userPhotoThree,
-        userPhotoFour
-      });
+      // Special Info
+      sect,
+      manglik,
+      gotra,
+      foodPreference,
+      specs,
+      bloodGroup,
+    });
 
-      await user.save();
+    await user.save();
 
-      return res.send({
-        status: true,
-        message: "User registered successfully.",
-      });
-    } catch (error) {
-      return res.send({ status: false, message: "Something went wrong. Send data properly." })
-    }
-
+    return res.status(200).send({
+      status: true,
+      message: "User registered successfully.",
+    });
   } catch (error) {
     console.error("Registration Error:", error);
     return res.status(500).send({
       status: false,
       message: "Server Error",
-      // error: error.message,
     });
   }
 };
+
 
 export const login = async (req, res) => {
   const { identifier, password } = req.body;
