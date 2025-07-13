@@ -10,6 +10,10 @@ const distributorSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    points: {
+        type: Number,
+        default: 0
+    },
     mobileNumber: {
         type: String,
         required: true,

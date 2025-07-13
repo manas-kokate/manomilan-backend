@@ -1235,6 +1235,22 @@ export const deleteMotherTongue = async (req, res) => {
     }
 };
 
+export const addNewPoints = async (req, res) => {
+    const adminId = req.id;
+    const { points, transactionPassword } = req.body;
+
+    if (!points || !transactionPassword) {
+        return res.send({ status: false, message: "Points and transactionPassword required" })
+    }
+
+    const admin = await adminModel.findById(adminId);
+    if (!(await bcrypt.compare(transactionPassword, admin.transactionPassword))) {
+        return res.send({ status: false, message: 'Invalid transaction password' })
+    }
+    admin.points = admin.points + points;
+    await admin.save()
+}
+
 export const getDistributors = async (req, res) => {
     try {
         const distributors = await distributorModel.find();
@@ -1245,4 +1261,31 @@ export const getDistributors = async (req, res) => {
     } catch ({ error }) {
         return res.send({ status: false, message: "Something went wrong. Server error." })
     }
+}
+
+export const givePointsToDistributor = async (req, res) => {
+    const adminId = req.id
+    const { distributorId, points } = req.body;
+    try {
+        if (!distributorId || !points) {
+            return res.send({ status: false, message: "Distributor id and points required" })
+        }
+
+        const distributor = await distributorModel.findById(distributorId);
+        const admin = await adminModel.findById(adminId);
+
+        if (parseInt(points) !== 0) {
+            distributor.points = distributor.points + parseInt(points);
+            admin.points = admin.points - parseInt(points)
+            await distributor.save();
+            await admin.save();
+            return res.send({ status: true, message: "Points added to distributor successfully" })
+        }
+
+        return res.send({ status: false, message: 'Points undefined or 0 please check before sending.' })
+
+    } catch (err) {
+        return res.send({ status: false, message: "Something went wrong.Server error." })
+    }
+
 }

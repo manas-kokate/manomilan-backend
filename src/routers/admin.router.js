@@ -173,5 +173,8 @@ router.delete('/delete-mother-tongue', deleteMotherTongue);
 // === DISTRIBUTORS ===
 router.get('/get-distributors', getDistributors);
 
+// === POINTS ===
+// router.post('/add-points')
+
 
 export default router

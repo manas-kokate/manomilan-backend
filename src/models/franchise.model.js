@@ -40,6 +40,10 @@ const franchiseSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    points: {
+        type: Number,
+        default: 0
+    },
     email: {
         type: String,
         required: true,
