@@ -3,7 +3,8 @@ import bcrypt from "bcrypt"
 
 const adminSchema = new Schema({
     name: {
-        type: String
+        type: String,
+        required: true
     },
     email: {
         type: String,
@@ -12,6 +13,10 @@ const adminSchema = new Schema({
     password: {
         type: String,
         required: true
+    },
+    points: {
+        type: Number,
+        default: 0
     },
     transactionPassword: {
         type: String,

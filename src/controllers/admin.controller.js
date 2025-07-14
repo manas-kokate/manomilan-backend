@@ -22,6 +22,8 @@ import motherTongueModel from "../models/small_models/motherTongue.js";
 import distributorModel from "../models/distributor.model.js";
 import pointsModel from "../models/small_models/points.model.js";
 import freepackageModel from "../models/small_models/freepackage.model.js";
+import franchiseModel from "../models/franchise.model.js";
+import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
 
 
 export const registerAdmin = async (req, res) => {
@@ -1268,10 +1270,12 @@ export const addNewPoints = async (req, res) => {
             points,
             name: admin.name
         })
-
         await newpoints.save()
 
-        return res.send({ status: true, message: 'New points added successfully' })
+        admin.points = admin.points + points;
+        await admin.save();
+
+        return res.send({ status: true, message: 'New points added successfully and updated admin points' })
     } catch (error) {
         return res.send({ status: false, message: "Server Error" })
     }
@@ -1308,6 +1312,24 @@ export const getDistributors = async (req, res) => {
     }
 }
 
+export const getSingleFranchise = async (req, res) => {
+    try {
+        const franchiseId = req.params.id;
+        if (!franchiseId) {
+            return res.send({ status: false, message: "Please send franchise Id in params" });
+        }
+
+        const singleFranchise = await franchiseModel.findById(franchiseId);
+        if (!singleFranchise) {
+            return res.send({ status: false, message: "franchise not found" });
+        }
+        return res.send({ status: true, singleFranchise: singleFranchise });
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+}
+
 export const getSingleDistributor = async (req, res) => {
     try {
         const distributorId = req.params.id;
@@ -1327,9 +1349,9 @@ export const getSingleDistributor = async (req, res) => {
 }
 
 export const givePointsToDistributor = async (req, res) => {
-    const adminId = req.id
-    const { distributorId, points } = req.body;
     try {
+        const adminId = req.id
+        const { distributorId, points } = req.body;
         if (!distributorId || !points) {
             return res.send({ status: false, message: "Distributor id and points required" })
         }
@@ -1337,15 +1359,23 @@ export const givePointsToDistributor = async (req, res) => {
         const distributor = await distributorModel.findById(distributorId);
         const admin = await adminModel.findById(adminId);
 
-        if (parseInt(points) !== 0) {
-            distributor.points = distributor.points + parseInt(points);
-            admin.points = admin.points - parseInt(points)
-            await distributor.save();
-            await admin.save();
-            return res.send({ status: true, message: "Points added to distributor successfully" })
+        if (parseInt(points) == 0) {
+            return res.send({ status: false, message: 'Points undefined or 0 please check before sending.' })
         }
 
-        return res.send({ status: false, message: 'Points undefined or 0 please check before sending.' })
+        distributor.points = distributor.points + parseInt(points);
+        admin.points = admin.points - parseInt(points)
+        await distributor.save();
+
+        const newDistributorLog = new distributorpointslogModel({
+            distributorId: distributor._id,
+            points: points,
+            By: admin.name
+        })
+        await newDistributorLog.save()
+
+        await admin.save();
+        return res.send({ status: true, message: "Points alloted to distributor successfully" })
 
     } catch (err) {
         return res.send({ status: false, message: "Something went wrong.Server error." })

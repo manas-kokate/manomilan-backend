@@ -66,7 +66,8 @@ import {
     addNewPoints,
     givePointsToDistributor,
     getPoints,
-    getSingleDistributor
+    getSingleDistributor,
+    getSingleFranchise
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
 
@@ -179,8 +180,10 @@ router.get('/get-distributors', getDistributors);
 
 // === POINTS ===
 router.post('/add-points', adminAuth, addNewPoints);
-router.get('/get-points', adminAuth, getPoints)
-router.get('/get-single-distributor', adminAuth, getSingleDistributor)
+router.get('/get-points', adminAuth, getPoints);
+router.post('/give-points-to-distributor', adminAuth, givePointsToDistributor);
+router.get('/get-single-franchise', adminAuth, getSingleFranchise);
+router.get('/get-single-distributor', adminAuth, getSingleDistributor);
 
 
 export default router
