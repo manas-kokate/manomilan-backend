@@ -64,7 +64,8 @@ import {
     deleteFoodPref,
     getDistributors,
     addNewPoints,
-    givePointsToDistributor
+    givePointsToDistributor,
+    getPoints
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
 
@@ -176,8 +177,9 @@ router.delete('/delete-mother-tongue', deleteMotherTongue);
 router.get('/get-distributors', getDistributors);
 
 // === POINTS ===
-router.post('/add-points', addNewPoints);
-router.post('/give-points-to-distributor', givePointsToDistributor);
+router.post('/add-points', adminAuth, addNewPoints);
+router.get('/get-points', adminAuth, getPoints)
+// router.post('/give-points-to-distributor', );
 
 
 export default router

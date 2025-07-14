@@ -17,10 +17,6 @@ const adminSchema = new Schema({
         type: String,
         required: true
     },
-    points: {
-        type: Number,
-        default: 0
-    },
 }, { timestamps: true })
 
 adminSchema.pre('save', async function (next) {

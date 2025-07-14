@@ -20,6 +20,7 @@ import positionsModel from "../models/small_models/positionsModel.js";
 import manglikModel from "../models/small_models/manglikModel.js";
 import motherTongueModel from "../models/small_models/motherTongue.js";
 import distributorModel from "../models/distributor.model.js";
+import pointsModel from "../models/small_models/points.model.js";
 
 
 export const registerAdmin = async (req, res) => {
@@ -1236,19 +1237,50 @@ export const deleteMotherTongue = async (req, res) => {
 };
 
 export const addNewPoints = async (req, res) => {
-    const adminId = req.id;
-    const { points, transactionPassword } = req.body;
+    try {
+        const adminId = req.id;
+        const { points, transactionPassword } = req.body;
 
-    if (!points || !transactionPassword) {
-        return res.send({ status: false, message: "Points and transactionPassword required" })
+        if (!points || !transactionPassword) {
+            return res.send({ status: false, message: "Points and transactionPassword required" })
+        }
+
+        const admin = await adminModel.findById(adminId);
+        if (!(await bcrypt.compare(transactionPassword, admin.transactionPassword))) {
+            return res.send({ status: false, message: 'Invalid transaction password' })
+        }
+
+        const newpoints = new pointsModel({
+            adminId,
+            points,
+            name: admin.name
+        })
+
+        await newpoints.save()
+
+        return res.send({ status: true, message: 'New points added successfully' })
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" })
     }
 
-    const admin = await adminModel.findById(adminId);
-    if (!(await bcrypt.compare(transactionPassword, admin.transactionPassword))) {
-        return res.send({ status: false, message: 'Invalid transaction password' })
+}
+
+export const getPoints = async (req, res) => {
+    try {
+
+        const adminId = req.id;
+
+        const allPointsEntries = await pointsModel.find({ adminId: adminId })
+
+        if (allPointsEntries.length === 0) {
+            return res.send({ status: false, message: "No points entries found for this admin" })
+        }
+
+        return res.send({ status: true, entries: allPointsEntries })
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
     }
-    admin.points = admin.points + points;
-    await admin.save()
 }
 
 export const getDistributors = async (req, res) => {
