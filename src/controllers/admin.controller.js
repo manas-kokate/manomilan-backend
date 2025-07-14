@@ -21,15 +21,24 @@ import manglikModel from "../models/small_models/manglikModel.js";
 import motherTongueModel from "../models/small_models/motherTongue.js";
 import distributorModel from "../models/distributor.model.js";
 import pointsModel from "../models/small_models/points.model.js";
+import freepackageModel from "../models/small_models/freepackage.model.js";
 
 
 export const registerAdmin = async (req, res) => {
-    const { email, password } = req.body;
+    const { name, email, password, transactionPassword } = req.body;
     if (!email) {
         return res.send({ status: false, message: "Email Required!" });
     }
     if (!password) {
         return res.send({ status: false, message: "Password Required!" });
+    }
+
+    if (!name) {
+        return res.send({ status: false, message: "Name Required!" });
+    }
+
+    if (!transactionPassword) {
+        return res.send({ status: false, message: "TransactionPassword Required!" });
     }
 
     const ExistingAdmin = await adminModel.findOne({ email });
@@ -40,7 +49,9 @@ export const registerAdmin = async (req, res) => {
     try {
         const newAdmin = new adminModel({
             email,
-            password
+            password,
+            transactionPassword,
+            name
         })
 
         await newAdmin.save()
@@ -1236,6 +1247,8 @@ export const deleteMotherTongue = async (req, res) => {
     }
 };
 
+
+// === POINTS ====
 export const addNewPoints = async (req, res) => {
     try {
         const adminId = req.id;
@@ -1295,6 +1308,24 @@ export const getDistributors = async (req, res) => {
     }
 }
 
+export const getSingleDistributor = async (req, res) => {
+    try {
+        const distributorId = req.params.id;
+        if (!distributorId) {
+            return res.send({ status: false, message: "Please send distributor Id in params" });
+        }
+
+        const singleDistributor = await distributorModel.findById(distributorId);
+        if (!singleDistributor) {
+            return res.send({ status: false, message: "Distributor not found" });
+        }
+        return res.send({ status: true, singleDistributor: singleDistributor });
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+}
+
 export const givePointsToDistributor = async (req, res) => {
     const adminId = req.id
     const { distributorId, points } = req.body;
@@ -1321,3 +1352,31 @@ export const givePointsToDistributor = async (req, res) => {
     }
 
 }
+
+// === PACKAGES ===
+export const addFreePackage = async (req, res) => {
+    const {
+        NumOfFreeAddress,
+        validity,
+        status
+    } = req.body
+
+    if (!NumOfFreeAddress ||
+        !validity) {
+        return res.send({ status: false, message: 'NumOfFreeAddress , validity and status required' })
+    }
+
+    const allPackages = await freepackageModel.find({});
+
+    let packageId = 1;
+    if (allPackages.length != 0) {
+        packageId = await freepackageModel.find({}).sort({ packageId: -1 })
+    }
+
+
+
+    await freepackageModel.updateMany({}, { $set: { status: 'Inactive' } });
+
+
+
+} 
