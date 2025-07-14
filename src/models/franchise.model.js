@@ -16,25 +16,22 @@ const franchiseSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        match: /^[6-9]\d{9}$/,
     },
     alternateNumber: {
         type: String,
-        match: /^[6-9]\d{9}$/,
     },
     adharNumber: {
         type: String,
         required: true,
         trim: true,
-        // unique: true,
+        unique: true,
         // match: /^\d{12}$/,
     },
     panNumber: {
         type: String,
         required: true,
         trim: true,
-        // unique: true,
-        // match: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+        unique: true,
     },
     password: {
         type: Number,
@@ -49,7 +46,6 @@ const franchiseSchema = new mongoose.Schema({
         required: true,
         trim: true,
         unique: true,
-        match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
     },
     address: {
         type: String,

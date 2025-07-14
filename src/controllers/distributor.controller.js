@@ -131,3 +131,7 @@ export const getAllUsers = async (req, res) => {
     }
 
 }
+
+// export const addPoints = async (req, res) => {
+
+// }
