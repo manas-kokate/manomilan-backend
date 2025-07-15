@@ -79,13 +79,11 @@ export const registerDistributor = async (req, res) => {
 export const loginDistributor = async (req, res) => {
     try {
         const { identifier, password } = req.body;
-
-        // Find distributor by mobile number
         let distributor = await distributorModel.findOne({ email: identifier });
         if (!distributor) {
             distributor = await distributorModel.findOne({ mobileNumber: identifier })
         }
-        console.log(distributor.password, password)
+        // console.log(distributor.password, password)
 
         if (!distributor) {
             return res.status(401).json({ status: false, message: "Invalid mobile number or email" });
@@ -107,6 +105,7 @@ export const loginDistributor = async (req, res) => {
             status: true,
             message: "Login successful",
             token,
+            distributor
         });
 
     } catch (error) {
