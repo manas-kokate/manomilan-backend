@@ -25,6 +25,8 @@ import freepackageModel from "../models/small_models/freepackage.model.js";
 import franchiseModel from "../models/franchise.model.js";
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
 import vippackageModel from "../models/small_models/vippackage.model.js";
+import mainPackageModel from "../models/small_models/mainPackage.model.js";
+import addOnPackage from "../models/small_models/addOnPackage.js";
 
 
 export const registerAdmin = async (req, res) => {
@@ -1383,7 +1385,7 @@ export const givePointsToDistributor = async (req, res) => {
         }
 
         distributor.points = distributor.points + parseInt(points);
-        admin.points = admin.points - parseInt(points)
+        admin.points = admin.points - parseInt(points);
         await distributor.save();
 
         const newDistributorLog = new distributorpointslogModel({
@@ -1412,7 +1414,7 @@ export const addFreePackage = async (req, res) => {
 
         if (!NumOfFreeAddress ||
             !validity) {
-            return res.send({ status: false, message: 'NumOfFreeAddress , validity and status required' })
+            return res.send({ status: false, message: 'NumOfFreeAddress , validity required' })
         }
 
         let packageId = 1;
@@ -1474,17 +1476,129 @@ export const addVipPackage = async (req, res) => {
             adminShare,
             validity
         })
+        await vippackageModel.updateMany({}, { $set: { status: 'Inactive' } });
+
+        await newPackage.save()
+
+        return res.send({ status: true, message: 'New vip package added.', newPackage })
 
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ error: "Server error" });
     }
 };
 
 export const getAllVipPackages = async (req, res) => {
     try {
-        const packages = await vippackageModel.find().sort({ createdAt: -1 });
+        const packages = await vippackageModel.find().sort({ packageId: -1 });
         res.json(packages);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
+
+export const addMainPackage = async (req, res) => {
+    try {
+        const {
+            packageName,
+            numberOfAddresses,
+            memberCost,
+            adminShare,
+            validity,
+        } = req.body
+
+        if (!numberOfAddresses ||
+            !memberCost ||
+            !validity ||
+            !adminShare ||
+            !packageName
+        ) {
+            return res.send({ status: false, message: 'NumOfFreeAddress, validity, memberCost, adminShare and packageName required' })
+        }
+
+        let packageId = 1;
+        const lastPackage = await mainPackageModel.findOne({}).sort({ packageId: -1 })
+        if (lastPackage) {
+            packageId = parseInt(lastPackage?.packageId) + 1;
+        }
+        const newPackage = new mainPackageModel({
+            packageId,
+            numOfFreeAddress,
+            memberCost,
+            validity,
+            adminShare,
+            status: 'Active'
+        })
+        await mainPackageModel.updateMany({}, { $set: { status: 'Inactive' } });
+        await newPackage.save()
+        return res.send({ status: true, message: "New Main Package added", newPackage });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
+export const getMainPackages = async (req, res) => {
+    try {
+        const existingPackages = await mainPackageModel.find({}).sort({ packageId: -1 });
+        if (existingPackages.length == 0) {
+            return res.send({ status: false, message: "No packages found" })
+        }
+        return res.send({ status: true, existingPackages })
+    } catch (error) {
+
+    }
+}
+
+export const addAddOnPackage = async (req, res) => {
+    try {
+        const {
+            packageName,
+            numberOfAddresses,
+            memberCost,
+            distributorShare,
+            franchiseShare,
+            validity,
+        } = req.body
+
+        if (!packageName ||
+            !numberOfAddresses ||
+            !memberCost ||
+            !validity ||
+            !distributorShare ||
+            !franchiseShare ||
+            !adminShare
+        ) {
+            return res.send({ status: false, message: 'NumOfFreeAddress , validity,memberCost,distributorShare,franchiseShare  required' })
+        }
+
+        let packageId = 1;
+        const lastPackage = await addOnPackage.findOne({}).sort({ packageId: -1 })
+        if (lastPackage) {
+            packageId = parseInt(lastPackage?.packageId) + 1;
+        }
+        const newPackage = new addOnPackage({
+            packageId,
+            numOfFreeAddress,
+            memberCost,
+            validity,
+            adminShare,
+            status: 'Active'
+        })
+        await addOnPackage.updateMany({}, { $set: { status: 'Inactive' } });
+        await newPackage.save()
+        return res.send({ status: true, message: "New Add on Package added", newPackage });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
+export const getAddOnPackages = async (req, res) => {
+    try {
+        const addOnPackages = await addAddOnPackage.find({}).sort({ packageId: -1 });
+        if (addOnPackages.length == 0) {
+            return res.send({ status: false, message: 'No packages found' })
+        }
+        return res.send({ status: true, addOnPackages })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}

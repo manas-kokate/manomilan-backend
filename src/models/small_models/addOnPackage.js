@@ -8,7 +8,7 @@ const addOnPackageSchema = new mongoose.Schema({
     franchiseShare: { type: Number, required: true },
     validity: { type: Number, required: true },
     status: { type: String, enum: ['Active', 'Inactive'], default: 'Inactive' },
-    createdAt: { type: Date, default: Date.now }
-});
+    packageId: { type: Number }
+}, { timestamps: true });
 
 export default mongoose.model('AddOnPackage', addOnPackageSchema);
