@@ -69,15 +69,15 @@ export const registerAdmin = async (req, res) => {
 }
 
 export const loginAdmin = async (req, res) => {
-    const { email, password } = req.body;
-    if (!email) {
-        return res.send({ status: false, message: "Email Required!" });
+    const { identifier, password } = req.body;
+    if (!identifier) {
+        return res.send({ status: false, message: "identifier Required!" });
     }
     if (!password) {
         return res.send({ status: false, message: "Password Required!" });
     }
 
-    const ExistingAdmin = await adminModel.findOne({ email });
+    const ExistingAdmin = await adminModel.findOne({ identifier });
     if (!ExistingAdmin) {
         return res.send({ status: false, message: "Admin Not Found." });
     }
