@@ -185,11 +185,11 @@ router.post('/add-points', adminAuth, addNewPoints);
 router.get('/get-points', adminAuth, getPoints);
 router.post('/give-points-to-distributor', adminAuth, givePointsToDistributor);
 router.get('/get-single-franchise', adminAuth, getSingleFranchise);
-router.get('/get-single-distributor', adminAuth, getSingleDistributor);
+router.get('/get-single-distributor/:id', adminAuth, getSingleDistributor);
 
 // === PACKAGES === 
 router.post('/add-free-package', addFreePackage);
-router.get('/get-free-packages', getFreepackages)
+router.get('/get-free-packages', getFreepackages);
 
 
 export default router
