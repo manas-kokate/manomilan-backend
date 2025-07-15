@@ -69,7 +69,8 @@ import {
     getSingleDistributor,
     getSingleFranchise,
     addFreePackage,
-    getFreepackages
+    getFreepackages,
+    getFranchiseUnder
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
 
@@ -179,6 +180,7 @@ router.delete('/delete-mother-tongue', deleteMotherTongue);
 
 // === DISTRIBUTORS ===
 router.get('/get-distributors', getDistributors);
+router.grt('/get-franchise-under/:id', getFranchiseUnder)
 
 // === POINTS ===
 router.post('/add-points', adminAuth, addNewPoints);
@@ -190,6 +192,7 @@ router.get('/get-single-distributor/:id', adminAuth, getSingleDistributor);
 // === PACKAGES === 
 router.post('/add-free-package', addFreePackage);
 router.get('/get-free-packages', getFreepackages);
+
 
 
 export default router

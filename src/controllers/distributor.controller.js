@@ -15,7 +15,8 @@ export const registerDistributor = async (req, res) => {
         email,
         address,
         location,
-        socialMedia
+        socialMedia,
+        pincode
     } = req.body;
 
     const ExistingDistributor = await distributorModel.findOne({
@@ -65,7 +66,8 @@ export const registerDistributor = async (req, res) => {
             location,
             distributorPhoto,
             qrPhoto,
-            socialMedia
+            socialMedia,
+            pincode
         })
         await newDistributor.save();
         return res.send({ status: true, message: "Distributor registered successfully" })
