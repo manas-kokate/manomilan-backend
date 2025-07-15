@@ -24,6 +24,7 @@ import pointsModel from "../models/small_models/points.model.js";
 import freepackageModel from "../models/small_models/freepackage.model.js";
 import franchiseModel from "../models/franchise.model.js";
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
+import vippackageModel from "../models/small_models/vippackage.model.js";
 
 
 export const registerAdmin = async (req, res) => {
@@ -1377,7 +1378,7 @@ export const givePointsToDistributor = async (req, res) => {
         if (parseInt(points) == 0) {
             return res.send({ status: false, message: 'Points undefined or 0 please check before sending.' })
         }
-        if (!(await bcrypt.compare(admin.givePointsPassword, givePointsPassword))) {
+        if (!(await bcrypt.compare(givePointsPassword, admin.givePointsPassword))) {
             return res.send({ status: false, message: 'Invalid password. Points not alloted' })
         }
 
@@ -1445,3 +1446,45 @@ export const getFreepackages = async (req, res) => {
         return res.send({ status: false, message: 'Server error' })
     }
 }
+
+export const addVipPackage = async (req, res) => {
+    try {
+        const {
+            packageName,
+            numberOfAddresses,
+            memberCost,
+            adminShare,
+            validity
+        } = req.body;
+
+        if (!packageName || !numberOfAddresses || !memberCost || !adminShare || !validity) {
+            return res.send({ status: false, message: "all fields required" })
+        }
+
+        let packageId = 1;
+        const lastPackage = await vippackageModel.findOne({}).sort({ packageId: -1 })
+        if (lastPackage) {
+            packageId = parseInt(lastPackage?.packageId) + 1;
+        }
+        const newPackage = new vippackageModel({
+            packageId,
+            packageName,
+            numberOfAddresses,
+            memberCost,
+            adminShare,
+            validity
+        })
+
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const getAllVipPackages = async (req, res) => {
+    try {
+        const packages = await vippackageModel.find().sort({ createdAt: -1 });
+        res.json(packages);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

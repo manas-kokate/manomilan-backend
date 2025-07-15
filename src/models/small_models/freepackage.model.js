@@ -6,7 +6,7 @@ const freePackageSchema = new mongoose.Schema({
         required: true
     },
     validity: {
-        type: Date,
+        type: Number,
         required: true
     },
     packageId: {
