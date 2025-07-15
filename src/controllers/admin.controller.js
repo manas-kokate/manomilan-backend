@@ -77,7 +77,7 @@ export const loginAdmin = async (req, res) => {
         return res.send({ status: false, message: "Password Required!" });
     }
 
-    const ExistingAdmin = await adminModel.findOne({ identifier });
+    const ExistingAdmin = await adminModel.findOne({ email: identifier });
     if (!ExistingAdmin) {
         return res.send({ status: false, message: "Admin Not Found." });
     }
@@ -88,7 +88,7 @@ export const loginAdmin = async (req, res) => {
 
     const token = jwt.sign({ id: ExistingAdmin._id }, envCredentials.secretKey, { expiresIn: '4h' })
 
-    return res.send({ status: true, message: "User Login successful.", token: token });
+    return res.send({ status: true, message: "User Login successful.", token: token, ExistingAdmin });
 }
 
 export const getUsers = async (req, res) => {
