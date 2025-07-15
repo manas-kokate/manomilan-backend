@@ -22,6 +22,10 @@ const adminSchema = new Schema({
         type: String,
         required: true
     },
+    givePointsPassword: {
+        type: String,
+        required: true
+    }
 }, { timestamps: true })
 
 adminSchema.pre('save', async function (next) {
@@ -33,6 +37,12 @@ adminSchema.pre('save', async function (next) {
 adminSchema.pre('save', async function (next) {
     if (this.isModified('transactionPassword')) {
         this.transactionPassword = await bcrypt.hash(this.transactionPassword, 10)
+    }
+    next()
+})
+adminSchema.pre('save', async function (next) {
+    if (this.isModified('givePointsPassword')) {
+        this.givePointsPassword = await bcrypt.hash(this.givePointsPassword, 10)
     }
     next()
 })

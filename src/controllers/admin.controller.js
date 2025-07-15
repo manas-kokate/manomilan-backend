@@ -1351,8 +1351,8 @@ export const getSingleDistributor = async (req, res) => {
 export const givePointsToDistributor = async (req, res) => {
     try {
         const adminId = req.id
-        const { distributorId, points } = req.body;
-        if (!distributorId || !points) {
+        const { distributorId, points, givePointsPassword } = req.body;
+        if (!distributorId || !points || !givePointsPassword) {
             return res.send({ status: false, message: "Distributor id and points required" })
         }
 
@@ -1361,6 +1361,9 @@ export const givePointsToDistributor = async (req, res) => {
 
         if (parseInt(points) == 0) {
             return res.send({ status: false, message: 'Points undefined or 0 please check before sending.' })
+        }
+        if (!(await bcrypt.compare(admin.givePointsPassword, givePointsPassword))) {
+            return res.send({ status: false, message: 'Invalid password. Points not alloted' })
         }
 
         distributor.points = distributor.points + parseInt(points);
@@ -1385,28 +1388,45 @@ export const givePointsToDistributor = async (req, res) => {
 
 // === PACKAGES ===
 export const addFreePackage = async (req, res) => {
-    const {
-        NumOfFreeAddress,
-        validity,
-        status
-    } = req.body
+    try {
+        const {
+            NumOfFreeAddress,
+            validity,
+        } = req.body
 
-    if (!NumOfFreeAddress ||
-        !validity) {
-        return res.send({ status: false, message: 'NumOfFreeAddress , validity and status required' })
+        if (!NumOfFreeAddress ||
+            !validity) {
+            return res.send({ status: false, message: 'NumOfFreeAddress , validity and status required' })
+        }
+
+        let packageId = 1;
+        const lastPackage = await freepackageModel.findOne({}).sort({ packageId: -1 })
+        if (lastPackage) {
+            packageId = parseInt(lastPackage?.packageId) + 1;
+        }
+        const newPackage = new freepackageModel({
+            NumOfFreeAddress,
+            validity,
+            packageId,
+            status: 'Active'
+        })
+        await freepackageModel.updateMany({}, { $set: { status: 'Inactive' } });
+        await newPackage.save()
+        return res.send({ status: true, message: "New Package added", newPackage });
+
+    } catch (error) {
+        return res.send({ status: false, message: 'Server error' })
     }
+}
 
-    const allPackages = await freepackageModel.find({});
-
-    let packageId = 1;
-    if (allPackages.length != 0) {
-        packageId = await freepackageModel.find({}).sort({ packageId: -1 })
+export const getFreepackages = async (req, res) => {
+    try {
+        const freepackages = await freepackageModel.find({}).sort({ packageId: -1 });
+        if (freepackages.length === 0) {
+            return res.send({ status: false, message: "No free packages found" })
+        }
+        return res.send({ status: true, freepackages: freepackages })
+    } catch (error) {
+        return res.send({ status: false, message: 'Server error' })
     }
-
-
-
-    await freepackageModel.updateMany({}, { $set: { status: 'Inactive' } });
-
-
-
-} 
+}
