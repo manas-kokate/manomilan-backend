@@ -2,9 +2,11 @@ import franchiseModel from "../models/franchise.model.js";
 import userModel from "../models/user.model.js"
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
+import distributorModel from "../models/distributor.model.js";
 
 
 export const registerFranchise = async (req, res) => {
+    const distributorId = req.id;
     const {
         franchiseName,
         ownerName,
@@ -46,9 +48,11 @@ export const registerFranchise = async (req, res) => {
 
 
     try {
+        const currentDistributor = await distributorModel.findById(distributorId);
         const newSchema = new franchiseModel({
             franchiseName,
             ownerName,
+            distributorUnder: currentDistributor.distributorName,
             mobileNumber,
             alternateNumber,
             adharNumber,

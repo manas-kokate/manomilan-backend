@@ -12,6 +12,10 @@ const franchiseSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    distributorUnder: {
+        type: String,
+        required: true,
+    },
     mobileNumber: {
         type: String,
         required: true,

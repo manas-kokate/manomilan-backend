@@ -1352,6 +1352,17 @@ export const getSingleDistributor = async (req, res) => {
     }
 }
 
+export const getFranchiseUnder = async (req, res) => {
+    try {
+        const distributorId = req.params.id;
+        const distributor = await distributorModel.findById(distributorId);
+        const franchiseUnder = await franchiseModel.find({ distributorUnder: distributor.distributorName })
+        return res.send({ status: true, franchiseUnder })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
 export const givePointsToDistributor = async (req, res) => {
     try {
         const adminId = req.id

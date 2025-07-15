@@ -66,6 +66,9 @@ const distributorSchema = new mongoose.Schema({
     },
     location: {
         type: String
+    },
+    pincode: {
+        type: Number
     }
 });
 
