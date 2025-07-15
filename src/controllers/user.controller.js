@@ -176,9 +176,12 @@ export const registerUser = async (req, res) => {
       expectedMaritalStatus,
       expectedNationality,
       childAccepted,
-      expectedReligion,
-      expectedNativeLocation,
-      expectedWorkingLocation,
+
+      expectedReligion: typeof expectedReligion === 'string' ? JSON.parse(expectedReligion) : expectedReligion,
+
+      expectedNativeLocation: typeof expectedNativeLocation === "string" ? JSON.parse(expectedNativeLocation) : expectedNativeLocation,
+
+      expectedWorkingLocation: typeof expectedWorkingLocation === "string" ? JSON.parse(expectedWorkingLocation) : expectedWorkingLocation,
 
       // Photos
       profilePic,
