@@ -27,7 +27,7 @@ import distributorpointslogModel from "../models/small_models/distributorpointsl
 
 
 export const registerAdmin = async (req, res) => {
-    const { name, email, password, transactionPassword } = req.body;
+    const { name, email, password, transactionPassword, givePointsPassword } = req.body;
     if (!email) {
         return res.send({ status: false, message: "Email Required!" });
     }
@@ -37,6 +37,9 @@ export const registerAdmin = async (req, res) => {
 
     if (!name) {
         return res.send({ status: false, message: "Name Required!" });
+    }
+    if (!givePointsPassword) {
+        return res.send({ status: false, message: "givePointsPassword Required!" });
     }
 
     if (!transactionPassword) {
@@ -53,7 +56,8 @@ export const registerAdmin = async (req, res) => {
             email,
             password,
             transactionPassword,
-            name
+            name,
+            givePointsPassword
         })
 
         await newAdmin.save()
