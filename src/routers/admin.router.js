@@ -180,7 +180,7 @@ router.delete('/delete-mother-tongue', deleteMotherTongue);
 
 // === DISTRIBUTORS ===
 router.get('/get-distributors', getDistributors);
-router.grt('/get-franchise-under/:id', getFranchiseUnder)
+router.get('/get-franchise-under/:id', getFranchiseUnder)
 
 // === POINTS ===
 router.post('/add-points', adminAuth, addNewPoints);
