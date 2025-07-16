@@ -26,7 +26,8 @@ import franchiseModel from "../models/franchise.model.js";
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
 import vippackageModel from "../models/small_models/vippackage.model.js";
 import mainPackageModel from "../models/small_models/mainPackage.model.js";
-import addOnPackage from "../models/small_models/addOnPackage.js";
+import addOnPackage from "../models/small_models/addOnPackage.model.js";
+import addOnPackageModel from "../models/small_models/addOnPackage.model.js";
 
 
 export const registerAdmin = async (req, res) => {
@@ -1522,7 +1523,8 @@ export const addMainPackage = async (req, res) => {
         }
         const newPackage = new mainPackageModel({
             packageId,
-            numOfFreeAddress,
+            packageName,
+            numberOfAddresses,
             memberCost,
             validity,
             adminShare,
@@ -1564,26 +1566,27 @@ export const addAddOnPackage = async (req, res) => {
             !memberCost ||
             !validity ||
             !distributorShare ||
-            !franchiseShare ||
-            !adminShare
+            !franchiseShare
         ) {
             return res.send({ status: false, message: 'NumOfFreeAddress , validity,memberCost,distributorShare,franchiseShare  required' })
         }
 
         let packageId = 1;
-        const lastPackage = await addOnPackage.findOne({}).sort({ packageId: -1 })
+        const lastPackage = await addOnPackageModel.findOne({}).sort({ packageId: -1 })
         if (lastPackage) {
             packageId = parseInt(lastPackage?.packageId) + 1;
         }
-        const newPackage = new addOnPackage({
+        const newPackage = new addOnPackageModel({
             packageId,
-            numOfFreeAddress,
+            packageName,
+            numberOfAddresses,
             memberCost,
+            distributorShare,
+            franchiseShare,
             validity,
-            adminShare,
             status: 'Active'
         })
-        await addOnPackage.updateMany({}, { $set: { status: 'Inactive' } });
+        await addOnPackageModel.updateMany({}, { $set: { status: 'Inactive' } });
         await newPackage.save()
         return res.send({ status: true, message: "New Add on Package added", newPackage });
     } catch (error) {
@@ -1593,7 +1596,7 @@ export const addAddOnPackage = async (req, res) => {
 
 export const getAddOnPackages = async (req, res) => {
     try {
-        const addOnPackages = await addAddOnPackage.find({}).sort({ packageId: -1 });
+        const addOnPackages = await addOnPackageModel.find({}).sort({ packageId: -1 });
         if (addOnPackages.length == 0) {
             return res.send({ status: false, message: 'No packages found' })
         }

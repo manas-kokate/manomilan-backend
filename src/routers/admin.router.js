@@ -68,9 +68,15 @@ import {
     getPoints,
     getSingleDistributor,
     getSingleFranchise,
+    getFranchiseUnder,
     addFreePackage,
     getFreepackages,
-    getFranchiseUnder
+    addVipPackage,
+    getAllVipPackages,
+    addMainPackage,
+    getMainPackages,
+    addAddOnPackage,
+    getAddOnPackages
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
 
@@ -190,8 +196,22 @@ router.get('/get-single-franchise', adminAuth, getSingleFranchise);
 router.get('/get-single-distributor/:id', adminAuth, getSingleDistributor);
 
 // === PACKAGES === 
-router.post('/add-free-package', addFreePackage);
+// Free Package Routes
+router.post('/add-free-packages', addFreePackage);
 router.get('/get-free-packages', getFreepackages);
+
+// VIP Package Routes
+router.post('/add-vip-packages', addVipPackage);
+router.get('/get-vip-packages', getAllVipPackages);
+
+// Main Package Routes
+router.post('/add-main-packages', addMainPackage);
+router.get('/get-main-packages', getMainPackages);
+
+// Add-on Package Routes
+router.post('/add-addon-packages', addAddOnPackage);
+router.get('/get-addon-packages', getAddOnPackages);
+
 
 
 
