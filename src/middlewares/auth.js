@@ -77,7 +77,7 @@ export const distributorAuth = async (req, res, next) => {
     try {
         const decode = jwt.verify(token, envCredentials.secretKey)
         const distributor = await distributorModel.findById(decode.id);
-        if (!admin) {
+        if (!distributor) {
             return res.send({ message: "Unauthorized user" });
         }
         req.id = decode.id;
