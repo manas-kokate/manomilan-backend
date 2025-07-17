@@ -1,6 +1,6 @@
 import express from "express"
 import { uploadMiddleware } from "../utils/upload.js";
-import { registerUser, login, getLoggedInUser, editProfile, getFranchises, mutualMatching } from "../controllers/user.controller.js";
+import { registerUser, login, getLoggedInUser, editProfile, getFranchises, mutualMatching, sendMessage, draftMessage, getSentMessages, getdraftMessages, getReplies } from "../controllers/user.controller.js";
 import { userAuth } from "../middlewares/auth.js"
 import {
     getCountry, getDegreesByStream, getFoodPref, getReligion,
@@ -18,7 +18,7 @@ import {
     getCasteByReligion,
     getAllStates,
     getAllLocations,
-    getSubCasteEntry
+    getSubCasteEntry,
 } from "../controllers/admin.controller.js";
 
 
@@ -77,6 +77,18 @@ router.get('/food-choices', getFoodPref);
 
 // === MUTUAL MATCHING ===
 router.get('/mutual-matching', userAuth, mutualMatching)
+
+
+// === MESSAGES === 
+router.post('/send', sendMessage);
+
+router.post('/save-draft', draftMessage);
+
+router.get('/sent/:userId', getSentMessages);
+
+router.get('/drafts/:userId', getdraftMessages);
+
+router.get('/replies/:userId', getReplies);
 
 
 export default router

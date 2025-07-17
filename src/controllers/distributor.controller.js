@@ -133,6 +133,137 @@ export const getAllUsers = async (req, res) => {
 
 }
 
-// export const addPoints = async (req, res) => {
 
-// }
+export const sendMessageFromDistributor = async (req, res) => {
+    try {
+        const { distributorId, userName, franchiseName, adminName, message } = req.body;
+
+        if (!userName && !franchiseName && !adminName) {
+            return res.send({ status: false, message: "Please select a recipient" });
+        }
+
+        if (!distributorId || !message) {
+            return res.send({ status: false, message: "Distributor ID and message are required." });
+        }
+
+        const newMessage = new MessageModel({
+            distributorId,
+            isReply: false,  // original message
+            userName,
+            franchiseName,
+            adminName,
+            message,
+            status: 'sent'
+        });
+
+        await newMessage.save();
+
+        return res.send({ status: true, message: "Message sent successfully." });
+
+    } catch (error) {
+        console.error("Error sending message from distributor:", error);
+        return res.send({ status: false, message: "Server error. Message not sent." });
+    }
+};
+
+// ➤ Save draft (NOT a reply)
+export const draftMessageFromDistributor = async (req, res) => {
+    try {
+        const { distributorId, userName, franchiseName, adminName, message } = req.body;
+
+        if (!userName && !franchiseName && !adminName) {
+            return res.send({ status: false, message: "Please select a recipient" });
+        }
+
+        if (!distributorId || !message) {
+            return res.send({ status: false, message: "Distributor ID and message are required." });
+        }
+
+        const newMessage = new MessageModel({
+            distributorId,
+            isReply: false,  // original message
+            userName,
+            franchiseName,
+            adminName,
+            message,
+            status: 'draft'
+        });
+
+        await newMessage.save();
+
+        return res.send({ status: true, message: "Message saved to drafts successfully." });
+
+    } catch (error) {
+        console.error("Error saving draft from distributor:", error);
+        return res.send({ status: false, message: "Server error. Message not saved." });
+    }
+};
+
+// ➤ Get sent messages
+export const getSentMessagesFromDistributor = async (req, res) => {
+    try {
+        const distributorId = req.params.distributorId;
+
+        const sentMessages = await MessageModel.find({
+            distributorId,
+            status: 'sent',
+            isReply: false
+        }).sort({ createdAt: -1 });
+
+        if (sentMessages.length === 0) {
+            return res.send({ status: false, message: "No sent messages found." });
+        }
+
+        return res.send({ status: true, messages: sentMessages });
+
+    } catch (error) {
+        console.error("Error fetching distributor sent messages:", error);
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+// ➤ Get draft messages
+export const getDraftMessagesFromDistributor = async (req, res) => {
+    try {
+        const distributorId = req.params.distributorId;
+
+        const draftMessages = await MessageModel.find({
+            distributorId,
+            status: 'draft',
+            isReply: false
+        }).sort({ createdAt: -1 });
+
+        if (draftMessages.length === 0) {
+            return res.send({ status: false, message: "No draft messages found." });
+        }
+
+        return res.send({ status: true, messages: draftMessages });
+
+    } catch (error) {
+        console.error("Error fetching distributor draft messages:", error);
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+// ➤ Get replies received by distributor (replies = isReply: true)
+export const getRepliesForDistributor = async (req, res) => {
+    try {
+        const distributorId = req.params.distributorId;
+
+        const replies = await MessageModel.find({
+            distributorId,
+            status: 'sent',
+            isReply: true
+        }).sort({ createdAt: -1 });
+
+        if (replies.length === 0) {
+            return res.send({ status: false, message: "No replies found." });
+        }
+
+        return res.send({ status: true, messages: replies });
+
+    } catch (error) {
+        console.error("Error fetching replies for distributor:", error);
+        return res.send({ status: false, message: "Server error" });
+    }
+};

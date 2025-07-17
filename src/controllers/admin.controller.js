@@ -1605,3 +1605,137 @@ export const getAddOnPackages = async (req, res) => {
         return res.send({ status: false, message: "Server error" })
     }
 }
+
+export const sendMessageFromAdmin = async (req, res) => {
+    try {
+        const { adminId, userName, franchiseName, distributorName, message } = req.body;
+
+        if (!userName && !franchiseName && !distributorName) {
+            return res.send({ status: false, message: "Please select a recipient" });
+        }
+
+        if (!adminId || !message) {
+            return res.send({ status: false, message: "Admin ID and message are required." });
+        }
+
+        const newMessage = new MessageModel({
+            adminId,
+            isReply: false,
+            userName,
+            franchiseName,
+            distributorName,
+            message,
+            status: 'sent'
+        });
+
+        await newMessage.save();
+
+        return res.send({ status: true, message: "Message sent successfully." });
+
+    } catch (error) {
+        console.error("Error sending message from admin:", error);
+        return res.send({ status: false, message: "Server error. Message not sent." });
+    }
+};
+
+// ➤ Save draft (original)
+export const draftMessageFromAdmin = async (req, res) => {
+    try {
+        const { adminId, userName, franchiseName, distributorName, message } = req.body;
+
+        if (!userName && !franchiseName && !distributorName) {
+            return res.send({ status: false, message: "Please select a recipient" });
+        }
+
+        if (!adminId || !message) {
+            return res.send({ status: false, message: "Admin ID and message are required." });
+        }
+
+        const newMessage = new MessageModel({
+            adminId,
+            isReply: false,
+            userName,
+            franchiseName,
+            distributorName,
+            message,
+            status: 'draft'
+        });
+
+        await newMessage.save();
+
+        return res.send({ status: true, message: "Message saved to drafts successfully." });
+
+    } catch (error) {
+        console.error("Error saving draft from admin:", error);
+        return res.send({ status: false, message: "Server error. Message not saved." });
+    }
+};
+
+// ➤ Get sent messages
+export const getSentMessagesFromAdmin = async (req, res) => {
+    try {
+        const adminId = req.params.adminId;
+
+        const sentMessages = await MessageModel.find({
+            adminId,
+            status: 'sent',
+            isReply: false
+        }).sort({ createdAt: -1 });
+
+        if (sentMessages.length === 0) {
+            return res.send({ status: false, message: "No sent messages found." });
+        }
+
+        return res.send({ status: true, messages: sentMessages });
+
+    } catch (error) {
+        console.error("Error fetching admin sent messages:", error);
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+// ➤ Get draft messages
+export const getDraftMessagesFromAdmin = async (req, res) => {
+    try {
+        const adminId = req.params.adminId;
+
+        const draftMessages = await MessageModel.find({
+            adminId,
+            status: 'draft',
+            isReply: false
+        }).sort({ createdAt: -1 });
+
+        if (draftMessages.length === 0) {
+            return res.send({ status: false, message: "No draft messages found." });
+        }
+
+        return res.send({ status: true, messages: draftMessages });
+
+    } catch (error) {
+        console.error("Error fetching admin draft messages:", error);
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+// ➤ Get replies received by admin
+export const getRepliesForAdmin = async (req, res) => {
+    try {
+        const adminId = req.params.adminId;
+
+        const replies = await MessageModel.find({
+            adminId,
+            status: 'sent',
+            isReply: true
+        }).sort({ createdAt: -1 });
+
+        if (replies.length === 0) {
+            return res.send({ status: false, message: "No replies found." });
+        }
+
+        return res.send({ status: true, messages: replies });
+
+    } catch (error) {
+        console.error("Error fetching replies for admin:", error);
+        return res.send({ status: false, message: "Server error" });
+    }
+};

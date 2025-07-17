@@ -373,5 +373,133 @@ export const viewMember = async (req, res) => {
         console.error(error);
         return res.send({ status: false, message: "Server Error" });
     }
-
 }
+
+// === MESSAGES === 
+export const sendMessageFromFranchise = async (req, res) => {
+    try {
+        const { franchiseId, distributorName, adminName, message } = req.body;
+
+        // Validate receiver
+        if (!distributorName && !adminName) {
+            return res.send({ status: false, message: "Please select a recipient" });
+        }
+
+        // Validate sender and message
+        if (!franchiseId || !message) {
+            return res.send({ status: false, message: "Franchise ID and message are required." });
+        }
+
+        const newMessage = new MessageModel({
+            franchiseId,
+            isReply: false,
+            userName,
+            distributorName,
+            adminName,
+            message,
+            status: 'sent'
+        });
+
+        await newMessage.save();
+
+        return res.send({ status: true, message: "Message sent successfully." });
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server error. Message not sent." });
+    }
+};
+
+export const getSentMessagesFromFranchise = async (req, res) => {
+    try {
+        const franchiseId = req.params.id;
+
+        const sentMessages = await MessageModel.find({
+            franchiseId,
+            status: 'sent',
+            isReply: false
+        }).sort({ createdAt: -1 });
+
+        if (sentMessages.length === 0) {
+            return res.send({ status: false, message: 'No sent messages found' });
+        }
+
+        return res.send({ status: true, messages: sentMessages });
+
+    } catch (error) {
+        return res.send({ status: false, message: 'Server error' });
+    }
+};
+
+export const draftMessageFromFranchise = async (req, res) => {
+    try {
+        const { franchiseId, userName, distributorName, adminName, message } = req.body;
+
+        if (!userName && !distributorName && !adminName) {
+            return res.send({ status: false, message: "Please select a recipient" });
+        }
+
+        if (!franchiseId || !message) {
+            return res.send({ status: false, message: "Franchise ID and message are required." });
+        }
+
+        const newMessage = new MessageModel({
+            franchiseId,
+            isReply: false,
+            userName,
+            distributorName,
+            adminName,
+            message,
+            status: 'draft'
+        });
+
+        await newMessage.save();
+
+        return res.send({ status: true, message: "Message saved to drafts successfully." });
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server error. Message not saved." });
+    }
+};
+
+export const getDraftMessagesFromFranchise = async (req, res) => {
+    try {
+        const franchiseId = req.params.id;
+
+        const draftMessages = await MessageModel.find({
+            franchiseId,
+            status: 'draft',
+            isReply: false
+        }).sort({ createdAt: -1 });
+
+        if (draftMessages.length === 0) {
+            return res.send({ status: false, message: 'No draft messages found' });
+        }
+
+        return res.send({ status: true, messages: draftMessages });
+
+    } catch (error) {
+        return res.send({ status: false, message: 'Server error' });
+    }
+};
+
+export const getRepliesForFranchise = async (req, res) => {
+    try {
+        const franchiseId = req.params.id;
+
+        const replies = await MessageModel.find({
+            franchiseId,
+            isReply: true,
+            status: 'sent'
+        }).sort({ createdAt: -1 });
+
+        if (replies.length === 0) {
+            return res.send({ status: false, message: "No replies found." });
+        }
+
+        return res.send({ status: true, messages: replies });
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+

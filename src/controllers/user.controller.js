@@ -3,6 +3,7 @@ import sendMail from "../utils/mail.js";
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
 import franchiseModel from "../models/franchise.model.js";
+import MessageModel from "../models/small_models/message.model.js";
 
 
 
@@ -547,160 +548,128 @@ export const getFranchises = async (req, res) => {
   }
 }
 
-// export const testmutualMatching = async (req, res) => {
-//   const userId = req.id;
-//   const currentUser = await userModel.findById(userId);
-//   const {
-//     ageFrom,
-//     ageTo,
-//     heightFrom,
-//     heightTo,
-//     expectedEducation,
-//     expectedOccupation,
-//     expectedMonthlyIncome,
-//     expectedWorkAbroad,
-//     divyangPrefer,
-//     expectedMaritalStatus,
-//     expectedNationality,
-//     childAccepted,
-//     expectedReligion,
-//     expectedNativeLocation,
-//     expectedWorkingLocation
-//   } = currentUser;
+// === MESSAGES ===
+export const sendMessage = async (req, res) => {
+  try {
+    const { userId, franchiseName, distributorName, adminName, message } = req.body;
 
-//   // console.log(currentUser)
-//   const filterObj = {}
+    if (!franchiseName && !distributorName && !adminName) {
+      return res.send({ status: false, message: "Please select recepient" })
+    }
 
-//   filterObj._id = {
-//     $ne: userId
-//   }
+    if (!userId | !message) {
+      return res.send({ status: false, message: "user Id or message not required." })
+    }
 
+    const newMessage = new MessageModel({
+      userId,
+      isReply: false,
+      franchiseName,
+      distributorName,
+      adminName,
+      message,
+      status: 'sent'
+    })
 
-//   filterObj.gender = {
-//     $ne: currentUser.gender.toLowerCase()
-//   }
+    await newMessage.save();
 
+    return res.send({ status: true, message: "Message sent successfully." })
 
-//   filterObj.ActiveStatus = true;
+  } catch (error) {
+    return res.send({ status: false, message: "Server error.Message not sent." })
+  }
+}
 
-//   if (heightFrom !== 'ANY' && heightTo !== 'ANY') {
-//     filterObj.height = {
-//       $gte: parseInt(heightFrom),
-//       $lte: parseInt(heightTo)
-//     }
-//   }
+export const getSentMessages = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const getSentMessages = await MessageModel.find({ userId, status: 'sent', isReply: false }).sort({ createdAt: -1 });
+    if (getSentMessages.length == 0) {
+      return res.send({ status: false, message: 'No sent messages found' })
+    }
+    return res.send({ status: true, messages: getSentMessages })
+  } catch (error) {
+    return res.send({ status: false, message: 'Server error' })
+  }
+}
 
-//   if (!expectedEducation.includes('ANY')) {
-//     filterObj.education = {
-//       $in: expectedEducation
-//     }
-//   }
+export const draftMessage = async (req, res) => {
+  try {
+    const { userId, franchiseName, distributorName, adminName, message } = req.body;
 
-//   if (expectedOccupation !== 'ANY') {
-//     filterObj.occupation = expectedOccupation
-//   }
+    if (!franchiseName && !distributorName && !adminName) {
+      return res.send({ status: false, message: "Please select recepient" })
+    }
 
-//   if (expectedMonthlyIncome !== 'ANY') {
-//     filterObj.monthlyIncome = {
-//       $gte: expectedMonthlyIncome
-//     }
-//   }
+    if (!userId | !message) {
+      return res.send({ status: false, message: "user Id or message not required." })
+    }
 
-//   filterObj.workAbroad = expectedWorkAbroad.toLowerCase();
+    const newMessage = new MessageModel({
+      userId,
+      isReply: false,
+      franchiseName,
+      distributorName,
+      adminName,
+      message,
+      status: 'draft'
+    })
 
-//   filterObj.divyang = divyangPrefer;
+    await newMessage.save();
 
-//   if (expectedMaritalStatus !== 'ANY') {
-//     filterObj.maritalStatus = expectedMaritalStatus;
-//   }
+    return res.send({ status: true, message: "Message saved to drafts successfully." })
 
-//   if (!expectedNationality.includes('ANY')) {
-//     filterObj.nationality = {
-//       $in: expectedNationality
-//     }
-//   }
+  } catch (error) {
+    return res.send({ status: false, message: "Server error. Message not saved." })
+  }
+}
 
-//   if (childAccepted.toLowerCase() === 'yes') {
-//     filterObj.children = { $not: { $size: 0 } }
-//   } else {
-//     filterObj.children = { $size: 0 }
-//   }
+export const getdraftMessages = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const draftMessages = await MessageModel.find({ userId, status: 'draft', isReply: false }).sort({ createdAt: -1 });
 
-//   if (expectedReligion?.length) {
-//     const casteOrConditions = [];
+    if (draftMessages.length == 0) {
+      return res.send({ status: false, message: 'No draft messages found' })
+    }
+    return res.send({ status: true, messages: draftMessages })
+  } catch (error) {
+    return res.send({ status: false, message: 'Server error' })
+  }
+}
 
-//     for (const item of expectedReligion) {
-//       const isAllAny =
-//         item.religion === 'ANY' &&
-//         item.caste === 'ANY' &&
-//         item.subCaste === 'ANY';
+export const getReplies = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const replies = await MessageModel.find({ userId, isReply: true, status: 'sent' }).sort({ createdAt: -1 });
+    if (replies.length == 0) {
+      return res.send({ status: false, message: "No replies found." })
+    }
+    return res.send({ status: true, messages: replies })
+  } catch (error) {
+    return res.send({ status: false, message: "Server error" })
+  }
+}
 
-//       if (!isAllAny) {
-//         const condition = {};
-//         if (item.religion !== 'ANY') {
-//           condition['caste.religion'] = item.religion;
-//         }
-//         if (item.caste !== 'ANY') {
-//           condition['caste.caste'] = item.caste;
-//         }
-//         if (item.subCaste !== 'ANY') {
-//           condition['caste.subCaste'] = item.subCaste;
-//         }
-//         casteOrConditions.push(condition);
-//       }
-//     }
+export const getRepliesForFranchise = async (req, res) => {
+  try {
+    const franchiseId = req.params.id;
 
-//     if (casteOrConditions.length > 0) {
-//       filterObj.$or = casteOrConditions;
-//     }
-//   }
+    const replies = await MessageModel.find({
+      franchiseId,
+      isReply: true,
+      status: 'sent'
+    }).sort({ createdAt: -1 });
 
+    if (replies.length === 0) {
+      return res.send({ status: false, message: "No replies found." });
+    }
 
-//   // Add native location filtering
-//   if (expectedNativeLocation?.length) {
-//     const nativeOrConditions = [];
+    return res.send({ status: true, messages: replies });
 
-//     for (const loc of expectedNativeLocation) {
-//       const isAllAny =
-//         loc.country === 'ANY' &&
-//         loc.state === 'ANY' &&
-//         loc.city === 'ANY';
-
-//       if (!isAllAny) {
-//         const condition = {};
-//         if (loc.country !== 'ANY') {
-//           condition['nativeCity.country'] = loc.country;
-//         }
-//         if (loc.state !== 'ANY') {
-//           condition['nativeCity.state'] = loc.state;
-//         }
-//         if (loc.city !== 'ANY') {
-//           condition['nativeCity.city'] = loc.city;
-//         }
-//         nativeOrConditions.push(condition);
-//       }
-//     }
-
-//     if (nativeOrConditions.length > 0) {
-//       // Merge with existing $or if needed (like from expectedReligion)
-//       if (filterObj.$or) {
-//         filterObj.$and = [
-//           { $or: filterObj.$or },
-//           { $or: nativeOrConditions }
-//         ];
-//         delete filterObj.$or;
-//       } else {
-//         filterObj.$or = nativeOrConditions;
-//       }
-//     }
-//   }
-
-
-//   console.log(filterObj)
-
-//   const OneWayUsers = await userModel.find(filterObj);
-//   return res.send({ status: true, Matches: OneWayUsers })
-// };
-
+  } catch (error) {
+    return res.send({ status: false, message: "Server error" });
+  }
+};
 
 

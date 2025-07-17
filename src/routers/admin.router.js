@@ -76,7 +76,12 @@ import {
     addMainPackage,
     getMainPackages,
     addAddOnPackage,
-    getAddOnPackages
+    getAddOnPackages,
+    sendMessageFromAdmin,
+    draftMessageFromAdmin,
+    getSentMessagesFromAdmin,
+    getDraftMessagesFromAdmin,
+    getRepliesForAdmin
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
 
@@ -213,6 +218,21 @@ router.post('/add-addon-packages', addAddOnPackage);
 router.get('/get-addon-packages', getAddOnPackages);
 
 
+// === MESSAGES ===
+// Send a message
+router.post('/send', sendMessageFromAdmin);
+
+// Save a draft
+router.post('/save-draft', draftMessageFromAdmin);
+
+// Get sent messages
+router.get('/sent/:adminId', getSentMessagesFromAdmin);
+
+// Get draft messages
+router.get('/drafts/:adminId', getDraftMessagesFromAdmin);
+
+// Get replies received by admin
+router.get('/replies/:adminId', getRepliesForAdmin);
 
 
 export default router
