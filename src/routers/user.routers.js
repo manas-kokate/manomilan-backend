@@ -1,6 +1,6 @@
 import express from "express"
 import { uploadMiddleware } from "../utils/upload.js";
-import { registerUser, login, getLoggedInUser, editProfile, getFranchises, mutualMatching, sendMessage, draftMessage, getSentMessages, getdraftMessages, getReplies } from "../controllers/user.controller.js";
+import { registerUser, login, getLoggedInUser, editProfile, getFranchises, mutualMatching, sendMessageFromUser, draftMessageFromUser, getSentMessagesForUser, getDraftedMessagesForUser, getRepliesForUser } from "../controllers/user.controller.js";
 import { userAuth } from "../middlewares/auth.js"
 import {
     getCountry, getDegreesByStream, getFoodPref, getReligion,
@@ -80,15 +80,13 @@ router.get('/mutual-matching', userAuth, mutualMatching)
 
 
 // === MESSAGES === 
-router.post('/send', sendMessage);
+router.post('/message/send', userAuth, sendMessageFromUser)
+router.get('/message/get-sendMessages', userAuth, getSentMessagesForUser);
 
-router.post('/save-draft', draftMessage);
+router.post('/message/draft', userAuth, draftMessageFromUser);
+router.get('/message/get-draftedMessages', userAuth, getDraftedMessagesForUser);
 
-router.get('/sent/:userId', getSentMessages);
-
-router.get('/drafts/:userId', getdraftMessages);
-
-router.get('/replies/:userId', getReplies);
+router.get('/message/replies', userAuth, getRepliesForUser);
 
 
 export default router

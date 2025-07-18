@@ -1,10 +1,11 @@
 import express from "express"
 import { uploadMiddleware } from "../utils/upload.js";
 import {
-    registerFranchise, loginFranchise, updateFranchiseProfile, createMember, viewMember, sendMessageFromFranchise,
+    registerFranchise, loginFranchise, updateFranchiseProfile, createMember, viewMember,
+    sendMessageFromFranchise,
+    getSentMessagesForFranchise,
     draftMessageFromFranchise,
-    getSentMessagesFromFranchise,
-    getDraftMessagesFromFranchise,
+    getDraftedMessagesForFranchise,
     getRepliesForFranchise
 } from "../controllers/franchise.controller.js";
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
@@ -18,16 +19,13 @@ router.post('/create-member', franchiseAuth, uploadMiddleware, createMember);
 router.get('/view-members', franchiseAuth, viewMember);
 
 // === MESSAGES ===
-router.post('/send', sendMessageFromFranchise);
+router.post('/message/send', franchiseAuth, sendMessageFromFranchise)
+router.get('/message/get-sendMessages', franchiseAuth, getSentMessagesForFranchise)
 
-router.post('/save-draft', draftMessageFromFranchise);
+router.post('/message/draft', franchiseAuth, draftMessageFromFranchise)
+router.get('/message/get-draftedMessages', franchiseAuth, getDraftedMessagesForFranchise);
 
-router.get('/sent/:franchiseId', getSentMessagesFromFranchise);
-
-router.get('/drafts/:franchiseId', getDraftMessagesFromFranchise);
-
-router.get('/replies/:franchiseId', getRepliesForFranchise);
-
+router.get('/message/replies', franchiseAuth, getRepliesForFranchise);
 
 
 export default router

@@ -2,6 +2,9 @@ import distributorModel from "../models/distributor.model.js";
 import jwt from "jsonwebtoken"
 import envCredentials from "../config/env.js";
 import userModel from "../models/user.model.js";
+import franchiseModel from "../models/franchise.model.js";
+import adminModel from "../models/admin.model.js";
+import MessageModel from "../models/small_models/message.model.js";
 
 export const registerDistributor = async (req, res) => {
     const {
@@ -133,137 +136,118 @@ export const getAllUsers = async (req, res) => {
 
 }
 
-
 export const sendMessageFromDistributor = async (req, res) => {
     try {
-        const { distributorId, userName, franchiseName, adminName, message } = req.body;
+        const senderId = req.id;
+        const { receiverId, message } = req.body;
 
-        if (!userName && !franchiseName && !adminName) {
-            return res.send({ status: false, message: "Please select a recipient" });
+        const sender = await distributorModel.findById(senderId);
+
+        let receiver;
+        if (await userModel.findById(receiverId)) {
+            receiver = await userModel.findById(receiverId);
+        } else if (await adminModel.findById(receiverId)) {
+            receiver = await adminModel.findById(receiverId);
+        } else {
+            receiver = await franchiseModel.findById(receiverId);
         }
 
-        if (!distributorId || !message) {
-            return res.send({ status: false, message: "Distributor ID and message are required." });
-        }
+        const receiverName = receiver.firstName ? `${receiver.firstName} ${receiver.lastName}` :
+            receiver.name ? receiver.name : receiver.franchiseName;
 
         const newMessage = new MessageModel({
-            distributorId,
-            isReply: false,  // original message
-            userName,
-            franchiseName,
-            adminName,
+            senderId,
+            receiverId,
+            from: sender.distributorName,
+            to: receiverName,
             message,
-            status: 'sent'
+            status: 'sent',
         });
 
         await newMessage.save();
-
-        return res.send({ status: true, message: "Message sent successfully." });
-
+        return res.send({ status: true, message: "Message sent successfully" });
     } catch (error) {
-        console.error("Error sending message from distributor:", error);
         return res.send({ status: false, message: "Server error. Message not sent." });
     }
 };
 
-// ➤ Save draft (NOT a reply)
-export const draftMessageFromDistributor = async (req, res) => {
+export const getSentMessagesForDistributor = async (req, res) => {
     try {
-        const { distributorId, userName, franchiseName, adminName, message } = req.body;
-
-        if (!userName && !franchiseName && !adminName) {
-            return res.send({ status: false, message: "Please select a recipient" });
-        }
-
-        if (!distributorId || !message) {
-            return res.send({ status: false, message: "Distributor ID and message are required." });
-        }
-
-        const newMessage = new MessageModel({
-            distributorId,
-            isReply: false,  // original message
-            userName,
-            franchiseName,
-            adminName,
-            message,
-            status: 'draft'
-        });
-
-        await newMessage.save();
-
-        return res.send({ status: true, message: "Message saved to drafts successfully." });
-
-    } catch (error) {
-        console.error("Error saving draft from distributor:", error);
-        return res.send({ status: false, message: "Server error. Message not saved." });
-    }
-};
-
-// ➤ Get sent messages
-export const getSentMessagesFromDistributor = async (req, res) => {
-    try {
-        const distributorId = req.params.distributorId;
-
-        const sentMessages = await MessageModel.find({
-            distributorId,
-            status: 'sent',
-            isReply: false
-        }).sort({ createdAt: -1 });
+        const distributorId = req.id;
+        const sentMessages = await messageModel.find({ senderId: distributorId, status: 'sent' }).sort({ createdAt: -1 });
 
         if (sentMessages.length === 0) {
-            return res.send({ status: false, message: "No sent messages found." });
+            return res.send({ status: false, message: "No Sent Messages Found." });
         }
 
         return res.send({ status: true, messages: sentMessages });
-
     } catch (error) {
-        console.error("Error fetching distributor sent messages:", error);
-        return res.send({ status: false, message: "Server error" });
+        return res.send({ status: false, message: "Server error. Can't get messages." });
     }
 };
 
-// ➤ Get draft messages
-export const getDraftMessagesFromDistributor = async (req, res) => {
+export const draftMessageFromDistributor = async (req, res) => {
     try {
-        const distributorId = req.params.distributorId;
+        const senderId = req.id;
+        const { receiverId, message } = req.body;
 
-        const draftMessages = await MessageModel.find({
-            distributorId,
-            status: 'draft',
-            isReply: false
-        }).sort({ createdAt: -1 });
+        const sender = await distributorModel.findById(senderId);
 
-        if (draftMessages.length === 0) {
-            return res.send({ status: false, message: "No draft messages found." });
+        let receiver;
+        if (await userModel.findById(receiverId)) {
+            receiver = await userModel.findById(receiverId);
+        } else if (await adminModel.findById(receiverId)) {
+            receiver = await adminModel.findById(receiverId);
+        } else {
+            receiver = await franchiseModel.findById(receiverId);
         }
 
-        return res.send({ status: true, messages: draftMessages });
+        const receiverName = receiver.firstName ? `${receiver.firstName} ${receiver.lastName}` :
+            receiver.name ? receiver.name : receiver.franchiseName;
 
+        const newMessage = new MessageModel({
+            senderId,
+            receiverId,
+            from: sender.distributorName,
+            to: receiverName,
+            message,
+            status: 'drafted',
+        });
+
+        await newMessage.save();
+        return res.send({ status: true, message: "Message drafted successfully" });
     } catch (error) {
-        console.error("Error fetching distributor draft messages:", error);
-        return res.send({ status: false, message: "Server error" });
+        return res.send({ status: false, message: "Server error. Message not drafted." });
     }
 };
 
-// ➤ Get replies received by distributor (replies = isReply: true)
+export const getDraftedMessagesForDistributor = async (req, res) => {
+    try {
+        const distributorId = req.id;
+        const draftedMessages = await messageModel.find({ senderId: distributorId, status: 'drafted' }).sort({ createdAt: -1 });
+
+        if (draftedMessages.length === 0) {
+            return res.send({ status: false, message: "No drafted Messages Found." });
+        }
+
+        return res.send({ status: true, messages: draftedMessages });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error. Can't get messages." });
+    }
+};
+
 export const getRepliesForDistributor = async (req, res) => {
     try {
-        const distributorId = req.params.distributorId;
-
-        const replies = await MessageModel.find({
-            distributorId,
-            status: 'sent',
-            isReply: true
-        }).sort({ createdAt: -1 });
+        const distributorId = req.id;
+        const replies = await messageModel.find({ receiverId: distributorId, status: 'sent' }).sort({ createdAt: -1 });
 
         if (replies.length === 0) {
-            return res.send({ status: false, message: "No replies found." });
+            return res.send({ status: false, message: "No replies yet. Wait for receiver to reply." });
         }
 
         return res.send({ status: true, messages: replies });
-
     } catch (error) {
-        console.error("Error fetching replies for distributor:", error);
-        return res.send({ status: false, message: "Server error" });
+        return res.send({ status: false, message: "Server error. Can't get messages." });
     }
 };
+

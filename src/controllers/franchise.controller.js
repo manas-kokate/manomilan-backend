@@ -3,6 +3,7 @@ import userModel from "../models/user.model.js"
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
 import distributorModel from "../models/distributor.model.js";
+import MessageModel from "../models/small_models/message.model.js";
 
 
 export const registerFranchise = async (req, res) => {
@@ -378,128 +379,115 @@ export const viewMember = async (req, res) => {
 // === MESSAGES === 
 export const sendMessageFromFranchise = async (req, res) => {
     try {
-        const { franchiseId, distributorName, adminName, message } = req.body;
+        const senderId = req.id;
+        const { receiverId, message } = req.body;
 
-        // Validate receiver
-        if (!distributorName && !adminName) {
-            return res.send({ status: false, message: "Please select a recipient" });
+        const sender = await franchiseModel.findById(senderId);
+
+        let receiver;
+        if (await userModel.findById(receiverId)) {
+            receiver = await userModel.findById(receiverId);
+        } else if (await adminModel.findById(receiverId)) {
+            receiver = await adminModel.findById(receiverId);
+        } else {
+            receiver = await distributorModel.findById(receiverId);
         }
 
-        // Validate sender and message
-        if (!franchiseId || !message) {
-            return res.send({ status: false, message: "Franchise ID and message are required." });
-        }
+        const receiverName = receiver.firstName ? `${receiver.firstName} ${receiver.lastName}` :
+            receiver.name ? receiver.name : receiver.distributorName;
 
         const newMessage = new MessageModel({
-            franchiseId,
-            isReply: false,
-            userName,
-            distributorName,
-            adminName,
+            senderId,
+            receiverId,
+            from: sender.franchiseName,
+            to: receiverName,
             message,
-            status: 'sent'
+            status: 'sent',
         });
 
         await newMessage.save();
-
-        return res.send({ status: true, message: "Message sent successfully." });
-
+        return res.send({ status: true, message: "Message sent successfully" });
     } catch (error) {
         return res.send({ status: false, message: "Server error. Message not sent." });
     }
 };
 
-export const getSentMessagesFromFranchise = async (req, res) => {
+export const getSentMessagesForFranchise = async (req, res) => {
     try {
-        const franchiseId = req.params.id;
-
-        const sentMessages = await MessageModel.find({
-            franchiseId,
-            status: 'sent',
-            isReply: false
-        }).sort({ createdAt: -1 });
+        const franchiseId = req.id;
+        const sentMessages = await MessageModel.find({ senderId: franchiseId, status: 'sent' }).sort({ createdAt: -1 });
 
         if (sentMessages.length === 0) {
-            return res.send({ status: false, message: 'No sent messages found' });
+            return res.send({ status: false, message: "No Sent Messages Found." });
         }
 
         return res.send({ status: true, messages: sentMessages });
-
     } catch (error) {
-        return res.send({ status: false, message: 'Server error' });
+        return res.send({ status: false, message: "Server error. Can't get messages." });
     }
 };
 
 export const draftMessageFromFranchise = async (req, res) => {
     try {
-        const { franchiseId, userName, distributorName, adminName, message } = req.body;
+        const senderId = req.id;
+        const { receiverId, message } = req.body;
 
-        if (!userName && !distributorName && !adminName) {
-            return res.send({ status: false, message: "Please select a recipient" });
+        const sender = await franchiseModel.findById(senderId);
+
+        let receiver;
+        if (await userModel.findById(receiverId)) {
+            receiver = await userModel.findById(receiverId);
+        } else if (await adminModel.findById(receiverId)) {
+            receiver = await adminModel.findById(receiverId);
+        } else {
+            receiver = await distributorModel.findById(receiverId);
         }
 
-        if (!franchiseId || !message) {
-            return res.send({ status: false, message: "Franchise ID and message are required." });
-        }
+        const receiverName = receiver.firstName ? `${receiver.firstName} ${receiver.lastName}` :
+            receiver.name ? receiver.name : receiver.distributorName;
 
         const newMessage = new MessageModel({
-            franchiseId,
-            isReply: false,
-            userName,
-            distributorName,
-            adminName,
+            senderId,
+            receiverId,
+            from: sender.franchiseName,
+            to: receiverName,
             message,
-            status: 'draft'
+            status: 'drafted',
         });
 
         await newMessage.save();
-
-        return res.send({ status: true, message: "Message saved to drafts successfully." });
-
+        return res.send({ status: true, message: "Message drafted successfully" });
     } catch (error) {
-        return res.send({ status: false, message: "Server error. Message not saved." });
+        return res.send({ status: false, message: "Server error. Message not drafted." });
     }
 };
 
-export const getDraftMessagesFromFranchise = async (req, res) => {
+export const getDraftedMessagesForFranchise = async (req, res) => {
     try {
-        const franchiseId = req.params.id;
+        const franchiseId = req.id;
+        const draftedMessages = await MessageModel.find({ senderId: franchiseId, status: 'drafted' }).sort({ createdAt: -1 });
 
-        const draftMessages = await MessageModel.find({
-            franchiseId,
-            status: 'draft',
-            isReply: false
-        }).sort({ createdAt: -1 });
-
-        if (draftMessages.length === 0) {
-            return res.send({ status: false, message: 'No draft messages found' });
+        if (draftedMessages.length === 0) {
+            return res.send({ status: false, message: "No drafted Messages Found." });
         }
 
-        return res.send({ status: true, messages: draftMessages });
-
+        return res.send({ status: true, messages: draftedMessages });
     } catch (error) {
-        return res.send({ status: false, message: 'Server error' });
+        return res.send({ status: false, message: "Server error. Can't get messages." });
     }
 };
 
 export const getRepliesForFranchise = async (req, res) => {
     try {
-        const franchiseId = req.params.id;
-
-        const replies = await MessageModel.find({
-            franchiseId,
-            isReply: true,
-            status: 'sent'
-        }).sort({ createdAt: -1 });
+        const franchiseId = req.id;
+        const replies = await MessageModel.find({ receiverId: franchiseId, status: 'sent' }).sort({ createdAt: -1 });
 
         if (replies.length === 0) {
-            return res.send({ status: false, message: "No replies found." });
+            return res.send({ status: false, message: "No replies yet. Wait for receiver to reply." });
         }
 
         return res.send({ status: true, messages: replies });
-
     } catch (error) {
-        return res.send({ status: false, message: "Server error" });
+        return res.send({ status: false, message: "Server error. Can't get messages." });
     }
 };
-
