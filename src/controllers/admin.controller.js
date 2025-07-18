@@ -1608,134 +1608,117 @@ export const getAddOnPackages = async (req, res) => {
 
 export const sendMessageFromAdmin = async (req, res) => {
     try {
-        const { adminId, userName, franchiseName, distributorName, message } = req.body;
+        const senderId = req.id;
+        const { receiverId, message } = req.body;
 
-        if (!userName && !franchiseName && !distributorName) {
-            return res.send({ status: false, message: "Please select a recipient" });
+        const sender = await adminModel.findById(senderId);
+
+        let receiver;
+        if (await userModel.findById(receiverId)) {
+            receiver = await userModel.findById(receiverId);
+        } else if (await franchiseModel.findById(receiverId)) {
+            receiver = await franchiseModel.findById(receiverId);
+        } else {
+            receiver = await distributorModel.findById(receiverId);
         }
 
-        if (!adminId || !message) {
-            return res.send({ status: false, message: "Admin ID and message are required." });
-        }
+        const receiverName = receiver.firstName ? `${receiver.firstName} ${receiver.lastName}` :
+            receiver.franchiseName ? receiver.franchiseName :
+                receiver.distributorName;
 
         const newMessage = new MessageModel({
-            adminId,
-            isReply: false,
-            userName,
-            franchiseName,
-            distributorName,
+            senderId,
+            receiverId,
+            from: sender.name,
+            to: receiverName,
             message,
-            status: 'sent'
+            status: 'sent',
         });
 
         await newMessage.save();
-
-        return res.send({ status: true, message: "Message sent successfully." });
-
+        return res.send({ status: true, message: "Message sent successfully" });
     } catch (error) {
-        console.error("Error sending message from admin:", error);
         return res.send({ status: false, message: "Server error. Message not sent." });
     }
 };
 
-// ➤ Save draft (original)
-export const draftMessageFromAdmin = async (req, res) => {
+export const getSentMessagesForAdmin = async (req, res) => {
     try {
-        const { adminId, userName, franchiseName, distributorName, message } = req.body;
-
-        if (!userName && !franchiseName && !distributorName) {
-            return res.send({ status: false, message: "Please select a recipient" });
-        }
-
-        if (!adminId || !message) {
-            return res.send({ status: false, message: "Admin ID and message are required." });
-        }
-
-        const newMessage = new MessageModel({
-            adminId,
-            isReply: false,
-            userName,
-            franchiseName,
-            distributorName,
-            message,
-            status: 'draft'
-        });
-
-        await newMessage.save();
-
-        return res.send({ status: true, message: "Message saved to drafts successfully." });
-
-    } catch (error) {
-        console.error("Error saving draft from admin:", error);
-        return res.send({ status: false, message: "Server error. Message not saved." });
-    }
-};
-
-// ➤ Get sent messages
-export const getSentMessagesFromAdmin = async (req, res) => {
-    try {
-        const adminId = req.params.adminId;
-
-        const sentMessages = await MessageModel.find({
-            adminId,
-            status: 'sent',
-            isReply: false
-        }).sort({ createdAt: -1 });
+        const adminId = req.id;
+        const sentMessages = await MessageModel.find({ senderId: adminId, status: 'sent' }).sort({ createdAt: -1 });
 
         if (sentMessages.length === 0) {
-            return res.send({ status: false, message: "No sent messages found." });
+            return res.send({ status: false, message: "No Sent Messages Found." });
         }
 
         return res.send({ status: true, messages: sentMessages });
-
     } catch (error) {
-        console.error("Error fetching admin sent messages:", error);
-        return res.send({ status: false, message: "Server error" });
+        return res.send({ status: false, message: "Server error. Can't get messages." });
     }
 };
 
-// ➤ Get draft messages
-export const getDraftMessagesFromAdmin = async (req, res) => {
+export const draftMessageFromAdmin = async (req, res) => {
     try {
-        const adminId = req.params.adminId;
+        const senderId = req.id;
+        const { receiverId, message } = req.body;
 
-        const draftMessages = await MessageModel.find({
-            adminId,
-            status: 'draft',
-            isReply: false
-        }).sort({ createdAt: -1 });
+        const sender = await adminModel.findById(senderId);
 
-        if (draftMessages.length === 0) {
-            return res.send({ status: false, message: "No draft messages found." });
+        let receiver;
+        if (await userModel.findById(receiverId)) {
+            receiver = await userModel.findById(receiverId);
+        } else if (await franchiseModel.findById(receiverId)) {
+            receiver = await franchiseModel.findById(receiverId);
+        } else {
+            receiver = await distributorModel.findById(receiverId);
         }
 
-        return res.send({ status: true, messages: draftMessages });
+        const receiverName = receiver.firstName ? `${receiver.firstName} ${receiver.lastName}` :
+            receiver.franchiseName ? receiver.franchiseName :
+                receiver.distributorName;
 
+        const newMessage = new MessageModel({
+            senderId,
+            receiverId,
+            from: sender.name,
+            to: receiverName,
+            message,
+            status: 'drafted',
+        });
+
+        await newMessage.save();
+        return res.send({ status: true, message: "Message drafted successfully" });
     } catch (error) {
-        console.error("Error fetching admin draft messages:", error);
-        return res.send({ status: false, message: "Server error" });
+        return res.send({ status: false, message: "Server error. Message not drafted." });
     }
 };
 
-// ➤ Get replies received by admin
+export const getDraftedMessagesForAdmin = async (req, res) => {
+    try {
+        const adminId = req.id;
+        const draftedMessages = await MessageModel.find({ senderId: adminId, status: 'drafted' }).sort({ createdAt: -1 });
+
+        if (draftedMessages.length === 0) {
+            return res.send({ status: false, message: "No drafted Messages Found." });
+        }
+
+        return res.send({ status: true, messages: draftedMessages });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error. Can't get messages." });
+    }
+};
+
 export const getRepliesForAdmin = async (req, res) => {
     try {
-        const adminId = req.params.adminId;
-
-        const replies = await MessageModel.find({
-            adminId,
-            status: 'sent',
-            isReply: true
-        }).sort({ createdAt: -1 });
+        const adminId = req.id;
+        const replies = await MessageModel.find({ receiverId: adminId, status: 'sent' }).sort({ createdAt: -1 });
 
         if (replies.length === 0) {
-            return res.send({ status: false, message: "No replies found." });
+            return res.send({ status: false, message: "No replies yet. Wait for receiver to reply." });
         }
 
         return res.send({ status: true, messages: replies });
-
     } catch (error) {
-        console.error("Error fetching replies for admin:", error);
-        return res.send({ status: false, message: "Server error" });
+        return res.send({ status: false, message: "Server error. Can't get messages." });
     }
 };

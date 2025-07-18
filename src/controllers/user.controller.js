@@ -203,11 +203,12 @@ export const registerUser = async (req, res) => {
       bloodGroup,
     });
 
-    await user.save();
+    const SavedNewUser = await user.save();
 
     return res.status(200).send({
       status: true,
       message: "User registered successfully.",
+      user: SavedNewUser
     });
   } catch (error) {
     console.error("Registration Error:", error);
