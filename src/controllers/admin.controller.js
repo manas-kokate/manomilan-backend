@@ -1811,7 +1811,6 @@ export const getReports = async (req, res) => {
     }
 };
 
-
 export const getUserByIdOrName = async (req, res) => {
     try {
         const { search, fields = [] } = req.body;

@@ -132,7 +132,7 @@ export const registerUser = async (req, res) => {
       timeOfBirth,
       placeOfBirth,
       maritalStatus,
-      children,
+      children: typeof children === 'string' ? JSON.parse(children) : children,
       height,
       occupation,
       monthlyIncome,
@@ -574,31 +574,35 @@ export const sendMessageFromUser = async (req, res) => {
     }
   };
 
-  const senderId = req.id;
-  const { receiverIds, message } = req.body;
+  try {
+    const senderId = req.id;
+    const { receiverIds, message } = req.body;
 
-  if (!message) {
-    return res.send({ status: false, message: "message not found" })
+    if (!message) {
+      return res.send({ status: false, message: "message not found" })
+    }
+
+    if (receiverIds.length == 0) {
+      return res.send({ status: false, message: "No receiver IDs found" })
+    }
+
+    const user = await userModel.findById(senderId);
+    const to = await Promise.all(receiverIds.map(async id => await getUserNameById(id)));
+
+    const NewMessage = new MessageModel({
+      senderId,
+      receiverId: receiverIds,
+      from: `${user.firstName} ${user.midname} ${user.lastName}`,
+      to,
+      message,
+      status: 'sent'
+    })
+
+    await NewMessage.save();
+    return res.send({ status: true, message: "Message sent successfully" })
+  } catch (error) {
+    return res.send({ status: false, message: 'Server error' })
   }
-
-  if (receiverIds.length == 0) {
-    return res.send({ status: false, message: "No receiver IDs found" })
-  }
-
-  const user = await userModel.findById(senderId);
-  const to = await Promise.all(receiverIds.map(async id => await getUserNameById(id)));
-
-  const NewMessage = new MessageModel({
-    senderId,
-    receiverId: receiverIds,
-    from: `${user.firstName} ${user.midname} ${user.lastName}`,
-    to,
-    message,
-    status: 'sent'
-  })
-
-  await NewMessage.save();
-  return res.send({ status: true, message: "Message sent successfully" })
 }
 
 export const getSentMessagesForUser = async (req, res) => {
