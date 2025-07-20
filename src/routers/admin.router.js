@@ -81,7 +81,10 @@ import {
     getSentMessagesForAdmin,
     draftMessageFromAdmin,
     getDraftedMessagesForAdmin,
-    getRepliesForAdmin
+    getRepliesForAdmin,
+    getUsersUnderFranchise,
+    getReports,
+    getUserByIdOrName
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
@@ -220,14 +223,19 @@ router.get('/get-addon-packages', getAddOnPackages);
 
 
 // === MESSAGES ===
-// Admin message routes
-router.post('/admin/message/send', adminAuth, sendMessageFromAdmin);
-router.get('/admin/message/get-sendMessages', adminAuth, getSentMessagesForAdmin);
+router.get('/get-Users-Under/:id', getUsersUnderFranchise)
 
-router.post('/admin/message/draft', adminAuth, draftMessageFromAdmin);
-router.get('/admin/message/get-draftedMessages', adminAuth, getDraftedMessagesForAdmin);
+router.post('/message/send', adminAuth, sendMessageFromAdmin);
+router.get('/message/get-sendMessages', adminAuth, getSentMessagesForAdmin);
 
-router.get('/admin/message/replies', adminAuth, getRepliesForAdmin);
+router.post('/message/draft', adminAuth, draftMessageFromAdmin);
+router.get('/message/get-draftedMessages', adminAuth, getDraftedMessagesForAdmin);
+
+router.get('/message/replies', adminAuth, getRepliesForAdmin);
+
+// === REPORTS ===
+router.post('/get-reports', getReports)
+router.post('/get-userById-userByname', getUserByIdOrName)
 
 
 export default router

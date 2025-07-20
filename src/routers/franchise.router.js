@@ -6,9 +6,11 @@ import {
     getSentMessagesForFranchise,
     draftMessageFromFranchise,
     getDraftedMessagesForFranchise,
-    getRepliesForFranchise
+    getRepliesForFranchise,
+    getDistributorAndAdmin
 } from "../controllers/franchise.controller.js";
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
+
 
 const router = express.Router();
 
@@ -19,6 +21,8 @@ router.post('/create-member', franchiseAuth, uploadMiddleware, createMember);
 router.get('/view-members', franchiseAuth, viewMember);
 
 // === MESSAGES ===
+router.get('/get-distributor-admin', franchiseAuth, getDistributorAndAdmin)
+
 router.post('/message/send', franchiseAuth, sendMessageFromFranchise)
 router.get('/message/get-sendMessages', franchiseAuth, getSentMessagesForFranchise)
 

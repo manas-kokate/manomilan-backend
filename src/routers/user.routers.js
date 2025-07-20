@@ -1,6 +1,6 @@
 import express from "express"
 import { uploadMiddleware } from "../utils/upload.js";
-import { registerUser, login, getLoggedInUser, editProfile, getFranchises, mutualMatching, sendMessageFromUser, draftMessageFromUser, getSentMessagesForUser, getDraftedMessagesForUser, getRepliesForUser } from "../controllers/user.controller.js";
+import { registerUser, login, getLoggedInUser, editProfile, getFranchises, mutualMatching, sendMessageFromUser, draftMessageFromUser, getSentMessagesForUser, getDraftedMessagesForUser, getRepliesForUser, getFrachiseAndDistributorAndAdmin } from "../controllers/user.controller.js";
 import { userAuth } from "../middlewares/auth.js"
 import {
     getCountry, getDegreesByStream, getFoodPref, getReligion,
@@ -80,6 +80,9 @@ router.get('/mutual-matching', userAuth, mutualMatching)
 
 
 // === MESSAGES === 
+
+router.get('/get-franchise-distributor/:franchiseUnder', getFrachiseAndDistributorAndAdmin)
+
 router.post('/message/send', userAuth, sendMessageFromUser)
 router.get('/message/get-sendMessages', userAuth, getSentMessagesForUser);
 

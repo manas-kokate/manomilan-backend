@@ -552,6 +552,17 @@ export const getFranchises = async (req, res) => {
 }
 
 // === MESSAGES ===
+export const getFrachiseAndDistributorAndAdmin = async (req, res) => {
+  try {
+    const franchiseUnder = req.params.franchiseUnder;
+    const franchise = await franchiseModel.findOne({ franchiseName: franchiseUnder })
+    const distributor = await distributorModel.findOne({ distributorName: franchise.distributorUnder })
+    const admin = await adminModel.find({}, '-points -transactionPassword -givePointsPassword -password -_id -__v -createdAt -updatedAt')
+    return res.send({ status: true, franchise, distributor, admin })
+  } catch (error) {
+    return res.send({ status: false, message: "Server error" })
+  }
+}
 
 export const sendMessageFromUser = async (req, res) => {
   const getUserNameById = async (id) => {
@@ -590,7 +601,6 @@ export const sendMessageFromUser = async (req, res) => {
   return res.send({ status: true, message: "Message sent successfully" })
 }
 
-
 export const getSentMessagesForUser = async (req, res) => {
   const senderId = req.id;
 
@@ -605,7 +615,6 @@ export const getSentMessagesForUser = async (req, res) => {
     return res.send({ status: false, message: "Server error. Failed to fetch sent messages" });
   }
 };
-
 
 export const draftMessageFromUser = async (req, res) => {
   const getUserNameById = async (id) => {
@@ -649,7 +658,6 @@ export const draftMessageFromUser = async (req, res) => {
   }
 };
 
-
 export const getDraftedMessagesForUser = async (req, res) => {
   const senderId = req.id;
   try {
@@ -663,7 +671,6 @@ export const getDraftedMessagesForUser = async (req, res) => {
     return res.send({ status: false, message: "Server error. Failed to fetch drafted messages" });
   }
 };
-
 
 export const getRepliesForUser = async (req, res) => {
   const userId = req.id;

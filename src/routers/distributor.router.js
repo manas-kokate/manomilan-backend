@@ -5,7 +5,9 @@ import {
     getSentMessagesForDistributor,
     draftMessageFromDistributor,
     getDraftedMessagesForDistributor,
-    getRepliesForDistributor
+    getRepliesForDistributor,
+    getFranchisesAndAdmin,
+    getUsers
 } from "../controllers/distributor.controller.js";
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
@@ -15,11 +17,14 @@ const router = express.Router()
 
 router.post('/register', uploadMiddleware, registerDistributor);
 router.post('/login', loginDistributor);
-router.get('/get-users', getAllUsers);
+router.get('/get-users/:upperLimit/:lowerLimit/:franchiseName', getAllUsers);
 
 
 
 // === MESSAGES ===
+router.get('/get-franchise-admin', distributorAuth, getFranchisesAndAdmin)
+router.get('/get-users-under', getUsers)
+
 router.post('/message/send', distributorAuth, sendMessageFromDistributor);
 router.get('/message/get-sendMessages', distributorAuth, getSentMessagesForDistributor);
 

@@ -1606,119 +1606,287 @@ export const getAddOnPackages = async (req, res) => {
     }
 }
 
+// === MESSAGES ===
+export const getUsersUnderFranchise = async (req, res) => {
+    try {
+        const franchiseId = req.params.id;
+        console.log(franchiseId)
+        const currentFranchise = await franchiseModel.findById(franchiseId);
+
+        const lowerLimit = parseInt(req.query.lowerLimit) || 0;  // start from 0
+        const upperLimit = parseInt(req.query.upperLimit) || 10; // number of results
+
+        const allUsers = await userModel
+            .find({ franchiseUnder: currentFranchise.franchiseName }, '-_id -__v -franchiseUnder -createdBy -password')
+            .skip(lowerLimit)
+            .limit(upperLimit);
+
+        return res.send({ status: true, result: allUsers });
+
+    } catch (error) {
+        console.error(error);
+        return res.send({ status: false, message: "Server Error" });
+    }
+}
+
 export const sendMessageFromAdmin = async (req, res) => {
     try {
+        const getUserNameById = async (id) => {
+            let user = await adminModel.findById(id) || await distributorModel.findById(id) || await franchiseModel.findById(id) || await userModel.findById(id);
+            return user
+                ? user.firstName
+                    ? `${user.firstName} ${user.midname} ${user.lastName}`
+                    : user.franchiseName || user.distributorName || user.name
+                : 'Unknown';
+        };
+
         const senderId = req.id;
-        const { receiverId, message } = req.body;
+        const { receiverIds, message } = req.body;
 
-        const sender = await adminModel.findById(senderId);
+        if (!message) return res.send({ status: false, message: "Message content is missing" });
+        if (!receiverIds || receiverIds.length === 0) return res.send({ status: false, message: "Receiver IDs are missing" });
 
-        let receiver;
-        if (await userModel.findById(receiverId)) {
-            receiver = await userModel.findById(receiverId);
-        } else if (await franchiseModel.findById(receiverId)) {
-            receiver = await franchiseModel.findById(receiverId);
-        } else {
-            receiver = await distributorModel.findById(receiverId);
-        }
+        const admin = await adminModel.findById(senderId);
+        if (!admin) return res.send({ status: false, message: "Admin not found" });
 
-        const receiverName = receiver.firstName ? `${receiver.firstName} ${receiver.lastName}` :
-            receiver.franchiseName ? receiver.franchiseName :
-                receiver.distributorName;
+        const to = await Promise.all(receiverIds.map(id => getUserNameById(id)));
 
         const newMessage = new MessageModel({
             senderId,
-            receiverId,
-            from: sender.name,
-            to: receiverName,
+            receiverId: receiverIds,
+            from: `${admin.firstName} ${admin.midname} ${admin.lastName}`,
+            to,
             message,
-            status: 'sent',
+            status: 'sent'
         });
 
         await newMessage.save();
         return res.send({ status: true, message: "Message sent successfully" });
     } catch (error) {
-        return res.send({ status: false, message: "Server error. Message not sent." });
-    }
-};
-
-export const getSentMessagesForAdmin = async (req, res) => {
-    try {
-        const adminId = req.id;
-        const sentMessages = await MessageModel.find({ senderId: adminId, status: 'sent' }).sort({ createdAt: -1 });
-
-        if (sentMessages.length === 0) {
-            return res.send({ status: false, message: "No Sent Messages Found." });
-        }
-
-        return res.send({ status: true, messages: sentMessages });
-    } catch (error) {
-        return res.send({ status: false, message: "Server error. Can't get messages." });
+        return res.send({ status: false, message: "Error sending message", error });
     }
 };
 
 export const draftMessageFromAdmin = async (req, res) => {
     try {
+        const getUserNameById = async (id) => {
+            let user = await adminModel.findById(id) || await distributorModel.findById(id) || await franchiseModel.findById(id) || await userModel.findById(id);
+            return user
+                ? user.firstName
+                    ? `${user.firstName} ${user.midname} ${user.lastName}`
+                    : user.franchiseName || user.distributorName || user.name
+                : 'Unknown';
+        };
+
         const senderId = req.id;
-        const { receiverId, message } = req.body;
+        const { receiverIds, message } = req.body;
 
-        const sender = await adminModel.findById(senderId);
+        if (!message) return res.send({ status: false, message: "Message content is missing" });
+        if (!receiverIds || receiverIds.length === 0) return res.send({ status: false, message: "Receiver IDs are missing" });
 
-        let receiver;
-        if (await userModel.findById(receiverId)) {
-            receiver = await userModel.findById(receiverId);
-        } else if (await franchiseModel.findById(receiverId)) {
-            receiver = await franchiseModel.findById(receiverId);
-        } else {
-            receiver = await distributorModel.findById(receiverId);
-        }
+        const admin = await adminModel.findById(senderId);
+        if (!admin) return res.send({ status: false, message: "Admin not found" });
 
-        const receiverName = receiver.firstName ? `${receiver.firstName} ${receiver.lastName}` :
-            receiver.franchiseName ? receiver.franchiseName :
-                receiver.distributorName;
+        const to = await Promise.all(receiverIds.map(id => getUserNameById(id)));
 
-        const newMessage = new MessageModel({
+        const draftMessage = new MessageModel({
             senderId,
-            receiverId,
-            from: sender.name,
-            to: receiverName,
+            receiverId: receiverIds,
+            from: `${admin.firstName} ${admin.midname} ${admin.lastName}`,
+            to,
             message,
-            status: 'drafted',
+            status: 'drafted'
         });
 
-        await newMessage.save();
+        await draftMessage.save();
         return res.send({ status: true, message: "Message drafted successfully" });
     } catch (error) {
-        return res.send({ status: false, message: "Server error. Message not drafted." });
+        return res.send({ status: false, message: "Error drafting message", error });
+    }
+};
+
+export const getSentMessagesForAdmin = async (req, res) => {
+    try {
+        const senderId = req.id;
+
+        const messages = await MessageModel.find({
+            senderId,
+            status: 'sent'
+        }).sort({ createdAt: -1 });
+
+        return res.send({ status: true, data: messages });
+    } catch (error) {
+        return res.send({ status: false, message: "Error fetching sent messages", error });
     }
 };
 
 export const getDraftedMessagesForAdmin = async (req, res) => {
     try {
-        const adminId = req.id;
-        const draftedMessages = await MessageModel.find({ senderId: adminId, status: 'drafted' }).sort({ createdAt: -1 });
+        const senderId = req.id;
 
-        if (draftedMessages.length === 0) {
-            return res.send({ status: false, message: "No drafted Messages Found." });
-        }
+        const drafts = await MessageModel.find({
+            senderId,
+            status: 'drafted'
+        }).sort({ updatedAt: -1 });
 
-        return res.send({ status: true, messages: draftedMessages });
+        return res.send({ status: true, data: drafts });
     } catch (error) {
-        return res.send({ status: false, message: "Server error. Can't get messages." });
+        return res.send({ status: false, message: "Error fetching drafted messages", error });
     }
 };
 
 export const getRepliesForAdmin = async (req, res) => {
     try {
-        const adminId = req.id;
-        const replies = await MessageModel.find({ receiverId: adminId, status: 'sent' }).sort({ createdAt: -1 });
+        const userId = req.id;
 
-        if (replies.length === 0) {
-            return res.send({ status: false, message: "No replies yet. Wait for receiver to reply." });
-        }
+        const replies = await MessageModel.find({
+            receiverId: userId,
+            status: 'sent'
+        }).sort({ createdAt: -1 });
 
-        return res.send({ status: true, messages: replies });
+        return res.send({ status: true, data: replies });
     } catch (error) {
-        return res.send({ status: false, message: "Server error. Can't get messages." });
+        return res.send({ status: false, message: "Error fetching replies", error });
     }
 };
+
+
+// === REPORTS ===
+
+export const getReports = async (req, res) => {
+    try {
+        const { filters = {}, fields = [] } = req.body;
+        // Step 1: Build MongoDB filter query
+        let query = {};
+
+        // Native Location
+        if (filters.nativeCountry) query["nativeCity.country"] = filters.nativeCountry;
+        if (filters.nativeState) query["nativeCity.state"] = filters.nativeState;
+        if (filters.nativeCity) query["nativeCity.city"] = filters.nativeCity;
+
+        // Working Location
+        if (filters.workCountry) query["workLocation.country"] = filters.workCountry;
+        if (filters.workState) query["workLocation.state"] = filters.workState;
+        if (filters.workCity) query["workLocation.city"] = filters.workCity;
+
+        // Community Info
+        if (filters.religion) query["caste.religion"] = filters.religion;
+        if (filters.caste) query["caste.caste"] = filters.caste;
+        if (filters.subCaste) query["caste.subCaste"] = filters.subCaste;
+        if (filters.motherTongue) query["motherTongue"] = filters.motherTongue;
+
+        // Career Info
+        if (filters.education) query["education"] = { $in: filters.education };
+        if (filters.occupation) query["occupation"] = filters.occupation;
+        if (filters.monthlyIncome) query["monthlyIncome"] = { $gte: filters.monthlyIncome };
+
+        // Other Info
+        if (filters.maritalStatus) query["maritalStatus"] = filters.maritalStatus;
+        if (filters.divyang) query["divyang"] = filters.divyang;
+
+        // Hierarchy
+        if (filters.distributor) query["CreatedBy"] = filters.distributor;
+        if (filters.franchise) query["franchiseUnder"] = filters.franchise;
+
+        // Step 2: Build field projection
+        let projection = {};
+        if (fields && fields.length > 0) {
+            fields.forEach(field => {
+                projection[field] = 1;
+            });
+        }
+
+        // Step 3: Query database
+        const users = await userModel.find(query, projection);
+
+        res.status(200).json({
+            success: true,
+            count: users.length,
+            data: users
+        });
+
+    } catch (error) {
+        console.error("Error fetching filtered users:", error);
+        res.status(500).json({ success: false, message: "Server Error", error });
+    }
+};
+
+
+export const getUserByIdOrName = async (req, res) => {
+    try {
+        const { search, fields = [] } = req.body;
+
+        if (!search) {
+            return res.status(400).json({
+                success: false,
+                message: "Search input is required"
+            });
+        }
+
+        // Build projection (optional fields array)
+        let projection = {};
+        if (fields.length > 0) {
+            fields.forEach(field => {
+                projection[field] = 1;
+            });
+        }
+
+        let query = {};
+
+        if (!isNaN(search)) {
+            // Numeric search → UserId
+            query = { UserId: Number(search) };
+        } else {
+            const parts = search.trim().split(/\s+/); // Split by space
+            const regexParts = parts.map(p => new RegExp(p, "i")); // Case-insensitive
+
+            if (regexParts.length === 1) {
+                query = { firstName: regexParts[0] };
+            } else if (regexParts.length === 2) {
+                query = {
+                    $and: [
+                        { firstName: regexParts[0] },
+                        { lastName: regexParts[1] }
+                    ]
+                };
+            } else if (regexParts.length === 3) {
+                query = {
+                    $and: [
+                        { firstName: regexParts[0] },
+                        { midname: regexParts[1] },
+                        { lastName: regexParts[2] }
+                    ]
+                };
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: "Too many name parts. Only first, middle, and last name are supported."
+                });
+            }
+        }
+
+        const users = await userModel.find(query, projection);
+
+        if (!users || users.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            count: users.length,
+            data: users
+        });
+
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+            error
+        });
+    }
+};
+

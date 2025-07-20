@@ -136,118 +136,158 @@ export const getAllUsers = async (req, res) => {
 
 }
 
+// === MESSAGES ===
+export const getFranchisesAndAdmin = async (req, res) => {
+    try {
+        const distributorId = req.id;
+        const currentDistributor = await distributorModel.findById(distributorId)
+        const franchises = await franchiseModel.find({ distributorUnder: currentDistributor.distributorName });
+        const admin = await adminModel.find({}, '-points -transactionPassword -givePointsPassword -password -_id -__v -createdAt -updatedAt')
+        return res.send({ status: true, franchises, admin })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
+export const getUsers = async (req, res) => {
+    try {
+        const franchiseName = req.query.franchiseName;
+        const franchise = await franchiseModel.findOne({ franchiseName: franchiseName });
+
+        const lowerLimit = parseInt(req.query.lowerLimit) || 0;  // start from 0
+        const upperLimit = parseInt(req.query.upperLimit) || 10; // number of results
+
+        const allUsers = await userModel
+            .find({ franchiseUnder: franchise.franchiseName })
+            .skip(lowerLimit)
+            .limit(upperLimit);
+
+        return res.send({ status: true, result: allUsers });
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
 export const sendMessageFromDistributor = async (req, res) => {
     try {
+        const getUserNameById = async (id) => {
+            let user = await adminModel.findById(id) || await distributorModel.findById(id) || await franchiseModel.findById(id) || await userModel.findById(id);
+            return user
+                ? user.firstName
+                    ? `${user.firstName} ${user.midname} ${user.lastName}`
+                    : user.franchiseName || user.distributorName || user.name
+                : 'Unknown';
+        };
+
         const senderId = req.id;
-        const { receiverId, message } = req.body;
+        const { receiverIds, message } = req.body;
 
-        const sender = await distributorModel.findById(senderId);
+        if (!message) return res.send({ status: false, message: "Message content is missing" });
+        if (!receiverIds || receiverIds.length === 0) return res.send({ status: false, message: "Receiver IDs are missing" });
 
-        let receiver;
-        if (await userModel.findById(receiverId)) {
-            receiver = await userModel.findById(receiverId);
-        } else if (await adminModel.findById(receiverId)) {
-            receiver = await adminModel.findById(receiverId);
-        } else {
-            receiver = await franchiseModel.findById(receiverId);
-        }
+        const distributor = await distributorModel.findById(senderId);
+        if (!distributor) return res.send({ status: false, message: "Distributor not found" });
 
-        const receiverName = receiver.firstName ? `${receiver.firstName} ${receiver.lastName}` :
-            receiver.name ? receiver.name : receiver.franchiseName;
+        const to = await Promise.all(receiverIds.map(id => getUserNameById(id)));
 
         const newMessage = new MessageModel({
             senderId,
-            receiverId,
-            from: sender.distributorName,
-            to: receiverName,
+            receiverId: receiverIds,
+            from: distributor.distributorName || 'Distributor User',
+            to,
             message,
-            status: 'sent',
+            status: 'sent'
         });
 
         await newMessage.save();
         return res.send({ status: true, message: "Message sent successfully" });
     } catch (error) {
-        return res.send({ status: false, message: "Server error. Message not sent." });
-    }
-};
-
-export const getSentMessagesForDistributor = async (req, res) => {
-    try {
-        const distributorId = req.id;
-        const sentMessages = await messageModel.find({ senderId: distributorId, status: 'sent' }).sort({ createdAt: -1 });
-
-        if (sentMessages.length === 0) {
-            return res.send({ status: false, message: "No Sent Messages Found." });
-        }
-
-        return res.send({ status: true, messages: sentMessages });
-    } catch (error) {
-        return res.send({ status: false, message: "Server error. Can't get messages." });
+        return res.send({ status: false, message: "Error sending message", error });
     }
 };
 
 export const draftMessageFromDistributor = async (req, res) => {
     try {
+        const getUserNameById = async (id) => {
+            let user = await adminModel.findById(id) || await distributorModel.findById(id) || await franchiseModel.findById(id) || await userModel.findById(id);
+            return user
+                ? user.firstName
+                    ? `${user.firstName} ${user.midname} ${user.lastName}`
+                    : user.franchiseName || user.distributorName || user.name
+                : 'Unknown';
+        };
+
         const senderId = req.id;
-        const { receiverId, message } = req.body;
+        const { receiverIds, message } = req.body;
 
-        const sender = await distributorModel.findById(senderId);
+        if (!message) return res.send({ status: false, message: "Message content is missing" });
+        if (!receiverIds || receiverIds.length === 0) return res.send({ status: false, message: "Receiver IDs are missing" });
 
-        let receiver;
-        if (await userModel.findById(receiverId)) {
-            receiver = await userModel.findById(receiverId);
-        } else if (await adminModel.findById(receiverId)) {
-            receiver = await adminModel.findById(receiverId);
-        } else {
-            receiver = await franchiseModel.findById(receiverId);
-        }
+        const distributor = await distributorModel.findById(senderId);
+        if (!distributor) return res.send({ status: false, message: "Distributor not found" });
 
-        const receiverName = receiver.firstName ? `${receiver.firstName} ${receiver.lastName}` :
-            receiver.name ? receiver.name : receiver.franchiseName;
+        const to = await Promise.all(receiverIds.map(id => getUserNameById(id)));
 
-        const newMessage = new MessageModel({
+        const draftMessage = new MessageModel({
             senderId,
-            receiverId,
-            from: sender.distributorName,
-            to: receiverName,
+            receiverId: receiverIds,
+            from: distributor.distributorName || 'Distributor User',
+            to,
             message,
-            status: 'drafted',
+            status: 'drafted'
         });
 
-        await newMessage.save();
+        await draftMessage.save();
         return res.send({ status: true, message: "Message drafted successfully" });
     } catch (error) {
-        return res.send({ status: false, message: "Server error. Message not drafted." });
+        return res.send({ status: false, message: "Error drafting message", error });
+    }
+};
+
+export const getSentMessagesForDistributor = async (req, res) => {
+    try {
+        const senderId = req.id;
+
+        const messages = await MessageModel.find({
+            senderId,
+            status: 'sent'
+        }).sort({ createdAt: -1 });
+
+        return res.send({ status: true, data: messages });
+    } catch (error) {
+        return res.send({ status: false, message: "Error fetching sent messages", error });
     }
 };
 
 export const getDraftedMessagesForDistributor = async (req, res) => {
     try {
-        const distributorId = req.id;
-        const draftedMessages = await messageModel.find({ senderId: distributorId, status: 'drafted' }).sort({ createdAt: -1 });
+        const senderId = req.id;
 
-        if (draftedMessages.length === 0) {
-            return res.send({ status: false, message: "No drafted Messages Found." });
-        }
+        const drafts = await MessageModel.find({
+            senderId,
+            status: 'drafted'
+        }).sort({ updatedAt: -1 });
 
-        return res.send({ status: true, messages: draftedMessages });
+        return res.send({ status: true, data: drafts });
     } catch (error) {
-        return res.send({ status: false, message: "Server error. Can't get messages." });
+        return res.send({ status: false, message: "Error fetching drafted messages", error });
     }
 };
 
 export const getRepliesForDistributor = async (req, res) => {
     try {
-        const distributorId = req.id;
-        const replies = await messageModel.find({ receiverId: distributorId, status: 'sent' }).sort({ createdAt: -1 });
+        const userId = req.id;
 
-        if (replies.length === 0) {
-            return res.send({ status: false, message: "No replies yet. Wait for receiver to reply." });
-        }
+        const replies = await MessageModel.find({
+            receiverId: userId,
+            status: 'sent'
+        }).sort({ createdAt: -1 });
 
-        return res.send({ status: true, messages: replies });
+        return res.send({ status: true, data: replies });
     } catch (error) {
-        return res.send({ status: false, message: "Server error. Can't get messages." });
+        return res.send({ status: false, message: "Error fetching replies", error });
     }
 };
+
 
