@@ -7,6 +7,8 @@ import MessageModel from "../models/small_models/message.model.js";
 import adminModel from "../models/admin.model.js";
 import distributorModel from "../models/distributor.model.js";
 import messageModel from "../models/small_models/message.model.js";
+import freepackageModel from "../models/small_models/freepackage.model.js";
+import userPackageTrackModel from "../models/small_models/userPackageTrack.model.js";
 
 
 export const registerUser = async (req, res) => {
@@ -113,6 +115,10 @@ export const registerUser = async (req, res) => {
     const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
     const UserId = LastIdUser ? Number(LastIdUser.UserId) + 1 : 1;
 
+    //Allot number of free addresses 
+    const latestFreePackage = await freepackageModel.findOne({ status: 'Active' });
+    const addressesAvailable = latestFreePackage.NumOfFreeAddress;
+
     // Prepare user object
     const user = new userModel({
       // Login credentials
@@ -192,6 +198,7 @@ export const registerUser = async (req, res) => {
       userPhotoTwo,
       userPhotoThree,
       userPhotoFour,
+      addressesAvailable,
 
       // Special Info
       sect,
@@ -203,11 +210,17 @@ export const registerUser = async (req, res) => {
     });
 
     const SavedNewUser = await user.save();
+    const newUserPackageTrack = await userPackageTrackModel({
+      userId: SavedNewUser._id,
+      packagesIds: [`${latestFreePackage._id}`]
+    })
+    const userPackageDetails = await newUserPackageTrack.save();
 
     return res.status(200).send({
       status: true,
       message: "User registered successfully.",
-      user: SavedNewUser
+      user: SavedNewUser,
+      userPackageDetails
     });
   } catch (error) {
     console.error("Registration Error:", error);

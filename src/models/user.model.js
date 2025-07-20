@@ -115,7 +115,11 @@ const userSchema = new Schema({
     userPhotoThree: { type: String },
     userPhotoFour: { type: String },
     userPhotoStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
-    premium: { type: Boolean, default: false },
+
+    // === PACKAGE ===
+    addressesAvailable: {
+        type: Number,
+    },
 
     // Special info
     sect: { type: String },
