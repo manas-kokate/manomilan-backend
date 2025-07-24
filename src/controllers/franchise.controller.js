@@ -5,6 +5,10 @@ import envCredentials from "../config/env.js";
 import distributorModel from "../models/distributor.model.js";
 import MessageModel from "../models/small_models/message.model.js";
 import adminModel from "../models/admin.model.js";
+import freepackageModel from '../models/small_models/freepackage.model.js'
+import addOnPackageModel from "../models/small_models/addOnPackage.model.js";
+import mainPackageModel from "../models/small_models/mainPackage.model.js";
+import vippackageModel from "../models/small_models/vippackage.model.js";
 
 
 export const registerFranchise = async (req, res) => {
@@ -383,10 +387,11 @@ export const getDistributorAndAdmin = async (req, res) => {
     const franchiseId = req.id;
     const franchise = await franchiseModel.findById(franchiseId);
 
-    const distributor = await distributorModel.findOne({ distributorName: franchise.distributorUnder })
-    const admin = await adminModel.find({}, '-points -transactionPassword -givePointsPassword -password -_id -__v -createdAt -updatedAt')
+    const users = await userModel.find({ franchiseUnder: franchise.franchiseName })
+    const distributor = await distributorModel.find({ distributorName: franchise.distributorUnder })
+    const admin = await adminModel.find({}, '-points -transactionPassword -givePointsPassword -password -__v -createdAt -updatedAt')
 
-    return res.send({ status: true, distributor, admin })
+    return res.send({ status: true, distributor, admin, users })
 }
 
 export const sendMessageFromFranchise = async (req, res) => {
@@ -509,5 +514,20 @@ export const getRepliesForFranchise = async (req, res) => {
         return res.send({ status: false, message: "Error fetching replies", error });
     }
 };
+
+// === ALLOT PACKAGE ===
+
+export const getAllActivePackages = async (req, res) => {
+    try {
+        const freepackages = await freepackageModel.findOne({ status: 'Active' })
+        const addOnPackages = await addOnPackageModel.findOne({ status: 'Active' })
+        const mainPackages = await mainPackageModel.findOne({ status: 'Active' })
+        const vipPackages = await vippackageModel.findOne({ status: 'Active' })
+        return res.send({ status: true, freepackages, addOnPackages, mainPackages })
+    }
+    catch (err) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
 
 

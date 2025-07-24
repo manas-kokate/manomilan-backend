@@ -116,11 +116,6 @@ const userSchema = new Schema({
     userPhotoFour: { type: String },
     userPhotoStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
 
-    // === PACKAGE ===
-    addressesAvailable: {
-        type: Number,
-    },
-
     // Special info
     sect: { type: String },
     manglik: { type: String },

@@ -6,7 +6,6 @@ import franchiseModel from "../models/franchise.model.js";
 import MessageModel from "../models/small_models/message.model.js";
 import adminModel from "../models/admin.model.js";
 import distributorModel from "../models/distributor.model.js";
-import messageModel from "../models/small_models/message.model.js";
 import freepackageModel from "../models/small_models/freepackage.model.js";
 import userPackageTrackModel from "../models/small_models/userPackageTrack.model.js";
 
@@ -115,9 +114,6 @@ export const registerUser = async (req, res) => {
     const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
     const UserId = LastIdUser ? Number(LastIdUser.UserId) + 1 : 1;
 
-    //Allot number of free addresses 
-    const latestFreePackage = await freepackageModel.findOne({ status: 'Active' });
-    const addressesAvailable = latestFreePackage.NumOfFreeAddress;
 
     // Prepare user object
     const user = new userModel({
@@ -198,7 +194,6 @@ export const registerUser = async (req, res) => {
       userPhotoTwo,
       userPhotoThree,
       userPhotoFour,
-      addressesAvailable,
 
       // Special Info
       sect,
@@ -220,7 +215,7 @@ export const registerUser = async (req, res) => {
       status: true,
       message: "User registered successfully.",
       user: SavedNewUser,
-      userPackageDetails
+      packageAlloted: userPackageDetails
     });
   } catch (error) {
     console.error("Registration Error:", error);
@@ -230,7 +225,6 @@ export const registerUser = async (req, res) => {
     });
   }
 };
-
 
 export const login = async (req, res) => {
   const { identifier, password } = req.body;
@@ -306,6 +300,21 @@ export const getLoggedInUser = async (req, res) => {
   }
 
   return res.send({ status: true, result: findUser });
+
+}
+
+export const getCurrentUserWithoutAuth = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.send({ status: false, message: "User not found" })
+    }
+    return res.send({ status: true, user })
+  } catch (error) {
+    return res.send({ status: false, message: "Server error" })
+  }
+
 
 }
 
@@ -433,7 +442,7 @@ export const mutualMatching = async (req, res) => {
     const finalQuery = orConditions.length ? { $and: filterConditions, $or: orConditions } : { $and: filterConditions };
 
     // console.log('One-way filter:', JSON.stringify(finalQuery, null, 2));
-    const oneWayMatches = await userModel.find(finalQuery).lean();
+    const oneWayMatches = await userModel.find(finalQuery).lean().sort({ createdAt: -1 });
     // console.log('One-way matches:', oneWayMatches.map(u => ({ _id: u._id.toString(), firstName: u.firstName, expectedWorkAbroad: u.expectedWorkAbroad, education: u.education })));
 
     // Mutual matching

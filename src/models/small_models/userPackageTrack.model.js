@@ -2,12 +2,11 @@ import mongoose from 'mongoose'
 
 const userPackageTrackSchema = new mongoose.Schema({
     userId: {
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user'
     },
-    packagesIds: {
-        type: [String],
-        required: true,
+    freeAddresses: {
+
     }
 })
 

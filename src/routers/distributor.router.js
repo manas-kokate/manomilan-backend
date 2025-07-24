@@ -7,7 +7,8 @@ import {
     getDraftedMessagesForDistributor,
     getRepliesForDistributor,
     getFranchisesAndAdmin,
-    getUsers
+    getUsers,
+    getCurrentDistributor
 } from "../controllers/distributor.controller.js";
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
@@ -17,8 +18,9 @@ const router = express.Router()
 
 router.post('/register', uploadMiddleware, registerDistributor);
 router.post('/login', loginDistributor);
-router.get('/get-users/:upperLimit/:lowerLimit/:franchiseName', getAllUsers);
-
+router.get('/get-users/:upperLimit/:lowerLimit', distributorAuth, getAllUsers);
+router.get('/get-all-users', distributorAuth, getAllUsers)
+router.post('/get-current-distributor', getCurrentDistributor); //send Id in req.body
 
 
 // === MESSAGES ===

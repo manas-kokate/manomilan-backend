@@ -1750,9 +1750,7 @@ export const getRepliesForAdmin = async (req, res) => {
     }
 };
 
-
 // === REPORTS ===
-
 export const getReports = async (req, res) => {
     try {
         const { filters = {}, fields = [] } = req.body;
@@ -1796,6 +1794,7 @@ export const getReports = async (req, res) => {
             });
         }
 
+
         // Step 3: Query database
         const users = await userModel.find(query, projection);
 
@@ -1806,86 +1805,132 @@ export const getReports = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error fetching filtered users:", error);
-        res.status(500).json({ success: false, message: "Server Error", error });
+        res.status(500).json({ success: false, message: "Server Error. Check your request body.", error });
     }
 };
 
-export const getUserByIdOrName = async (req, res) => {
+export const searchUsers = async (req, res) => {
     try {
-        const { search, fields = [] } = req.body;
+        const { searchTerm } = req.body;
 
-        if (!search) {
+        // If no search term provided, return early
+        if (!searchTerm) {
             return res.status(400).json({
-                success: false,
-                message: "Search input is required"
+                status: false,
+                message: 'Search term is required'
             });
         }
 
-        // Build projection (optional fields array)
-        let projection = {};
-        if (fields.length > 0) {
-            fields.forEach(field => {
-                projection[field] = 1;
+        // Create regex for case-insensitive partial matching
+        const regex = new RegExp(searchTerm, 'i');
+
+        // Check if searchTerm is a number for numeric fields
+        const isNumber = !isNaN(searchTerm) && !isNaN(parseInt(searchTerm));
+        const numericValue = isNumber ? parseInt(searchTerm) : null;
+
+        // Define fields to search (excluding expectation fields and sensitive fields like password)
+        const searchFields = [
+            'loginEmail',
+            'loginNumber',
+            'firstName',
+            'lastName',
+            'midname',
+            'gender',
+            'timeOfBirth',
+            'placeOfBirth',
+            'maritalStatus',
+            'occupation',
+            'motherTongue',
+            'divyang',
+            'mothersName',
+            'fathersName',
+            'mamkul',
+            'parentsResidence',
+            'parentsCity',
+            'alternateNumber',
+            'brothers',
+            'sisters',
+            'otherInfo',
+            'nativeVillage',
+            'nativeCity.country',
+            'nativeCity.state',
+            'nativeCity.city',
+            'workAbroad',
+            'companyName',
+            'designation',
+            'candidateNumber',
+            'candidateEmail',
+            'workLocation',
+            'userPhotoStatus',
+            'sect',
+            'manglik',
+            'foodPreference',
+            'bloodGroup',
+            'specs',
+            'gotra',
+            'caste.religion',
+            'caste.caste',
+            'caste.subCaste'
+        ];
+
+        // Define numeric fields for exact matching
+        const numericFields = [
+            'UserId',
+            'height',
+            'parentsContact',
+            'whatsApp',
+            'brothersCount',
+            'sistersExactCount',
+            'addressesAvailable'
+        ];
+
+        // Build the $or query for all searchable fields
+        const orQuery = [];
+
+        // Add string-based searches
+        searchFields.forEach(field => {
+            orQuery.push({ [field]: { $regex: regex } });
+        });
+
+        // Add special handling for array fields
+        orQuery.push(
+            { nationality: { $in: [regex] } },
+            { education: { $in: [regex] } },
+            { 'children.gender': { $regex: regex } },
+            { 'children.livesWith': { $regex: regex } }
+        );
+
+        // Add numeric field searches if searchTerm is a number
+        if (isNumber) {
+            numericFields.forEach(field => {
+                orQuery.push({ [field]: { $eq: numericValue } });
             });
+            // Special handling for monthlyIncome (exact match) 
+            orQuery.push({ monthlyIncome: { $eq: numericValue } });
         }
 
-        let query = {};
-
-        if (!isNaN(search)) {
-            // Numeric search → UserId
-            query = { UserId: Number(search) };
-        } else {
-            const parts = search.trim().split(/\s+/); // Split by space
-            const regexParts = parts.map(p => new RegExp(p, "i")); // Case-insensitive
-
-            if (regexParts.length === 1) {
-                query = { firstName: regexParts[0] };
-            } else if (regexParts.length === 2) {
-                query = {
-                    $and: [
-                        { firstName: regexParts[0] },
-                        { lastName: regexParts[1] }
-                    ]
-                };
-            } else if (regexParts.length === 3) {
-                query = {
-                    $and: [
-                        { firstName: regexParts[0] },
-                        { midname: regexParts[1] },
-                        { lastName: regexParts[2] }
-                    ]
-                };
-            } else {
-                return res.status(400).json({
-                    success: false,
-                    message: "Too many name parts. Only first, middle, and last name are supported."
-                });
-            }
-        }
-
-        const users = await userModel.find(query, projection);
+        // Perform the search
+        const users = await userModel.find({ $or: orQuery }).select('-password'); // Exclude password field
 
         if (!users || users.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: "User not found"
+                message: 'No users found matching the search criteria'
             });
         }
 
         res.status(200).json({
             success: true,
-            count: users.length,
+            totalCount: users.length,
+            message: 'Users found',
             data: users
         });
-
     } catch (error) {
-        console.error("Error fetching user:", error);
+        console.error('Error in searchUsers:', error);
         res.status(500).json({
             success: false,
-            message: "Server Error",
-            error
+            message: 'Internal server error',
+            error: error.message
         });
     }
 };
-

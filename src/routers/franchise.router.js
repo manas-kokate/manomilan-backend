@@ -7,7 +7,8 @@ import {
     draftMessageFromFranchise,
     getDraftedMessagesForFranchise,
     getRepliesForFranchise,
-    getDistributorAndAdmin
+    getDistributorAndAdmin,
+    getAllActivePackages
 } from "../controllers/franchise.controller.js";
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
 
@@ -31,5 +32,8 @@ router.get('/message/get-draftedMessages', franchiseAuth, getDraftedMessagesForF
 
 router.get('/message/replies', franchiseAuth, getRepliesForFranchise);
 
+
+// === PACKAGES ===
+router.get('/get-packages', getAllActivePackages)
 
 export default router

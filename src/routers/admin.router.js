@@ -84,7 +84,7 @@ import {
     getRepliesForAdmin,
     getUsersUnderFranchise,
     getReports,
-    getUserByIdOrName
+    searchUsers
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
@@ -234,8 +234,8 @@ router.get('/message/get-draftedMessages', adminAuth, getDraftedMessagesForAdmin
 router.get('/message/replies', adminAuth, getRepliesForAdmin);
 
 // === REPORTS ===
-router.post('/get-reports', getReports)
-router.post('/get-userById-userByname', getUserByIdOrName)
+router.post('/get-reports', getReports);
+router.post('/search-by-anything', searchUsers)
 
 
 export default router

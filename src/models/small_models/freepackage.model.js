@@ -5,16 +5,13 @@ const freePackageSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    validity: {
-        type: Number,
-        required: true
-    },
     packageId: {
         type: Number,
         required: true
     },
     status: {
-        type: String
+        type: String,
+        enum: ['Active', 'Inactive']
     }
 }, { timestamps: true });
 

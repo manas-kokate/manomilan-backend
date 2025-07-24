@@ -72,8 +72,8 @@ export const registerDistributor = async (req, res) => {
             socialMedia,
             pincode
         })
-        await newDistributor.save();
-        return res.send({ status: true, message: "Distributor registered successfully" })
+        const distributor = await newDistributor.save();
+        return res.send({ status: true, message: "Distributor registered successfully", distributor })
     } catch (error) {
         return res.send({ status: false, message: "Something went wrong. Send details properly." })
     }
@@ -119,10 +119,24 @@ export const loginDistributor = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
     try {
+        const distributorId = req.id;
         const lowerLimit = parseInt(req.params.lowerLimit) || 0;
-        const upperLimit = parseInt(req.params.upperLimit) || 20;
+        const upperLimit = parseInt(req.params.upperLimit) || 0;
 
-        const users = await userModel.find().skip(lowerLimit).limit(upperLimit);
+        const currentDistributor = await distributorModel.findById(distributorId)
+        const franchisesUnder = await franchiseModel.find({ distributorUnder: currentDistributor.distributorName });
+
+        if (franchisesUnder.length === 0) {
+            return res.send({ status: false, message: 'No franchises found under you.Kindly create or register new franchise.' })
+        }
+
+        const franchisesNameArr = franchisesUnder.map((ele) => {
+            return ele.franchiseName
+        });
+
+        const users = await userModel.find({ franchiseUnder: { $in: franchisesNameArr } }).skip(lowerLimit).limit(upperLimit)
+
+        console.log(franchisesNameArr)
 
         if (users.length == 0) {
             return res.send({ status: false, message: "No users found" });
@@ -136,6 +150,19 @@ export const getAllUsers = async (req, res) => {
 
 }
 
+export const getCurrentDistributor = async (req, res) => {
+    try {
+        const { distributorId } = req.body;
+        const distributor = await distributorModel.findById(distributorId);
+        if (!distributor) {
+            return res.send({ status: false, message: "Distributor not found." })
+        }
+        return res.send({ status: true, distributor })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+
+}
 // === MESSAGES ===
 export const getFranchisesAndAdmin = async (req, res) => {
     try {
