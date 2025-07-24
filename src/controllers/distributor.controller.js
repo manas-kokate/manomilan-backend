@@ -120,8 +120,8 @@ export const loginDistributor = async (req, res) => {
 export const getAllUsers = async (req, res) => {
     try {
         const distributorId = req.id;
-        const lowerLimit = parseInt(req.body.lowerLimit) || 0;
-        const upperLimit = parseInt(req.body.upperLimit) || 0;
+        const { lowerLimit } = parseInt(req.body.lowerLimit) || 0;
+        const { upperLimit } = parseInt(req.body.upperLimit) || 10;
 
         const currentDistributor = await distributorModel.findById(distributorId)
         const franchisesUnder = await franchiseModel.find({ distributorUnder: currentDistributor.distributorName });
@@ -136,10 +136,10 @@ export const getAllUsers = async (req, res) => {
 
         const users = await userModel.find({ franchiseUnder: { $in: franchisesNameArr } }).skip(lowerLimit).limit(upperLimit)
 
-        console.log(franchisesNameArr)
+        // console.log(franchisesNameArr)
 
         if (users.length == 0) {
-            return res.send({ status: false, message: "No users found" });
+            return res.send({ status: true, franchisesUnder, users: "No users found" });
         }
 
         return res.send({ status: true, users })
