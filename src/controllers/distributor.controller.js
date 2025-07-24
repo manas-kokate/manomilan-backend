@@ -120,8 +120,8 @@ export const loginDistributor = async (req, res) => {
 export const getAllUsers = async (req, res) => {
     try {
         const distributorId = req.id;
-        const lowerLimit = parseInt(req.params.lowerLimit) || 0;
-        const upperLimit = parseInt(req.params.upperLimit) || 0;
+        const lowerLimit = parseInt(req.body.lowerLimit) || 0;
+        const upperLimit = parseInt(req.body.upperLimit) || 0;
 
         const currentDistributor = await distributorModel.findById(distributorId)
         const franchisesUnder = await franchiseModel.find({ distributorUnder: currentDistributor.distributorName });
