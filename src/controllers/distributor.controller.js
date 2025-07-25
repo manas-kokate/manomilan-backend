@@ -163,6 +163,19 @@ export const getCurrentDistributor = async (req, res) => {
     }
 
 }
+
+export const getSingleFranchise = async (req, res) => {
+    try {
+        const { franchiseId } = req.body;
+        if (!franchiseId) {
+            return res.send({ status: false, message: 'Franchise ID not found' })
+        }
+        const franchise = await franchiseModel.findById(franchiseId);
+        return res.send({ status: true, franchise })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
 // === MESSAGES ===
 export const getFranchisesAndAdmin = async (req, res) => {
     try {

@@ -10,7 +10,8 @@ import {
     getDistributorAndAdmin,
     getAllActivePackages,
     allotPackage,
-    getSingleUser
+    getSingleUser,
+    getUserAllotedPackages
 } from "../controllers/franchise.controller.js";
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
 
@@ -38,6 +39,6 @@ router.get('/message/replies', franchiseAuth, getRepliesForFranchise);
 
 // === PACKAGES ===
 router.get('/get-packages', getAllActivePackages);
-router.post('/allot-main-package', allotPackage)
-
+router.post('/allot-package', allotPackage);
+router.post('/get-userPackage-track', getUserAllotedPackages)
 export default router

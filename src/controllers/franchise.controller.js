@@ -9,7 +9,7 @@ import freepackageModel from '../models/small_models/freepackage.model.js'
 import addOnPackageModel from "../models/small_models/addOnPackage.model.js";
 import mainPackageModel from "../models/small_models/mainPackage.model.js";
 import vippackageModel from "../models/small_models/vippackage.model.js";
-
+import userPackageTrackModel from "../models/small_models/userPackageTrack.model.js";
 
 export const registerFranchise = async (req, res) => {
     const distributorId = req.id;
@@ -549,7 +549,26 @@ export const getAllActivePackages = async (req, res) => {
     }
 }
 
+export const getUserAllotedPackages = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) {
+            return res.send({ status: false, message: "User Id required" })
+        }
+        const userPackageLog = await userPackageTrackModel.findOne({ userId }).populate(['vipPackage', 'addOnPackage', 'mainPackage', 'freePackage'])
+        if (!userPackageLog) {
+            return res.send({ status: false, message: "Something went wrong. User package details not found" })
+        }
+        return res.send({ status: true, userPackageLog });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error." })
+    }
+}
+
 export const allotPackage = async (req, res) => {
-    // #7d0a0a and white 
+    const { allotPackageIds } = req.body;
+    if (allotPackageIds.length === 0) {
+        return res.send({ status: false, message: "No allotment IDs found" })
+    }
 }
 

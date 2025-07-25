@@ -211,7 +211,6 @@ export const registerUser = async (req, res) => {
     const newPackageLog = new userPackageTrackModel({
       userId: SavedNewUser._id,
       freeAddresses: freePackage.NumOfFreeAddress,
-      allotmentDate: Date.now(),
       freePackage: freePackage._id
     })
     await newPackageLog.save()

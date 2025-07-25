@@ -4,6 +4,7 @@ import cors from 'cors'
 import adminRouter from './routers/admin.router.js'
 import franchiseRouter from "./routers/franchise.router.js"
 import distributorRouter from "./routers/distributor.router.js"
+// #7d0a0a and white 
 
 const app = express();
 
