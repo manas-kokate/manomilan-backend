@@ -205,17 +205,21 @@ export const registerUser = async (req, res) => {
     });
 
     const SavedNewUser = await user.save();
-    const newUserPackageTrack = await userPackageTrackModel({
-      userId: SavedNewUser._id,
-      packagesIds: [`${latestFreePackage._id}`]
-    })
-    const userPackageDetails = await newUserPackageTrack.save();
 
+    const freePackage = await freepackageModel.findOne({ status: 'Active' })
+
+    const newPackageLog = new userPackageTrackModel({
+      userId: SavedNewUser._id,
+      freeAddresses: freePackage.NumOfFreeAddress,
+      allotmentDate: Date.now(),
+      freePackage: freePackage._id
+    })
+    await newPackageLog.save()
     return res.status(200).send({
       status: true,
       message: "User registered successfully.",
       user: SavedNewUser,
-      packageAlloted: userPackageDetails
+      packageLog: newPackageLog
     });
   } catch (error) {
     console.error("Registration Error:", error);

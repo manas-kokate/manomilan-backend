@@ -1505,22 +1505,29 @@ export const addMainPackage = async (req, res) => {
             memberCost,
             adminShare,
             validity,
-        } = req.body
+        } = req.body;
 
-        if (!numberOfAddresses ||
+        if (
+            !numberOfAddresses ||
             !memberCost ||
             !validity ||
             !adminShare ||
             !packageName
         ) {
-            return res.send({ status: false, message: 'NumOfFreeAddress, validity, memberCost, adminShare and packageName required' })
+            return res.send({
+                status: false,
+                message: 'numberOfAddresses, validity, memberCost, adminShare and packageName are required',
+            });
         }
 
+        // Generate new packageId
         let packageId = 1;
-        const lastPackage = await mainPackageModel.findOne({}).sort({ packageId: -1 })
+        const lastPackage = await mainPackageModel.findOne({}).sort({ packageId: -1 });
         if (lastPackage) {
-            packageId = parseInt(lastPackage?.packageId) + 1;
+            packageId = parseInt(lastPackage.packageId) + 1;
         }
+
+        // Create new package with status: Active
         const newPackage = new mainPackageModel({
             packageId,
             packageName,
@@ -1528,25 +1535,105 @@ export const addMainPackage = async (req, res) => {
             memberCost,
             validity,
             adminShare,
-            status: 'Active'
-        })
+            status: 'Active',
+        });
+
+        // Save the new package
+        await newPackage.save();
+
+        // Get the latest 3 packages (including the newly added one)
+        const latestPackages = await mainPackageModel
+            .find({})
+            .sort({ createdAt: -1 })
+            .limit(3)
+            .select('_id');
+
+        const latestIds = latestPackages.map(pkg => pkg._id);
+
+        // Set all packages to Inactive
         await mainPackageModel.updateMany({}, { $set: { status: 'Inactive' } });
-        await newPackage.save()
-        return res.send({ status: true, message: "New Main Package added", newPackage });
+
+        // Set the latest 3 packages to Active
+        await mainPackageModel.updateMany(
+            { _id: { $in: latestIds } },
+            { $set: { status: 'Active' } }
+        );
+
+        return res.send({
+            status: true,
+            message: 'New Main Package added and status updated accordingly',
+            newPackage,
+        });
     } catch (error) {
-        return res.send({ status: false, message: "Server error" })
+        console.error('Error in addMainPackage:', error);
+        return res.send({
+            status: false,
+            message: 'Server error',
+        });
     }
-}
+};
+
+export const updateMainPackages = async (req, res) => {
+    try {
+        const { activatePackageIds } = req.body;
+
+        // Validate input
+        if (!activatePackageIds || !Array.isArray(activatePackageIds) || activatePackageIds.length === 0) {
+            return res.status(400).send({ status: false, message: "Valid package IDs are required" });
+        }
+
+        // Ensure only up to 3 IDs are processed to maintain the limit
+        if (activatePackageIds.length > 3) {
+            return res.status(400).send({ status: false, message: "Cannot activate more than 3 packages" });
+        }
+
+        // Get current active packages, sorted by creation date (oldest first)
+        const activePackages = await mainPackageModel
+            .find({ status: 'Active' })
+            .sort({ createdAt: 1 })
+            .select('_id');
+
+        // Calculate how many packages need to be deactivated
+        const slotsNeeded = Math.max(0, activatePackageIds.length - (3 - activePackages.length));
+
+        // Deactivate oldest packages if needed
+        if (slotsNeeded > 0) {
+            const packagesToDeactivate = activePackages.slice(0, slotsNeeded);
+            const deactivateIds = packagesToDeactivate.map(pkg => pkg._id);
+
+            await mainPackageModel.updateMany(
+                { _id: { $in: deactivateIds } },
+                { $set: { status: 'Inactive' } }
+            );
+        }
+
+        // Activate the new packages
+        await Promise.all(
+            activatePackageIds.map(id =>
+                mainPackageModel.findByIdAndUpdate(
+                    id,
+                    { $set: { status: 'Active' } },
+                    { new: true }
+                )
+            )
+        );
+
+        return res.status(200).send({ status: true, message: "Packages updated successfully" });
+    } catch (error) {
+        console.error('Error updating packages:', error);
+        return res.status(500).send({ status: false, message: "Server error" });
+    }
+};
 
 export const getMainPackages = async (req, res) => {
     try {
-        const existingPackages = await mainPackageModel.find({}).sort({ packageId: -1 });
+        const existingPackages = await mainPackageModel.find({}).sort({ status: 1 });
         if (existingPackages.length == 0) {
             return res.send({ status: false, message: "No packages found" })
         }
         return res.send({ status: true, existingPackages })
     } catch (error) {
-
+        return res.send({ status: false, message: "Server error" })
     }
 }
 

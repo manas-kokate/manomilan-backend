@@ -8,7 +8,9 @@ import {
     getDraftedMessagesForFranchise,
     getRepliesForFranchise,
     getDistributorAndAdmin,
-    getAllActivePackages
+    getAllActivePackages,
+    allotPackage,
+    getSingleUser
 } from "../controllers/franchise.controller.js";
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
 
@@ -20,6 +22,7 @@ router.post('/login', loginFranchise);
 router.put('/update/:franchiseId', uploadMiddleware, updateFranchiseProfile);
 router.post('/create-member', franchiseAuth, uploadMiddleware, createMember);
 router.get('/view-members', franchiseAuth, viewMember);
+router.get('/get-single-user', franchiseAuth, getSingleUser);
 
 // === MESSAGES ===
 router.get('/get-distributor-admin', franchiseAuth, getDistributorAndAdmin)
@@ -34,6 +37,7 @@ router.get('/message/replies', franchiseAuth, getRepliesForFranchise);
 
 
 // === PACKAGES ===
-router.get('/get-packages', getAllActivePackages)
+router.get('/get-packages', getAllActivePackages);
+router.post('/allot-main-package', allotPackage)
 
 export default router

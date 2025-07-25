@@ -381,6 +381,25 @@ export const viewMember = async (req, res) => {
     }
 }
 
+export const getSingleUser = async (req, res) => {
+    try {
+        const franchiseId = req.id;
+        const { userId } = req.params.id;
+        if (!userId) {
+            return res.send({ status: false, message: "User Id not found" })
+        }
+        const franchise = await franchiseModel.findById(franchiseId);
+        const user = await userModel.findById(userId);
+        const isUnderFranchise = user?.franchiseUnder === franchise.franchiseName ? true : false;
+        if (!isUnderFranchise) {
+            return res.send({ status: false, message: 'Sorry this user is not under your frachise. Contact admin.' });
+        }
+        return res.send({ status: true, user })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
 // === MESSAGES === 
 
 export const getDistributorAndAdmin = async (req, res) => {
@@ -530,4 +549,7 @@ export const getAllActivePackages = async (req, res) => {
     }
 }
 
+export const allotPackage = async (req, res) => {
+    // #7d0a0a and white 
+}
 

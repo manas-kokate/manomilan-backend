@@ -84,7 +84,8 @@ import {
     getRepliesForAdmin,
     getUsersUnderFranchise,
     getReports,
-    searchUsers
+    searchUsers,
+    updateMainPackages
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
@@ -215,6 +216,7 @@ router.get('/get-vip-packages', getAllVipPackages);
 
 // Main Package Routes
 router.post('/add-main-packages', addMainPackage);
+router.post('/activate-main-packages', updateMainPackages)
 router.get('/get-main-packages', getMainPackages);
 
 // Add-on Package Routes

@@ -6,7 +6,6 @@ const addOnPackageSchema = new mongoose.Schema({
     memberCost: { type: Number, required: true },
     distributorShare: { type: Number, required: true },
     franchiseShare: { type: Number, required: true },
-    validity: { type: Number, required: true },
     status: { type: String, enum: ['Active', 'Inactive'], default: 'Inactive' },
     packageId: { type: Number }
 }, { timestamps: true });
