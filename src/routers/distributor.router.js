@@ -8,11 +8,11 @@ import {
     getRepliesForDistributor,
     getFranchisesAndAdmin,
     getUsers,
-    getCurrentDistributor
+    getCurrentDistributor,
+    getSingleFranchise
 } from "../controllers/distributor.controller.js";
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
-import { getSingleFranchise } from "../controllers/admin.controller.js";
 
 const router = express.Router()
 
