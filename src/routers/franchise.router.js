@@ -22,7 +22,7 @@ router.post('/login', loginFranchise);
 router.put('/update/:franchiseId', uploadMiddleware, updateFranchiseProfile);
 router.post('/create-member', franchiseAuth, uploadMiddleware, createMember);
 router.get('/view-members', franchiseAuth, viewMember);
-router.get('/get-single-user', franchiseAuth, getSingleUser);
+router.get('/get-single-user/:userId', franchiseAuth, getSingleUser);
 
 // === MESSAGES ===
 router.get('/get-distributor-admin', franchiseAuth, getDistributorAndAdmin)

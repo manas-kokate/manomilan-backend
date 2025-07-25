@@ -384,7 +384,7 @@ export const viewMember = async (req, res) => {
 export const getSingleUser = async (req, res) => {
     try {
         const franchiseId = req.id;
-        const { userId } = req.params.id;
+        const { userId } = req.params;
         if (!userId) {
             return res.send({ status: false, message: "User Id not found" })
         }
