@@ -566,9 +566,18 @@ export const getUserAllotedPackages = async (req, res) => {
 }
 
 export const allotPackage = async (req, res) => {
-    const { allotPackageIds } = req.body;
+    const { allotPackageIds, userId } = req.body;
     if (allotPackageIds.length === 0) {
         return res.send({ status: false, message: "No allotment IDs found" })
     }
+    const userPackage = await userPackageTrackModel.findOne({ userId });
+    const MainPackages = await Promise.all(allotPackageIds.map(async (ele) => {
+        return await mainPackageModel.findById(ele)
+    }))
+
+    const addOnPackages = await Promise.all(allotPackageIds.map(async (ele) => {
+        return await addOnPackageModel.findById(ele)
+    }))
+    return res.send({ MainPackages, addOnPackages });
 }
 

@@ -176,6 +176,55 @@ export const getSingleFranchise = async (req, res) => {
         return res.send({ status: false, message: "Server error" })
     }
 }
+
+export const getSingleUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        if (!userId) {
+            return res.send({ status: false, message: "User Id required" })
+        }
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.send({ status: false, message: "User not found check Id properly." })
+        }
+        return res.send({ status: true, user })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
+// === POINTS ===
+export const givePointsToFranchise = async (req, res) => {
+    try {
+        const distributorId = req.id;
+        const { franchiseId, Points } = req.body;
+
+        if (!franchiseId || !Points) {
+            return res.send({ status: false, message: "Franchise Id and points required" });
+        }
+
+        const distributor = await distributorModel.findById(distributorId);
+        const franchise = await franchiseModel.findById(franchiseId);
+        if (!franchise) {
+            return res.send({ status: false, message: "Wrong Franchise ID. Franchise not found." })
+        }
+
+        distributor.points = parseInt(distributor.points) - parseInt(Points);
+
+        franchise.points = parseInt(franchise.points) + parseInt(Points);
+
+        try {
+            await distributor.save();
+            await franchise.save();
+            return res.send({ status: true, message: "Points alloted to  franchise." })
+        } catch (error) {
+            return res.send({ status: false, message: "Points not alloted. Server error." })
+        }
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
 // === MESSAGES ===
 export const getFranchisesAndAdmin = async (req, res) => {
     try {

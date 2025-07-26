@@ -9,7 +9,9 @@ import {
     getFranchisesAndAdmin,
     getUsers,
     getCurrentDistributor,
-    getSingleFranchise
+    getSingleFranchise,
+    givePointsToFranchise,
+    getSingleUser
 } from "../controllers/distributor.controller.js";
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
@@ -21,6 +23,7 @@ router.post('/register', uploadMiddleware, registerDistributor);
 router.post('/login', loginDistributor);
 // router.get('/get-users/:upperLimit/:lowerLimit', distributorAuth, getAllUsers);
 router.post('/get-all-users', distributorAuth, getAllUsers)
+router.get('/get-single-user', getSingleUser);
 router.post('/get-current-distributor', getCurrentDistributor); //send Id in req.body
 router.post('/get-single-franchise', distributorAuth, getSingleFranchise)
 
@@ -35,6 +38,9 @@ router.post('/message/draft', distributorAuth, draftMessageFromDistributor);
 router.get('/message/get-draftedMessages', distributorAuth, getDraftedMessagesForDistributor);
 
 router.get('/message/replies', distributorAuth, getRepliesForDistributor);
+
+//=== POINTS ===
+router.post('/give-points-to-franchise', distributorAuth, givePointsToFranchise)
 
 
 export default router
