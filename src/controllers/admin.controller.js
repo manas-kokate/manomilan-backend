@@ -1280,7 +1280,7 @@ export const addNewPoints = async (req, res) => {
         })
         await newpoints.save()
 
-        admin.points = admin.points + points;
+        admin.points = parseInt(admin.points) + parseInt(points);
         await admin.save();
 
         return res.send({ status: true, message: 'New points added successfully and updated admin points' })
@@ -1385,8 +1385,8 @@ export const givePointsToDistributor = async (req, res) => {
             return res.send({ status: false, message: 'Invalid password. Points not alloted' })
         }
 
-        distributor.points = distributor.points + parseInt(points);
-        admin.points = admin.points - parseInt(points);
+        distributor.points = parseInt(distributor.points) + parseInt(points);
+        admin.points = parseInt(admin.points) - parseInt(points);
         await distributor.save();
 
         const newDistributorLog = new distributorpointslogModel({
