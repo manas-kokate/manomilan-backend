@@ -9,7 +9,7 @@ import {
     getRepliesForFranchise,
     getDistributorAndAdmin,
     getAllActivePackages,
-    allotPackage,
+    allotMainPackage,
     getSingleUser,
     getUserAllotedPackages
 } from "../controllers/franchise.controller.js";
@@ -39,6 +39,6 @@ router.get('/message/replies', franchiseAuth, getRepliesForFranchise);
 
 // === PACKAGES ===
 router.get('/get-packages', getAllActivePackages);
-router.post('/allot-package', allotPackage);
+router.post('/allot-main-package', allotMainPackage);
 router.post('/get-userPackage-track', getUserAllotedPackages)
 export default router

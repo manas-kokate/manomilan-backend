@@ -22,7 +22,7 @@ const router = express.Router()
 router.post('/register', uploadMiddleware, registerDistributor);
 router.post('/login', loginDistributor);
 // router.get('/get-users/:upperLimit/:lowerLimit', distributorAuth, getAllUsers);
-router.post('/get-all-users', distributorAuth, getAllUsers)
+router.post('/get-all-users', distributorAuth, getAllUsers);
 router.get('/get-single-user', getSingleUser);
 router.post('/get-current-distributor', getCurrentDistributor); //send Id in req.body
 router.post('/get-single-franchise', distributorAuth, getSingleFranchise)

@@ -565,19 +565,21 @@ export const getUserAllotedPackages = async (req, res) => {
     }
 }
 
-export const allotPackage = async (req, res) => {
-    const { allotPackageIds, userId } = req.body;
-    if (allotPackageIds.length === 0) {
+export const allotMainPackage = async (req, res) => {
+    const { allotPackageId, userId } = req.body;
+    if (!allotPackageId) {
         return res.send({ status: false, message: "No allotment IDs found" })
     }
     const userPackage = await userPackageTrackModel.findOne({ userId });
-    const MainPackages = await Promise.all(allotPackageIds.map(async (ele) => {
-        return await mainPackageModel.findById(ele)
-    }))
-
-    const addOnPackages = await Promise.all(allotPackageIds.map(async (ele) => {
-        return await addOnPackageModel.findById(ele)
-    }))
-    return res.send({ MainPackages, addOnPackages });
+    const mainPackage = await mainPackageModel.findById(allotPackageId);
+    if (!mainPackage) {
+        return res.send({ status: false, message: "Package not found" })
+    }
+    if (mainPackage.status === 'Inactive') {
+        return res.send({ status: false, message: "Sorry this package is Inactive allot another package" })
+    }
+    userPackage.mainPackage = [...userPackage.mainPackage, allotPackageId];
+    await userPackage.save()
+    return res.send({ userPackage })
 }
 

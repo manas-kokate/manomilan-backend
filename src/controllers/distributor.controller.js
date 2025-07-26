@@ -231,7 +231,7 @@ export const getFranchisesAndAdmin = async (req, res) => {
         const distributorId = req.id;
         const currentDistributor = await distributorModel.findById(distributorId)
         const franchises = await franchiseModel.find({ distributorUnder: currentDistributor.distributorName });
-        const admin = await adminModel.find({}, '-points -transactionPassword -givePointsPassword -password -_id -__v -createdAt -updatedAt')
+        const admin = await adminModel.find({}, '-points -transactionPassword -givePointsPassword -password -__v -createdAt -updatedAt')
         return res.send({ status: true, franchises, admin })
     } catch (error) {
         return res.send({ status: false, message: "Server error" })
