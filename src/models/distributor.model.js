@@ -1,4 +1,5 @@
 import mongoose from "mongoose"
+import bcrypt from 'bcrypt'
 
 const distributorSchema = new mongoose.Schema({
     distributorName: {
@@ -69,7 +70,18 @@ const distributorSchema = new mongoose.Schema({
     },
     pincode: {
         type: Number
+    },
+    transactionPassword: {
+        type: String,
+        required: true
     }
 });
+
+distributorSchema.pre("save", async function (next) {
+    if (this.isModified('transactionPassword')) {
+        this.transactionPassword = await bcrypt.hash(this.transactionPassword, 10)
+    }
+    next()
+})
 
 export default mongoose.model('distributor', distributorSchema)

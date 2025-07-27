@@ -576,6 +576,22 @@ export const getFranchises = async (req, res) => {
   }
 }
 
+export const getCurrentUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      return res.send({ status: false, message: "User id required" })
+    }
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.send({ status: false, message: "User not found." })
+    }
+    return res.send({ status: true, user })
+  } catch (error) {
+    return res.send({ status: false, message: "Server error" })
+  }
+}
+
 // === MESSAGES ===
 export const getFrachiseAndDistributorAndAdmin = async (req, res) => {
   try {

@@ -15,6 +15,7 @@ import {
 } from "../controllers/franchise.controller.js";
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
 import { getFranchisePointsLog } from "../controllers/distributor.controller.js";
+import { getCurrentUser } from "../controllers/user.controller.js";
 
 
 const router = express.Router();
@@ -25,6 +26,7 @@ router.put('/update/:franchiseId', uploadMiddleware, updateFranchiseProfile);
 router.post('/create-member', franchiseAuth, uploadMiddleware, createMember);
 router.get('/view-members', franchiseAuth, viewMember);
 router.get('/get-single-user/:userId', franchiseAuth, getSingleUser);
+router.get('/getCurrentUser/:userId', getCurrentUser)
 
 // === MESSAGES ===
 router.get('/get-distributor-admin', franchiseAuth, getDistributorAndAdmin)

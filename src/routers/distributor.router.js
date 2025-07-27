@@ -17,6 +17,7 @@ import {
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
 import { getDistributorPointsLog } from "../controllers/admin.controller.js";
+import { getCurrentUser } from "../controllers/user.controller.js";
 
 const router = express.Router()
 
@@ -28,6 +29,7 @@ router.post('/get-all-users', distributorAuth, getAllUsers);
 router.get('/get-single-user', getSingleUser);
 router.post('/get-current-distributor', getCurrentDistributor); //send Id in req.body
 router.post('/get-single-franchise', distributorAuth, getSingleFranchise)
+router.get('/getCurrentUser/:userId', getCurrentUser)
 
 // === MESSAGES ===
 router.get('/get-franchise-admin', distributorAuth, getFranchisesAndAdmin)

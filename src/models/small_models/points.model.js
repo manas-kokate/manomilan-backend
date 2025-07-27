@@ -11,6 +11,10 @@ const pointsSchema = new mongoose.Schema({
     },
     name: {
         type: String
+    },
+    addDate: {
+        type: Date,
+        required: true
     }
 }, { timestamps: true });
 

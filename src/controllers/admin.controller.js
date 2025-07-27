@@ -1276,7 +1276,8 @@ export const addNewPoints = async (req, res) => {
         const newpoints = new pointsModel({
             adminId,
             points,
-            name: admin.name
+            name: admin.name,
+            addDate: Date.now()
         })
         await newpoints.save()
 
@@ -1295,7 +1296,7 @@ export const getPoints = async (req, res) => {
 
         const adminId = req.id;
 
-        const allPointsEntries = await pointsModel.find({ adminId: adminId })
+        const allPointsEntries = await pointsModel.find({ adminId: adminId });
 
         if (allPointsEntries.length === 0) {
             return res.send({ status: false, message: "No points entries found for this admin" })
@@ -1377,6 +1378,10 @@ export const givePointsToDistributor = async (req, res) => {
 
         const distributor = await distributorModel.findById(distributorId);
         const admin = await adminModel.findById(adminId);
+
+        if (parseInt(admin.points) < parseInt(points)) {
+            return res.send({ status: false, message: "You have Insufficient points. Please add more points to allot." })
+        }
 
         if (parseInt(points) == 0) {
             return res.send({ status: false, message: 'Points undefined or 0 please check before sending.' })

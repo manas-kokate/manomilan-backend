@@ -6,6 +6,7 @@ import franchiseModel from "../models/franchise.model.js";
 import adminModel from "../models/admin.model.js";
 import MessageModel from "../models/small_models/message.model.js";
 import franchisePointsLogModel from "../models/small_models/franchisePointsLog.model.js";
+import bcrypt from 'bcrypt'
 
 export const registerDistributor = async (req, res) => {
     const {
@@ -20,7 +21,8 @@ export const registerDistributor = async (req, res) => {
         address,
         location,
         socialMedia,
-        pincode
+        pincode,
+        transactionPassword
     } = req.body;
 
     const ExistingDistributor = await distributorModel.findOne({
@@ -71,7 +73,8 @@ export const registerDistributor = async (req, res) => {
             distributorPhoto,
             qrPhoto,
             socialMedia,
-            pincode
+            pincode,
+            transactionPassword
         })
         const distributor = await newDistributor.save();
         return res.send({ status: true, message: "Distributor registered successfully", distributor })
@@ -198,20 +201,25 @@ export const getSingleUser = async (req, res) => {
 export const givePointsToFranchise = async (req, res) => {
     try {
         const distributorId = req.id;
-        const { franchiseId, Points } = req.body;
+        const { franchiseId, Points, transactionPassword } = req.body;
 
-        if (!franchiseId || !Points) {
-            return res.send({ status: false, message: "Franchise Id and points required" });
+        if (!franchiseId || !Points || !transactionPassword) {
+            return res.send({ status: false, message: "Franchise Id, points and transactionPassword required" });
         }
-
         const distributor = await distributorModel.findById(distributorId);
+        if (!(await bcrypt.compare(distributor.transactionPassword, transactionPassword))) {
+            return res.send({ status: false, message: "Invalid transaction password" })
+        }
         const franchise = await franchiseModel.findById(franchiseId);
         if (!franchise) {
             return res.send({ status: false, message: "Wrong Franchise ID. Franchise not found." })
         }
 
-        distributor.points = parseInt(distributor.points) - parseInt(Points);
+        if (parseInt(distributor.points) < parseInt(Points)) {
+            return res.send({ status: false, message: "You have Insufficient points. Please get more points to allot." })
+        }
 
+        distributor.points = parseInt(distributor.points) - parseInt(Points);
         franchise.points = parseInt(franchise.points) + parseInt(Points);
 
         try {
