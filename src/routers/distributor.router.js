@@ -11,10 +11,12 @@ import {
     getCurrentDistributor,
     getSingleFranchise,
     givePointsToFranchise,
-    getSingleUser
+    getSingleUser,
+    getFranchisePointsLog
 } from "../controllers/distributor.controller.js";
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
+import { getDistributorPointsLog } from "../controllers/admin.controller.js";
 
 const router = express.Router()
 
@@ -40,7 +42,9 @@ router.get('/message/get-draftedMessages', distributorAuth, getDraftedMessagesFo
 router.get('/message/replies', distributorAuth, getRepliesForDistributor);
 
 //=== POINTS ===
+router.get('/get/pointsLog/:distributorId', getDistributorPointsLog)
 router.post('/give-points-to-franchise', distributorAuth, givePointsToFranchise)
+router.get('/get/franchiseLogs/:franchiseId', getFranchisePointsLog)
 
 
 export default router

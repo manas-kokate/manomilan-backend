@@ -14,6 +14,7 @@ import {
     getUserAllotedPackages
 } from "../controllers/franchise.controller.js";
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
+import { getFranchisePointsLog } from "../controllers/distributor.controller.js";
 
 
 const router = express.Router();
@@ -41,4 +42,7 @@ router.get('/message/replies', franchiseAuth, getRepliesForFranchise);
 router.get('/get-packages', getAllActivePackages);
 router.post('/allot-main-package', allotMainPackage);
 router.post('/get-userPackage-track', getUserAllotedPackages)
+
+// === POINTS ===
+router.get('/get/franchiseLogs/:franchiseId', getFranchisePointsLog)
 export default router

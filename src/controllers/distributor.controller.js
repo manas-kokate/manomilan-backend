@@ -5,6 +5,7 @@ import userModel from "../models/user.model.js";
 import franchiseModel from "../models/franchise.model.js";
 import adminModel from "../models/admin.model.js";
 import MessageModel from "../models/small_models/message.model.js";
+import franchisePointsLogModel from "../models/small_models/franchisePointsLog.model.js";
 
 export const registerDistributor = async (req, res) => {
     const {
@@ -216,10 +217,39 @@ export const givePointsToFranchise = async (req, res) => {
         try {
             await distributor.save();
             await franchise.save();
+            const newFranchiseLog = await franchisePointsLogModel({
+                franchiseId: franchise._id,
+                points: Points,
+                allotmentDate: Date.now(),
+                By: distributor.distributorName
+            })
+            await newFranchiseLog.save()
             return res.send({ status: true, message: "Points alloted to  franchise." })
         } catch (error) {
             return res.send({ status: false, message: "Points not alloted. Server error." })
         }
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
+export const getFranchisePointsLog = async (req, res) => {
+    try {
+        const { franchiseId } = req.params;
+        if (!franchiseId) {
+            return res.send({ status: false, message: 'franchise Id not found' })
+        }
+        const franchise = await franchiseModel.findById(franchiseId);
+        if (!franchise) {
+            return res.send({ status: false, message: "Wrong Id franchise not found." })
+        }
+        const franchiseLogs = await franchisePointsLogModel.find({
+            franchiseId
+        }).sort({ createdAt: -1 })
+        if (franchiseLogs.length === 0) {
+            return res.send({ status: false, message: "No logs found for this franchise" })
+        }
+        return res.send({ status: true, franchiseLogs })
     } catch (error) {
         return res.send({ status: false, message: "Server error" })
     }

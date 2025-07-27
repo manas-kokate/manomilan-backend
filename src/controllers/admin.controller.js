@@ -1392,7 +1392,8 @@ export const givePointsToDistributor = async (req, res) => {
         const newDistributorLog = new distributorpointslogModel({
             distributorId: distributor._id,
             points: points,
-            By: admin.name
+            By: admin.name,
+            allotmentDate: Date.now()
         })
         await newDistributorLog.save()
 
@@ -1402,7 +1403,26 @@ export const givePointsToDistributor = async (req, res) => {
     } catch (err) {
         return res.send({ status: false, message: "Something went wrong.Server error." })
     }
+}
 
+export const getDistributorPointsLog = async (req, res) => {
+    try {
+        const { distributorId } = req.params;
+        if (!distributorId) {
+            return res.send({ status: false, message: "Distributor Id not found" })
+        }
+        const distributor = await distributorModel.findById(distributorId);
+        if (!distributor) {
+            return res.send({ status: false, message: "Distributor not found" })
+        }
+        const distributorLogs = await distributorpointslogModel.find({ distributorId }).sort({ createdAt: -1 });
+        if (distributorLogs.length === 0) {
+            return res.send({ status: false, message: "No logs found for this distributor" })
+        }
+        return res.send({ status: true, distributorLogs })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
 }
 
 // === PACKAGES ===

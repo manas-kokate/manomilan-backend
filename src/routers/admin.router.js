@@ -85,7 +85,8 @@ import {
     getUsersUnderFranchise,
     getReports,
     searchUsers,
-    updateMainPackages
+    updateMainPackages,
+    getDistributorPointsLog
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
@@ -202,6 +203,7 @@ router.get('/get-franchise-under/:id', getFranchiseUnder)
 router.post('/add-points', adminAuth, addNewPoints);
 router.get('/get-points', adminAuth, getPoints);
 router.post('/give-points-to-distributor', adminAuth, givePointsToDistributor);
+router.get('/get/pointsLog/:distributorId', getDistributorPointsLog)
 router.get('/get-single-franchise', adminAuth, getSingleFranchise);
 router.get('/get-single-distributor/:id', adminAuth, getSingleDistributor);
 

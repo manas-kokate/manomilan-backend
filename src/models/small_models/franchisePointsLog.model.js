@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
-const distributorLog = new mongoose.Schema({
-    distributorId: {
+const franchiseLog = new mongoose.Schema({
+    franchiseId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'distributor'
+        ref: 'franchise'
     },
     points: {
         type: Number,
@@ -19,4 +19,4 @@ const distributorLog = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-export default mongoose.model('distributorLog', distributorLog)
+export default mongoose.model('franchiseLog', franchiseLog)
