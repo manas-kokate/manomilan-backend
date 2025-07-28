@@ -9,13 +9,16 @@ const distributorLog = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    allotmentDate: {
-        type: Date,
-        required: true
+    Type: {
+        type: String,
+        enum: ['Credited', 'Debited']
     },
     By: {
         type: String,
         required: true
+    },
+    Balance: {
+        type: Number
     }
 }, { timestamps: true });
 

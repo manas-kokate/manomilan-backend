@@ -90,6 +90,7 @@ import {
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
+import { getFranchisePointsLog } from '../controllers/distributor.controller.js';
 
 
 const router = express.Router();
@@ -203,6 +204,7 @@ router.get('/get-franchise-under/:id', getFranchiseUnder)
 router.post('/add-points', adminAuth, addNewPoints);
 router.get('/get-points', adminAuth, getPoints);
 router.post('/give-points-to-distributor', adminAuth, givePointsToDistributor);
+router.get('/get/franchiseLogs/:franchiseId', getFranchisePointsLog)
 router.get('/get/pointsLog/:distributorId', getDistributorPointsLog)
 router.get('/get-single-franchise', adminAuth, getSingleFranchise);
 router.get('/get-single-distributor/:id', adminAuth, getSingleDistributor);

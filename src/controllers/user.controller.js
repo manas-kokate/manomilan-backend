@@ -592,6 +592,84 @@ export const getCurrentUser = async (req, res) => {
   }
 }
 
+export const editExpectaions = async (req, res) => {
+  try {
+    const { expectations } = req.body;
+    const userId = req.id;
+
+    if (!expectations) {
+      return res.status(400).send({ status: false, message: 'No valid data found to update' });
+    }
+
+    const existingUser = await userModel.findById(userId);
+    if (!existingUser) {
+      return res.status(404).send({ status: false, message: 'User not found' });
+    }
+
+    // Prepare update data, merging with existing values to preserve unedited fields
+    const updateData = {
+      ageFrom: expectations.ageFrom !== undefined ? expectations.ageFrom : existingUser.ageFrom,
+      ageTo: expectations.ageTo !== undefined ? expectations.ageTo : existingUser.ageTo,
+      heightFrom: expectations.heightFrom !== undefined ? expectations.heightFrom : existingUser.heightFrom,
+      heightTo: expectations.heightTo !== undefined ? expectations.heightTo : existingUser.heightTo,
+      expectedOccupation: expectations.expectedOccupation !== undefined
+        ? expectations.expectedOccupation
+        : existingUser.expectedOccupation,
+      expectedIncome: expectations.expectedIncome !== undefined
+        ? expectations.expectedIncome
+        : existingUser.expectedIncome,
+      workAbroad: expectations.workAbroad !== undefined ? expectations.workAbroad : existingUser.workAbroad,
+      divyangPrefer: expectations.divyangPrefer !== undefined
+        ? expectations.divyangPrefer
+        : existingUser.divyangPrefer,
+      expectedNationality: expectations.expectedNationality !== undefined
+        ? expectations.expectedNationality
+        : existingUser.expectedNationality,
+      expectedMaritalStatus: expectations.expectedMaritalStatus !== undefined
+        ? expectations.expectedMaritalStatus
+        : existingUser.expectedMaritalStatus,
+      childAccepted: expectations.childAccepted !== undefined
+        ? expectations.childAccepted
+        : existingUser.childAccepted,
+      expectedEducation: expectations.expectedEducation !== undefined
+        ? expectations.expectedEducation
+        : existingUser.expectedEducation,
+      expectedReligion: expectations.expectedReligion !== undefined
+        ? expectations.expectedReligion
+        : existingUser.expectedReligion,
+      expectedNativeLocation: expectations.expectedNativeLocation !== undefined
+        ? expectations.expectedNativeLocation
+        : existingUser.expectedNativeLocation,
+      expectedWorkingLocation: expectations.expectedWorkingLocation !== undefined
+        ? expectations.expectedWorkingLocation
+        : existingUser.expectedWorkingLocation,
+    };
+
+    const updatedUser = await userModel.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(500).send({ status: false, message: 'Failed to update user' });
+    }
+
+    const finalUser = await userModel.findById(userId, '-password -__v -updatedAt -createdAt');
+    return res.status(200).send({
+      status: true,
+      message: 'User updated successfully',
+      updatedData: finalUser,
+    });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    return res.status(500).send({
+      status: false,
+      message: "Server error",
+    });
+  }
+}
+
 // === MESSAGES ===
 export const getFrachiseAndDistributorAndAdmin = async (req, res) => {
   try {

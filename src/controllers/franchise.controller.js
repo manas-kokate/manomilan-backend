@@ -538,11 +538,9 @@ export const getRepliesForFranchise = async (req, res) => {
 
 export const getAllActivePackages = async (req, res) => {
     try {
-        const freepackages = await freepackageModel.findOne({ status: 'Active' })
         const addOnPackages = await addOnPackageModel.findOne({ status: 'Active' })
         const mainPackages = await mainPackageModel.findOne({ status: 'Active' })
-        const vipPackages = await vippackageModel.findOne({ status: 'Active' })
-        return res.send({ status: true, freepackages, addOnPackages, mainPackages })
+        return res.send({ status: true, addOnPackages, mainPackages })
     }
     catch (err) {
         return res.send({ status: false, message: "Server error" })
@@ -582,4 +580,3 @@ export const allotMainPackage = async (req, res) => {
     await userPackage.save()
     return res.send({ userPackage })
 }
-

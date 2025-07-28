@@ -7,6 +7,7 @@ import adminModel from "../models/admin.model.js";
 import MessageModel from "../models/small_models/message.model.js";
 import franchisePointsLogModel from "../models/small_models/franchisePointsLog.model.js";
 import bcrypt from 'bcrypt'
+import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
 
 export const registerDistributor = async (req, res) => {
     const {
@@ -203,13 +204,13 @@ export const givePointsToFranchise = async (req, res) => {
         const distributorId = req.id;
         const { franchiseId, Points, transactionPassword } = req.body;
 
-        if (!franchiseId || !Points || !transactionPassword) {
+        if (!franchiseId || !Points) {
             return res.send({ status: false, message: "Franchise Id, points and transactionPassword required" });
         }
         const distributor = await distributorModel.findById(distributorId);
-        if (!(await bcrypt.compare(distributor.transactionPassword, transactionPassword))) {
-            return res.send({ status: false, message: "Invalid transaction password" })
-        }
+        // if (!(await bcrypt.compare(distributor.transactionPassword, transactionPassword))) {
+        //     return res.send({ status: false, message: "Invalid transaction password" })
+        // }
         const franchise = await franchiseModel.findById(franchiseId);
         if (!franchise) {
             return res.send({ status: false, message: "Wrong Franchise ID. Franchise not found." })
@@ -222,16 +223,25 @@ export const givePointsToFranchise = async (req, res) => {
         distributor.points = parseInt(distributor.points) - parseInt(Points);
         franchise.points = parseInt(franchise.points) + parseInt(Points);
 
+        const newFranchiseLog = await franchisePointsLogModel({
+            franchiseId: franchise._id,
+            points: Points,
+            Type: 'Credited',
+            Balance: franchise.points,
+            By: distributor.distributorName
+        })
+        const distributorLog = new distributorpointslogModel({
+            distributorId: distributor._id,
+            points: -Points,
+            Type: 'Debited',
+            Balance: distributor.points,
+            By: distributor.distributorName
+        })
         try {
             await distributor.save();
             await franchise.save();
-            const newFranchiseLog = await franchisePointsLogModel({
-                franchiseId: franchise._id,
-                points: Points,
-                allotmentDate: Date.now(),
-                By: distributor.distributorName
-            })
             await newFranchiseLog.save()
+            await distributorLog.save()
             return res.send({ status: true, message: "Points alloted to  franchise." })
         } catch (error) {
             return res.send({ status: false, message: "Points not alloted. Server error." })
@@ -417,4 +427,14 @@ export const getRepliesForDistributor = async (req, res) => {
     }
 };
 
+// === PACKAGES ===
+export const givePackageToFranchise = async (req, res) => {
+    try {
+        const { packageId, franchiseId, franchiseShare } = req.body;
+        if (!packageId || !franchiseId || !franchiseShare) {
 
+        }
+    } catch (error) {
+
+    }
+}

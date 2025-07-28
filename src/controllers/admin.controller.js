@@ -20,7 +20,6 @@ import positionsModel from "../models/small_models/positionsModel.js";
 import manglikModel from "../models/small_models/manglikModel.js";
 import motherTongueModel from "../models/small_models/motherTongue.js";
 import distributorModel from "../models/distributor.model.js";
-import pointsModel from "../models/small_models/points.model.js";
 import freepackageModel from "../models/small_models/freepackage.model.js";
 import franchiseModel from "../models/franchise.model.js";
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
@@ -29,6 +28,7 @@ import mainPackageModel from "../models/small_models/mainPackage.model.js";
 import addOnPackage from "../models/small_models/addOnPackage.model.js";
 import addOnPackageModel from "../models/small_models/addOnPackage.model.js";
 import MessageModel from "../models/small_models/message.model.js";
+import adminPointsLogModel from "../models/small_models/adminPointsLog.model.js";
 
 
 export const registerAdmin = async (req, res) => {
@@ -1258,58 +1258,6 @@ export const deleteMotherTongue = async (req, res) => {
     }
 };
 
-
-// === POINTS ====
-export const addNewPoints = async (req, res) => {
-    try {
-        const adminId = req.id;
-        const { points, transactionPassword } = req.body;
-
-        if (!points || !transactionPassword) {
-            return res.send({ status: false, message: "Points and transactionPassword required" })
-        }
-
-        const admin = await adminModel.findById(adminId);
-        if (!(await bcrypt.compare(transactionPassword, admin.transactionPassword))) {
-            return res.send({ status: false, message: 'Invalid transaction password' })
-        }
-
-        const newpoints = new pointsModel({
-            adminId,
-            points,
-            name: admin.name,
-            addDate: Date.now()
-        })
-        await newpoints.save()
-
-        admin.points = parseInt(admin.points) + parseInt(points);
-        await admin.save();
-
-        return res.send({ status: true, message: 'New points added successfully and updated admin points' })
-    } catch (error) {
-        return res.send({ status: false, message: "Server Error" })
-    }
-
-}
-
-export const getPoints = async (req, res) => {
-    try {
-
-        const adminId = req.id;
-
-        const allPointsEntries = await pointsModel.find({ adminId: adminId });
-
-        if (allPointsEntries.length === 0) {
-            return res.send({ status: false, message: "No points entries found for this admin" })
-        }
-
-        return res.send({ status: true, entries: allPointsEntries })
-
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
-    }
-}
-
 export const getDistributors = async (req, res) => {
     try {
         const distributors = await distributorModel.find();
@@ -1369,6 +1317,57 @@ export const getFranchiseUnder = async (req, res) => {
     }
 }
 
+// === POINTS ====
+export const addNewPoints = async (req, res) => {
+    try {
+        const adminId = req.id;
+        const { points, transactionPassword } = req.body;
+
+        if (!points || !transactionPassword) {
+            return res.send({ status: false, message: "Points and transactionPassword required" })
+        }
+
+        const admin = await adminModel.findById(adminId);
+        if (!(await bcrypt.compare(transactionPassword, admin.transactionPassword))) {
+            return res.send({ status: false, message: 'Invalid transaction password' })
+        }
+
+        admin.points = parseInt(admin.points) + parseInt(points);
+        const newAdminLog = new adminPointsLogModel({
+            adminId: admin._id,
+            points: points,
+            Type: 'Credited',
+            Balance: admin.points
+        })
+
+        try {
+            await admin.save();
+            await newAdminLog.save()
+            return res.send({ status: true, message: 'New points added successfully and updated admin points log.' })
+        } catch (error) {
+            return res.send({ status: false, message: "Points not updated.Something went wrong." })
+        }
+    } catch (error) {
+        return res.send({ status: false, message: "Server Error" })
+    }
+
+}
+
+export const getPoints = async (req, res) => {
+    try {
+        const adminId = req.id;
+        const allPointsEntries = await adminPointsLogModel.find().sort({ createdAt: -1 })
+        if (allPointsEntries.length === 0) {
+            return res.send({ status: false, message: "No points entries found for this admin" })
+        }
+
+        return res.send({ status: true, entries: allPointsEntries })
+
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
 export const givePointsToDistributor = async (req, res) => {
     try {
         const adminId = req.id
@@ -1393,17 +1392,26 @@ export const givePointsToDistributor = async (req, res) => {
 
         distributor.points = parseInt(distributor.points) + parseInt(points);
         admin.points = parseInt(admin.points) - parseInt(points);
-        await distributor.save();
 
         const newDistributorLog = new distributorpointslogModel({
             distributorId: distributor._id,
             points: points,
             By: admin.name,
-            allotmentDate: Date.now()
+            Type: 'Credited',
+            Balance: parseInt(distributor.points)
         })
-        await newDistributorLog.save()
 
+        const newAdminLog = new adminPointsLogModel({
+            adminId: admin._id,
+            points: -points,
+            Type: 'Debited',
+            Balance: admin.points
+        })
+
+        await distributor.save();
+        await newDistributorLog.save()
         await admin.save();
+        await newAdminLog.save()
         return res.send({ status: true, message: "Points alloted to distributor successfully" })
 
     } catch (err) {
@@ -1863,6 +1871,7 @@ export const getRepliesForAdmin = async (req, res) => {
 };
 
 // === REPORTS ===
+// add parentsResidence field here 
 export const getReports = async (req, res) => {
     try {
         const { filters = {}, fields = [] } = req.body;
@@ -1915,7 +1924,6 @@ export const getReports = async (req, res) => {
             count: users.length,
             data: users
         });
-
     } catch (error) {
         res.status(500).json({ success: false, message: "Server Error. Check your request body.", error });
     }

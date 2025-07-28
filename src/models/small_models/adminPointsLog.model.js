@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const pointsSchema = new mongoose.Schema({
+const adminLog = new mongoose.Schema({
     adminId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'admin'
@@ -9,13 +9,13 @@ const pointsSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    name: {
-        type: String
+    Type: {
+        type: String,
+        enum: ['Credited', 'Debited']
     },
-    addDate: {
-        type: Date,
-        required: true
+    Balance: {
+        type: Number
     }
 }, { timestamps: true });
 
-export default mongoose.model('adminPoints', pointsSchema)
+export default mongoose.model('adminLog', adminLog)
