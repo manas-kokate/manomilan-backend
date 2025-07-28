@@ -12,7 +12,8 @@ import {
     getSingleFranchise,
     givePointsToFranchise,
     getSingleUser,
-    getFranchisePointsLog
+    getFranchisePointsLog,
+    givePackageToFranchise
 } from "../controllers/distributor.controller.js";
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
@@ -48,5 +49,7 @@ router.get('/get/pointsLog/:distributorId', getDistributorPointsLog)
 router.post('/give-points-to-franchise', distributorAuth, givePointsToFranchise)
 router.get('/get/franchiseLogs/:franchiseId', getFranchisePointsLog)
 
+// === PACKAGEs ===
+router.post('/give-package-to-franchise', distributorAuth, givePackageToFranchise);
 
 export default router

@@ -8,6 +8,10 @@ import MessageModel from "../models/small_models/message.model.js";
 import franchisePointsLogModel from "../models/small_models/franchisePointsLog.model.js";
 import bcrypt from 'bcrypt'
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
+import franchisePackageModel from "../models/small_models/franchise.package.model.js";
+import mainPackageModel from "../models/small_models/mainPackage.model.js";
+import addOnPackageModel from "../models/small_models/addOnPackage.model.js";
+import vippackageModel from "../models/small_models/vippackage.model.js";
 
 export const registerDistributor = async (req, res) => {
     const {
@@ -204,13 +208,13 @@ export const givePointsToFranchise = async (req, res) => {
         const distributorId = req.id;
         const { franchiseId, Points, transactionPassword } = req.body;
 
-        if (!franchiseId || !Points) {
+        if (!franchiseId || !Points || !transactionPassword) {
             return res.send({ status: false, message: "Franchise Id, points and transactionPassword required" });
         }
         const distributor = await distributorModel.findById(distributorId);
-        // if (!(await bcrypt.compare(distributor.transactionPassword, transactionPassword))) {
-        //     return res.send({ status: false, message: "Invalid transaction password" })
-        // }
+        if (!(await bcrypt.compare(distributor.transactionPassword, transactionPassword))) {
+            return res.send({ status: false, message: "Invalid transaction password" })
+        }
         const franchise = await franchiseModel.findById(franchiseId);
         if (!franchise) {
             return res.send({ status: false, message: "Wrong Franchise ID. Franchise not found." })
@@ -430,11 +434,47 @@ export const getRepliesForDistributor = async (req, res) => {
 // === PACKAGES ===
 export const givePackageToFranchise = async (req, res) => {
     try {
+        const distributorId = req.id;
         const { packageId, franchiseId, franchiseShare } = req.body;
         if (!packageId || !franchiseId || !franchiseShare) {
-
+            return res.send({ status: false, message: "packageId, franchiseId  and franchiseShare required" })
         }
-    } catch (error) {
 
+        const mainPackage = await mainPackageModel.findById(packageId) || null;
+        const addOnPackage = await addOnPackageModel.findById(packageId) || null;
+        const vipPackage = await vippackageModel.findById(packageId) || null;
+
+        let newFranchisePackage;
+        if (mainPackage) {
+            newFranchisePackage = new franchisePackageModel({
+                mainPackageId: mainPackage._id,
+                franchiseId,
+                franchiseShare,
+                distributorId,
+                distributorShare: parseInt(mainPackage.memberCost) - parseInt(mainPackage.adminShare) - parseInt(franchiseShare)
+            })
+        }
+        if (addOnPackage) {
+            newFranchisePackage = new franchisePackageModel({
+                addOnPackageId: addOnPackage._id,
+                franchiseId,
+                franchiseShare,
+                distributorId,
+                distributorShare: parseInt(addOnPackage.memberCost) - parseInt(addOnPackage.adminShare) - parseInt(franchiseShare)
+            })
+        }
+        if (vipPackage) {
+            newFranchisePackage = new franchisePackageModel({
+                vipPackageId: vipPackage._id,
+                franchiseId,
+                franchiseShare,
+                distributorId,
+                distributorShare: parseInt(vipPackage.memberCost) - parseInt(vipPackage.adminShare) - parseInt(franchiseShare)
+            })
+        }
+        await newFranchisePackage.save();
+        return res.send({ status: true, message: "Package alloted to franchise", newFranchisePackage })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
     }
 }

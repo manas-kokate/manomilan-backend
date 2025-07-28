@@ -29,4 +29,6 @@ const franchisePackageSchema = new mongoose.Schema({
         type: Number,
         required: true
     }
-})
+}, { timestamps: true })
+
+export default mongoose.model('franchisePackage', franchisePackageSchema)
