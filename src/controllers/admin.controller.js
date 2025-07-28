@@ -28,6 +28,7 @@ import vippackageModel from "../models/small_models/vippackage.model.js";
 import mainPackageModel from "../models/small_models/mainPackage.model.js";
 import addOnPackage from "../models/small_models/addOnPackage.model.js";
 import addOnPackageModel from "../models/small_models/addOnPackage.model.js";
+import MessageModel from "../models/small_models/message.model.js";
 
 
 export const registerAdmin = async (req, res) => {
@@ -1771,7 +1772,6 @@ export const sendMessageFromAdmin = async (req, res) => {
             message,
             status: 'sent'
         });
-
         await newMessage.save();
         return res.send({ status: true, message: "Message sent successfully" });
     } catch (error) {
