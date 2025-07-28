@@ -1767,7 +1767,7 @@ export const sendMessageFromAdmin = async (req, res) => {
         const newMessage = new MessageModel({
             senderId,
             receiverId: receiverIds,
-            from: `${admin.firstName} ${admin.midname} ${admin.lastName}`,
+            from: `${admin.name}`,
             to,
             message,
             status: 'sent'
@@ -1804,7 +1804,7 @@ export const draftMessageFromAdmin = async (req, res) => {
         const draftMessage = new MessageModel({
             senderId,
             receiverId: receiverIds,
-            from: `${admin.firstName} ${admin.midname} ${admin.lastName}`,
+            from: `${admin.name}`,
             to,
             message,
             status: 'drafted'
