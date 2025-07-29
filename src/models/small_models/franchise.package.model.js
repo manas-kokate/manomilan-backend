@@ -7,11 +7,11 @@ const franchisePackageSchema = new mongoose.Schema({
     },
     vipPackage: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'vippackage'
+        ref: 'vipPackage'
     },
     addOnPackage: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'addonpackage'
+        ref: 'AddOnPackage'
     },
     franchiseId: {
         type: mongoose.Schema.Types.ObjectId,
