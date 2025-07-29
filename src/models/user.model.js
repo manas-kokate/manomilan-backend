@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 
 const userSchema = new Schema({
     // Login credentials
@@ -140,16 +140,23 @@ const userSchema = new Schema({
     Reference: { type: String },
     ReferenceMobile: { type: String },
 
-
-
     // addresses available
+    freeAddresses: {
+        type: Number
+    },
     numberOfAddresses: {
         type: Number
     },
     validity: {
         type: Date
-    }
+    },
 
+    // === SUBSCRIBES ===
+    subscribes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+        default: ''
+    }]
 }, { timestamps: true });
 
 export default model("user", userSchema);

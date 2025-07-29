@@ -673,6 +673,68 @@ export const editExpectaions = async (req, res) => {
   }
 }
 
+export const subscribe = async (req, res) => {
+  try {
+    const userId = req.id;
+    const { subscribeUserId } = req.body;
+
+    if (!subscribeUserId) {
+      return res.status(400).json({ status: false, message: "Subscriber user ID not provided." });
+    }
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ status: false, message: "User not found." });
+    }
+
+    const validityDate = new Date(user.validity);
+    const currentDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+
+    // Check if user's package is expired
+    if (currentDate > validityDate) {
+      return res.status(403).json({ status: false, message: "Your package validity has expired. Please purchase a new package." });
+    }
+
+    // Check if user has any valid addresses (paid or free)
+    if (user.numberOfAddresses <= 0 && user.freeAddresses <= 0) {
+      return res.status(403).json({ status: false, message: "You don't have any address credits to subscribe." });
+    }
+
+    // Prevent duplicate subscriptions
+    if (user.subscribes.includes(subscribeUserId)) {
+      return res.status(409).json({ status: false, message: "Already subscribed to this user." });
+    }
+
+    // Prioritize using paid address credits
+    if (user.numberOfAddresses > 0) {
+      user.numberOfAddresses -= 1;
+    } else if (user.freeAddresses > 0) {
+      user.freeAddresses -= 1;
+    }
+
+    user.subscribes.push(subscribeUserId);
+
+    await user.save();
+
+    return res.status(200).json({ status: true, message: "Subscribed successfully." });
+
+  } catch (error) {
+    console.error("Subscribe Error:", error);
+    return res.status(500).json({ status: false, message: "Server error." });
+  }
+};
+
+export const subscribed = async (req, res) => {
+  try {
+    const userId = req.id;
+    const user = await userModel.findById(userId).populate('subscribes');
+    const subscribed = user.subscribes;
+    return res.send({ status: true, subscribed })
+  } catch (error) {
+    return res.send({ status: false, message: "Server error" })
+  }
+}
+
 // === MESSAGES ===
 export const getFrachiseAndDistributorAndAdmin = async (req, res) => {
   try {
