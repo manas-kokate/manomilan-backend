@@ -479,7 +479,7 @@ export const givePackageToFranchise = async (req, res) => {
                 distributorShare: parseInt(vipPackage.memberCost) - parseInt(vipPackage.adminShare) - parseInt(franchiseShare)
             })
         }
-        // await newFranchisePackage.save();
+        await newFranchisePackage.save();
         return res.send({ status: true, message: "Package alloted to franchise", newFranchisePackage })
     } catch (error) {
         return res.send({ status: false, message: "Server error" })

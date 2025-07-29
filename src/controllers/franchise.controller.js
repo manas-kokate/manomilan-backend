@@ -615,6 +615,7 @@ export const allotMainAddOnPackage = async (req, res) => {
             validity: packageDetails.mainPackageId?.numberOfAddresses || 0
         })
         await newUserPackage.save()
+        user.numberOfAddresses = parseInt(user.numberOfAddresses) + parseInt(newUserPackage.assignedAddresses)
         return res.send({
             status: true, message: "Package alloted",
             packageDetails,
