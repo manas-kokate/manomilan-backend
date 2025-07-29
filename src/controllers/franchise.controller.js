@@ -537,6 +537,15 @@ export const getRepliesForFranchise = async (req, res) => {
         return res.send({ status: false, message: "Error fetching replies", error });
     }
 };
+export const getCurrentFranchise = async (req, res) => {
+    try {
+        const franchiseId = req.id
+        const franchise = await franchiseModel.findById(franchiseId);
+        return res.send({ status: true, franchise })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
 
 // === ALLOT PACKAGE ===
 export const getPackages = async (req, res) => {
@@ -599,9 +608,10 @@ export const allotPackage = async (req, res) => {
         })
         await newFranchisePointsLog.save()
 
-        const newUserPackage = new userPackagesModel({
+        const newUserPackage = new userPackageTrackModel({
             userId,
-            franchisePackageId
+            assignedAddresses: packageDetails.mainPackageId?.numberOfAddresses || packageDetails.vipPackage?.numberOfAddresses || packageDetails.addOnPackage?.numberOfAddresses,
+            validity: packageDetails.mainPackageId?.numberOfAddresses || packageDetails.vipPackage?.numberOfAddresses || 0
         })
         await newUserPackage.save()
         return res.send({

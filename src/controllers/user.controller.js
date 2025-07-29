@@ -116,6 +116,8 @@ export const registerUser = async (req, res) => {
     const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
     const UserId = LastIdUser ? Number(LastIdUser.UserId) + 1 : 1;
 
+    // Active free package 
+    const freePackage = await freepackageModel.findOne({ status: 'Active' })
 
     // Prepare user object
     const user = new userModel({
@@ -204,11 +206,10 @@ export const registerUser = async (req, res) => {
       foodPreference,
       specs,
       bloodGroup,
+      numberOfAddresses: freePackage.NumOfFreeAddress
     });
 
     const SavedNewUser = await user.save();
-
-    const freePackage = await freepackageModel.findOne({ status: 'Active' })
 
     const newPackageLog = new userPackageTrackModel({
       userId: SavedNewUser._id,
