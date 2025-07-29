@@ -679,7 +679,7 @@ export const getFrachiseAndDistributorAndAdmin = async (req, res) => {
     const franchiseUnder = req.params.franchiseUnder;
     const franchise = await franchiseModel.findOne({ franchiseName: franchiseUnder })
     const distributor = await distributorModel.findOne({ distributorName: franchise.distributorUnder })
-    const admin = await adminModel.find({}, '-points -transactionPassword -givePointsPassword -password -_id -__v -createdAt -updatedAt')
+    const admin = await adminModel.find({}, '-points -transactionPassword -givePointsPassword -password -__v -createdAt -updatedAt')
     return res.send({ status: true, franchise, distributor, admin })
   } catch (error) {
     return res.send({ status: false, message: "Server error" })

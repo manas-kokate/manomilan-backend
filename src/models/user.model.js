@@ -124,10 +124,24 @@ const userSchema = new Schema({
     specs: { type: String },
     gotra: { type: String },
 
+    //info to be filled by franchise
+    Complexion: { type: String },
+    BodyType: { type: String },
+    familyBackground: { type: String },
+    features: { type: String },
+    height: { type: String },
+    position: { type: String },
+    vipMember: {
+        type: Boolean,
+        default: false
+    },
+    Reference: { type: String },
+    ReferenceMobile: { type: String },
+
     // addresses available
     numberOfAddresses: {
         type: Number
-    }
+    },
 }, { timestamps: true });
 
 export default model("user", userSchema);

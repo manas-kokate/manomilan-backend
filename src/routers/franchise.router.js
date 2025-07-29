@@ -10,8 +10,9 @@ import {
     getDistributorAndAdmin,
     getSingleUser,
     getPackages,
-    allotPackage,
+    allotMainAddOnPackage,
     getCurrentFranchise,
+    allotVipPackage,
 } from "../controllers/franchise.controller.js";
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
 import { getFranchisePointsLog } from "../controllers/distributor.controller.js";
@@ -42,7 +43,8 @@ router.get('/message/replies', franchiseAuth, getRepliesForFranchise);
 router.get('/get-current-franchise', franchiseAuth, getCurrentFranchise)
 // === PACKAGES ===
 router.get('/get-packages/:franchiseId', getPackages)
-router.post('/allot-package', allotPackage)
+router.post('/allot-main-addOnpackage', allotMainAddOnPackage)
+router.post('/allot-vip-package', allotVipPackage)
 
 // === POINTS ===
 router.get('/get/franchiseLogs/:franchiseId', getFranchisePointsLog)

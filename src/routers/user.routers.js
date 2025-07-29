@@ -95,11 +95,4 @@ router.get('/message/replies', userAuth, getRepliesForUser);
 // === PACKAGE ===
 router.get('/get-packages/:userId', getUserPackages)
 
-
 export default router
-
-
-
-
-
-// router.get('/')

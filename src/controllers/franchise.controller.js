@@ -565,7 +565,7 @@ export const getPackages = async (req, res) => {
     }
 }
 
-export const allotPackage = async (req, res) => {
+export const allotMainAddOnPackage = async (req, res) => {
     try {
         const { userId, franchisePackageId } = req.body;
         if (!userId || !franchisePackageId) {
@@ -575,8 +575,8 @@ export const allotPackage = async (req, res) => {
         const packageDetails = await franchisePackageModel.findById(franchisePackageId).populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
         const franchiseShare = parseInt(packageDetails.franchiseShare);
         const distributorShare = parseInt(packageDetails.distributorShare)
-        const adminShare = parseInt(packageDetails.mainPackageId.adminShare || packageDetails.vipPackage.adminShare);
-        const memberCost = parseInt(packageDetails.mainPackageId.memberCost || packageDetails.vipPackage.memberCost);
+        const adminShare = parseInt(packageDetails.mainPackageId.adminShare);
+        const memberCost = parseInt(packageDetails.mainPackageId.memberCost);
 
         //user
         const user = await userModel.findById(userId);
@@ -590,7 +590,7 @@ export const allotPackage = async (req, res) => {
             distributorId,
             points: distributorShare,
             Type: 'Credited',
-            By: userId,
+            By: `${user.loginEmail}`,
             Balance: distributor.points
         })
         await newDistributorLog.save()
@@ -611,8 +611,72 @@ export const allotPackage = async (req, res) => {
 
         const newUserPackage = new userPackageTrackModel({
             userId,
-            assignedAddresses: packageDetails.mainPackageId?.numberOfAddresses || packageDetails.vipPackage?.numberOfAddresses || packageDetails.addOnPackage?.numberOfAddresses,
-            validity: packageDetails.mainPackageId?.numberOfAddresses || packageDetails.vipPackage?.numberOfAddresses || 0
+            assignedAddresses: packageDetails.mainPackageId?.numberOfAddresses || packageDetails.addOnPackage?.numberOfAddresses,
+            validity: packageDetails.mainPackageId?.numberOfAddresses || 0
+        })
+        await newUserPackage.save()
+        return res.send({
+            status: true, message: "Package alloted",
+            packageDetails,
+            newFranchisePointsLog,
+            newDistributorLog
+        })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+}
+
+export const allotVipPackage = async (req, res) => {
+    try {
+        const { userId, franchisePackageId } = req.body;
+        if (!userId || !franchisePackageId) {
+            return res.send({ status: false, message: "userId,franchisePackageId required" });
+        }
+
+        const packageDetails = await franchisePackageModel.findById(franchisePackageId).populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
+        const franchiseShare = parseInt(packageDetails.franchiseShare);
+        const distributorShare = parseInt(packageDetails.distributorShare)
+        const adminShare = parseInt(packageDetails.vipPackage.adminShare);
+        const memberCost = parseInt(packageDetails.vipPackage.memberCost);
+
+        //user
+        const user = await userModel.findById(userId);
+        if (!user.vipMember) {
+            return res.send({ status: false, message: "User is not Vip." })
+        }
+
+        //distributor related to package
+        const distributorId = packageDetails.distributorId
+        const distributor = await distributorModel.findById(distributorId)
+        distributor.points = parseInt(distributor.points) + distributorShare;
+        await distributor.save()
+        const newDistributorLog = new distributorpointslogModel({
+            distributorId,
+            points: distributorShare,
+            Type: 'Credited',
+            By: `${user.loginEmail}`,
+            Balance: distributor.points
+        })
+        await newDistributorLog.save()
+
+        // franchise related to package
+        const franchiseId = packageDetails.franchiseId;
+        const franchise = await franchiseModel.findById(franchiseId);
+        franchise.points = parseInt(franchise.points) - (distributorShare + adminShare)
+        await franchise.save()
+        const newFranchisePointsLog = new franchisePointsLogModel({
+            franchiseId,
+            points: -(distributorShare + adminShare),
+            Type: 'Debited',
+            By: userId,
+            Balance: franchise.points
+        })
+        await newFranchisePointsLog.save()
+
+        const newUserPackage = new userPackageTrackModel({
+            userId,
+            assignedAddresses: packageDetails.vipPackage?.numberOfAddresses,
+            validity: packageDetails.vipPackage?.numberOfAddresses || 0
         })
         await newUserPackage.save()
         return res.send({
