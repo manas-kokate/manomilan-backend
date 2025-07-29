@@ -96,6 +96,16 @@ export const loginAdmin = async (req, res) => {
     return res.send({ status: true, message: "User Login successful.", token: token, ExistingAdmin });
 }
 
+export const getCurrentAdmin = async (req, res) => {
+    try {
+        const adminId = req.id;
+        const admin = await adminModel.findById(adminId);
+        return res.send({ status: true, admin })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
 export const getUsers = async (req, res) => {
     try {
         const lowerLimit = parseInt(req.query.lowerLimit) || 0;

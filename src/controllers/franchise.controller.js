@@ -537,6 +537,7 @@ export const getRepliesForFranchise = async (req, res) => {
         return res.send({ status: false, message: "Error fetching replies", error });
     }
 };
+
 export const getCurrentFranchise = async (req, res) => {
     try {
         const franchiseId = req.id

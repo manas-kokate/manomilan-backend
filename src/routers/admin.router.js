@@ -86,7 +86,8 @@ import {
     getReports,
     searchUsers,
     updateMainPackages,
-    getDistributorPointsLog
+    getDistributorPointsLog,
+    getCurrentAdmin
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
@@ -97,6 +98,7 @@ const router = express.Router();
 
 router.post('/register', registerAdmin);
 router.post('/login', loginAdmin);
+router.get('/current-admin', adminAuth, getCurrentAdmin)
 
 // === USER ==== 
 router.get('/get-users', getUsers);
