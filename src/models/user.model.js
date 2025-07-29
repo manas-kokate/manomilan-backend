@@ -114,6 +114,8 @@ const userSchema = new Schema({
     userPhotoTwo: { type: String },
     userPhotoThree: { type: String },
     userPhotoFour: { type: String },
+    userPhotoFive: { type: String },
+    userPhotoSix: { type: String },
     userPhotoStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
 
     // Special info
@@ -137,6 +139,8 @@ const userSchema = new Schema({
     },
     Reference: { type: String },
     ReferenceMobile: { type: String },
+
+
 
     // addresses available
     numberOfAddresses: {

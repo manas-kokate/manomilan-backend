@@ -13,6 +13,7 @@ import {
     allotMainAddOnPackage,
     getCurrentFranchise,
     allotVipPackage,
+    updateOfficeInformation,
 } from "../controllers/franchise.controller.js";
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
 import { getFranchisePointsLog } from "../controllers/distributor.controller.js";
@@ -28,6 +29,9 @@ router.post('/create-member', franchiseAuth, uploadMiddleware, createMember);
 router.get('/view-members', franchiseAuth, viewMember);
 router.get('/get-single-user/:userId', franchiseAuth, getSingleUser);
 router.get('/getCurrentUser/:userId', getCurrentUser)
+
+// === OFFICE INFO ===
+router.put('/update-user-profile', uploadMiddleware, updateOfficeInformation)
 
 // === MESSAGES ===
 router.get('/get-distributor-admin', franchiseAuth, getDistributorAndAdmin)

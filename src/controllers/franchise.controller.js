@@ -689,3 +689,57 @@ export const allotVipPackage = async (req, res) => {
         return res.send({ status: false, message: "Server error" });
     }
 }
+
+// === OFFICE INFO ===
+export const updateOfficeInformation = async (req, res) => {
+    try {
+        const {
+            userId,
+            Complexion,
+            BodyType,
+            familyBackground,
+            features,
+            height,
+            position,
+            vipMember,
+            Reference,
+            ReferenceMobile,
+        } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Update basic fields
+        user.Complexion = Complexion || user.Complexion;
+        user.BodyType = BodyType || user.BodyType;
+        user.familyBackground = familyBackground || user.familyBackground;
+        user.features = features || user.features;
+        user.height = height || user.height;
+        user.position = position || user.position;
+        user.vipMember = vipMember === 'true' || vipMember === true;
+        user.Reference = Reference || user.Reference;
+        user.ReferenceMobile = ReferenceMobile || user.ReferenceMobile;
+
+        // Handle uploaded files (Multer adds req.files)
+        user.userPhotoFive = req?.files?.userPhotoFive?.[0]?.filename || "";
+        user.userPhotoSix = req?.files?.userPhotoSix?.[0]?.filename || "";
+
+
+        await user.save();
+
+        res.status(200).json({
+            message: "Office information updated successfully",
+            data: user
+        });
+
+    } catch (error) {
+        console.error("Error in updateOfficeInformation:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+};
