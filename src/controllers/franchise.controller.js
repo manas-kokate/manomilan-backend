@@ -577,6 +577,7 @@ export const allotMainAddOnPackage = async (req, res) => {
         }
 
         const packageDetails = await franchisePackageModel.findById(franchisePackageId).populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
+        console.log(packageDetails)
         const franchiseShare = parseInt(packageDetails.franchiseShare);
         const distributorShare = parseInt(packageDetails.distributorShare)
         const adminShare = parseInt(packageDetails.mainPackageId.adminShare);
@@ -620,7 +621,7 @@ export const allotMainAddOnPackage = async (req, res) => {
         })
         await newUserPackage.save()
         user.numberOfAddresses = parseInt(user.numberOfAddresses) + parseInt(newUserPackage.assignedAddresses)
-        // user.validity = 
+        user.validity = new Date(Date.now() + newUserPackage.validity * 24 * 60 * 60 * 1000);
         await user.save()
         return res.send({
             status: true, message: "Package alloted",
@@ -686,6 +687,9 @@ export const allotVipPackage = async (req, res) => {
             validity: packageDetails.vipPackage?.numberOfAddresses || 0
         })
         await newUserPackage.save()
+        user.numberOfAddresses = parseInt(user.numberOfAddresses) + parseInt(newUserPackage.assignedAddresses)
+        user.validity = new Date(Date.now() + newUserPackage.validity * 24 * 60 * 60 * 1000);
+        await user.save()
         return res.send({
             status: true, message: "Package alloted",
             packageDetails,
