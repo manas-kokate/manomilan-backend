@@ -12,6 +12,7 @@ import vippackageModel from "../models/small_models/vippackage.model.js";
 import userPackageTrackModel from "../models/small_models/userPackageTrack.model.js";
 import franchisePackageModel from "../models/small_models/franchise.package.model.js";
 import userPackagesModel from "../models/userPackages.model.js";
+import franchisePointsLogModel from "../models/small_models/franchisePointsLog.model.js";
 
 export const registerFranchise = async (req, res) => {
     const distributorId = req.id;
@@ -559,12 +560,48 @@ export const allotPackage = async (req, res) => {
         if (!userId || !franchisePackageId) {
             return res.send({ status: false, message: "userId,franchisePackageId required" });
         }
+
+        const packageDetails = await franchisePackageModel.findById(franchisePackageId).populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
+        const franchiseShare = parseInt(packageDetails.franchiseShare);
+        const distributorShare = parseInt(packageDetails.distributorShare)
+        const adminShare = parseInt(packageDetails.mainPackageId.adminShare || packageDetails.vipPackage.adminShare);
+        const memberCost = parseInt(packageDetails.mainPackageId.memberCost || packageDetails.vipPackage.memberCost);
+
+        //user
+        const user = await userModel.findById(userId);
+
+        //distributor related to package
+        const distributorId = packageDetails.distributorId
+        const distributor = await distributorModel.findById(distributorId)
+        distributor.points = parseInt(distributor.points) + distributorShare;
+
+        // franchise related to package
+        const franchiseId = packageDetails.franchiseId;
+        const franchise = await franchiseModel.findById(franchiseId);
+        const newFranchisePointsLog = new franchisePointsLogModel({
+            franchiseId,
+            points: -(distributorShare + adminShare),
+            Type: 'Debited',
+            By: userId,
+            Balance: franchise
+        })
+        franchise.points = parseInt(franchise.points) - (distributorShare + adminShare)
+        // admin related to package
+        const adminId = packageDetails.mainPackageId?.adminId;
+        const admin = await adminModel.findById(adminId)
+
         const newUserPackage = new userPackagesModel({
             userId,
             franchisePackageId
         })
-        await newUserPackage.save()
-        return res.send({ status: true, message: "Package alloted" })
+        // await newUserPackage.save()
+        return res.send({
+            status: true, message: "Package alloted",
+            packageDetails,
+            distributor,
+            franchise,
+            admin
+        })
     } catch (error) {
         return res.send({ status: false, message: "Server error" });
     }

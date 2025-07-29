@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const addOnPackageSchema = new mongoose.Schema({
     packageName: { type: String, required: true },
+    adminId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'admin'
+    },
     numberOfAddresses: { type: Number, required: true },
     memberCost: { type: Number, required: true },
     adminShare: { type: Number, required: true },

@@ -212,7 +212,7 @@ export const givePointsToFranchise = async (req, res) => {
             return res.send({ status: false, message: "Franchise Id, points and transactionPassword required" });
         }
         const distributor = await distributorModel.findById(distributorId);
-        if (!(await bcrypt.compare(distributor.transactionPassword, transactionPassword))) {
+        if (!(await bcrypt.compare(transactionPassword, distributor.transactionPassword))) {
             return res.send({ status: false, message: "Invalid transaction password" })
         }
         const franchise = await franchiseModel.findById(franchiseId);

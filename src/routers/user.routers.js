@@ -42,7 +42,6 @@ router.get('/get-state-by-country', getStateCountry);
 router.get('/get-all-cities', getAllLocations)
 router.get('/get-cities-by-state', getlocationEntry);
 
-
 // === CASTE ===
 router.get('/get-religions', getReligion);
 router.get('/get-caste-by-religion', getCasteByReligion);
