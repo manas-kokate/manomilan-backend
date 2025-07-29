@@ -550,23 +550,23 @@ export const getCurrentFranchise = async (req, res) => {
 
 // === ALLOT PACKAGE ===
 export const getPackages = async (req, res) => {
-    // try {
-    const { franchiseId } = req.params;
-    if (!franchiseId) {
-        return res.send({ status: false, message: "franchiseId required" })
+    try {
+        const { franchiseId } = req.params;
+        if (!franchiseId) {
+            return res.send({ status: false, message: "franchiseId required" })
+        }
+        const franchisePackages = await franchisePackageModel
+            .find({ franchiseId })
+            .populate('mainPackageId')
+            .populate('vipPackage')
+            .populate('addOnPackage');
+        if (franchisePackages.length === 0) {
+            return res.send({ status: false, message: "No packages alloted" })
+        }
+        return res.send({ status: true, franchisePackages })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
     }
-    const franchisePackages = await franchisePackageModel
-        .find({ franchiseId })
-        .populate('mainPackageId')
-        .populate('vipPackage')
-        .populate('addOnPackage');
-    if (franchisePackages.length === 0) {
-        return res.send({ status: false, message: "No packages alloted" })
-    }
-    return res.send({ status: true, franchisePackages })
-    // } catch (error) {
-    //     return res.send({ status: false, message: "Server error" })
-    // }
 }
 
 export const allotMainAddOnPackage = async (req, res) => {
