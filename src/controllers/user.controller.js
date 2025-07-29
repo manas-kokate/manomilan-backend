@@ -8,6 +8,8 @@ import adminModel from "../models/admin.model.js";
 import distributorModel from "../models/distributor.model.js";
 import freepackageModel from "../models/small_models/freepackage.model.js";
 import userPackageTrackModel from "../models/small_models/userPackageTrack.model.js";
+import userPackagesModel from "../models/userPackages.model.js";
+import franchisePackageModel from "../models/small_models/franchise.package.model.js";
 
 
 export const registerUser = async (req, res) => {
@@ -810,5 +812,21 @@ export const getRepliesForUser = async (req, res) => {
   }
 };
 
+// === PACKAGES ===
+export const getUserPackages = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      return res.send({ status: false, message: "User ID not found" })
+    }
+    const userPackages = await userPackagesModel.find({ userId }).populate('franchisePackageId')
+    const franchisePackage = await franchisePackageModel.findById(userPackages.franchisePackageId).populate(['mainPackageId', 'vipPackage', 'addOnPackage'])
+
+    return res.send({ status: true, userPackages, franchisePackage })
+
+  } catch (error) {
+    return res.send({ status: false, message: "server error" })
+  }
+}
 
 

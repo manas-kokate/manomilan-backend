@@ -1,6 +1,6 @@
 import express from "express"
 import { uploadMiddleware } from "../utils/upload.js";
-import { registerUser, login, getLoggedInUser, editProfile, getFranchises, mutualMatching, sendMessageFromUser, draftMessageFromUser, getSentMessagesForUser, getDraftedMessagesForUser, getRepliesForUser, getFrachiseAndDistributorAndAdmin, getCurrentUser, editExpectaions } from "../controllers/user.controller.js";
+import { registerUser, login, getLoggedInUser, editProfile, getFranchises, mutualMatching, sendMessageFromUser, draftMessageFromUser, getSentMessagesForUser, getDraftedMessagesForUser, getRepliesForUser, getFrachiseAndDistributorAndAdmin, getCurrentUser, editExpectaions, getUserPackages } from "../controllers/user.controller.js";
 import { userAuth } from "../middlewares/auth.js"
 import {
     getCountry, getDegreesByStream, getFoodPref, getReligion,
@@ -92,6 +92,9 @@ router.post('/message/draft', userAuth, draftMessageFromUser);
 router.get('/message/get-draftedMessages', userAuth, getDraftedMessagesForUser);
 
 router.get('/message/replies', userAuth, getRepliesForUser);
+
+// === PACKAGE ===
+router.get('/get-packages/:userId', getUserPackages)
 
 
 export default router

@@ -9,6 +9,8 @@ import {
     getRepliesForFranchise,
     getDistributorAndAdmin,
     getSingleUser,
+    getPackages,
+    allotPackage,
 } from "../controllers/franchise.controller.js";
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
 import { getFranchisePointsLog } from "../controllers/distributor.controller.js";
@@ -38,7 +40,8 @@ router.get('/message/replies', franchiseAuth, getRepliesForFranchise);
 
 
 // === PACKAGES ===
-
+router.get('/get-packages/:franchiseId', getPackages)
+router.post('/allot-package', allotPackage)
 
 // === POINTS ===
 router.get('/get/franchiseLogs/:franchiseId', getFranchisePointsLog)

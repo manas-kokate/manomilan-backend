@@ -1702,6 +1702,7 @@ export const addAddOnPackage = async (req, res) => {
             packageName,
             numberOfAddresses,
             memberCost,
+            adminShare: parseInt(memberCost) - parseInt(distributorShare) - parseInt(franchiseShare),
             distributorShare,
             franchiseShare,
             validity,

@@ -446,6 +446,9 @@ export const givePackageToFranchise = async (req, res) => {
 
         let newFranchisePackage;
         if (mainPackage) {
+            if (mainPackage.memberCost - mainPackage.adminShare < franchiseShare) {
+                return res.send({ status: false, message: "Invalid franchise share" })
+            }
             newFranchisePackage = new franchisePackageModel({
                 mainPackageId: mainPackage._id,
                 franchiseId,
@@ -455,15 +458,19 @@ export const givePackageToFranchise = async (req, res) => {
             })
         }
         if (addOnPackage) {
+            if (addOnPackage.memberCost - addOnPackage.adminShare < franchiseShare) {
+                return res.send({ status: false, message: "Invalid franchise share" })
+            }
             newFranchisePackage = new franchisePackageModel({
                 addOnPackageId: addOnPackage._id,
                 franchiseId,
-                franchiseShare,
                 distributorId,
-                distributorShare: parseInt(addOnPackage.memberCost) - parseInt(addOnPackage.adminShare) - parseInt(franchiseShare)
             })
         }
         if (vipPackage) {
+            if (vipPackage.memberCost - vipPackage.adminShare < franchiseShare) {
+                return res.send({ status: false, message: "Invalid franchise share" })
+            }
             newFranchisePackage = new franchisePackageModel({
                 vipPackageId: vipPackage._id,
                 franchiseId,

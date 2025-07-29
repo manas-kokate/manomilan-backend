@@ -10,6 +10,8 @@ import addOnPackageModel from "../models/small_models/addOnPackage.model.js";
 import mainPackageModel from "../models/small_models/mainPackage.model.js";
 import vippackageModel from "../models/small_models/vippackage.model.js";
 import userPackageTrackModel from "../models/small_models/userPackageTrack.model.js";
+import franchisePackageModel from "../models/small_models/franchise.package.model.js";
+import userPackagesModel from "../models/userPackages.model.js";
 
 export const registerFranchise = async (req, res) => {
     const distributorId = req.id;
@@ -535,4 +537,35 @@ export const getRepliesForFranchise = async (req, res) => {
 };
 
 // === ALLOT PACKAGE ===
+export const getPackages = async (req, res) => {
+    try {
+        const { franchiseId } = req.params;
+        if (!franchiseId) {
+            return res.send({ status: false, message: "franchiseId required" })
+        }
+        const franchisePackages = await franchisePackageModel.find({ franchiseId }).populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
+        if (franchisePackages.length === 0) {
+            return res.send({ status: false, message: "No packages alloted" })
+        }
+        return res.send({ status: true, franchisePackages })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
 
+export const allotPackage = async (req, res) => {
+    try {
+        const { userId, franchisePackageId } = req.body;
+        if (!userId || !franchisePackageId) {
+            return res.send({ status: false, message: "userId,franchisePackageId required" });
+        }
+        const newUserPackage = new userPackagesModel({
+            userId,
+            franchisePackageId
+        })
+        await newUserPackage.save()
+        return res.send({ status: true, message: "Package alloted" })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+}

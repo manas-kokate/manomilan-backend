@@ -19,7 +19,6 @@ const franchisePackageSchema = new mongoose.Schema({
     },
     franchiseShare: {
         type: Number,
-        required: true
     },
     distributorId: {
         type: mongoose.Schema.Types.ObjectId,
