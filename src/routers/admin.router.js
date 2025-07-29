@@ -206,7 +206,7 @@ router.get('/get-points', adminAuth, getPoints);
 router.post('/give-points-to-distributor', adminAuth, givePointsToDistributor);
 router.get('/get/franchiseLogs/:franchiseId', getFranchisePointsLog)
 router.get('/get/pointsLog/:distributorId', getDistributorPointsLog)
-router.get('/get-single-franchise', adminAuth, getSingleFranchise);
+router.get('/get-single-franchise/:id', adminAuth, getSingleFranchise);
 router.get('/get-single-distributor/:id', adminAuth, getSingleDistributor);
 
 // === PACKAGES === 
