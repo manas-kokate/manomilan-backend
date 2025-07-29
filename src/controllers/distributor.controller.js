@@ -462,7 +462,7 @@ export const givePackageToFranchise = async (req, res) => {
                 return res.send({ status: false, message: "Invalid franchise share" })
             }
             newFranchisePackage = new franchisePackageModel({
-                addOnPackageId: addOnPackage._id,
+                addOnPackage: addOnPackage._id,
                 franchiseId,
                 distributorId,
             })
@@ -472,14 +472,14 @@ export const givePackageToFranchise = async (req, res) => {
                 return res.send({ status: false, message: "Invalid franchise share" })
             }
             newFranchisePackage = new franchisePackageModel({
-                vipPackageId: vipPackage._id,
+                vipPackage: vipPackage._id,
                 franchiseId,
                 franchiseShare,
                 distributorId,
                 distributorShare: parseInt(vipPackage.memberCost) - parseInt(vipPackage.adminShare) - parseInt(franchiseShare)
             })
         }
-        await newFranchisePackage.save();
+        // await newFranchisePackage.save();
         return res.send({ status: true, message: "Package alloted to franchise", newFranchisePackage })
     } catch (error) {
         return res.send({ status: false, message: "Server error" })
