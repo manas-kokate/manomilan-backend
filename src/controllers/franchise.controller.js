@@ -13,6 +13,7 @@ import userPackageTrackModel from "../models/small_models/userPackageTrack.model
 import franchisePackageModel from "../models/small_models/franchise.package.model.js";
 import userPackagesModel from "../models/userPackages.model.js";
 import franchisePointsLogModel from "../models/small_models/franchisePointsLog.model.js";
+import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
 
 export const registerFranchise = async (req, res) => {
     const distributorId = req.id;
@@ -574,33 +575,40 @@ export const allotPackage = async (req, res) => {
         const distributorId = packageDetails.distributorId
         const distributor = await distributorModel.findById(distributorId)
         distributor.points = parseInt(distributor.points) + distributorShare;
+        await distributor.save()
+        const newDistributorLog = new distributorpointslogModel({
+            distributorId,
+            points: distributorShare,
+            Type: 'Credited',
+            By: userId,
+            Balance: distributor.points
+        })
+        await newDistributorLog.save()
 
         // franchise related to package
         const franchiseId = packageDetails.franchiseId;
         const franchise = await franchiseModel.findById(franchiseId);
+        franchise.points = parseInt(franchise.points) - (distributorShare + adminShare)
+        await franchise.save()
         const newFranchisePointsLog = new franchisePointsLogModel({
             franchiseId,
             points: -(distributorShare + adminShare),
             Type: 'Debited',
             By: userId,
-            Balance: franchise
+            Balance: franchise.points
         })
-        franchise.points = parseInt(franchise.points) - (distributorShare + adminShare)
-        // admin related to package
-        const adminId = packageDetails.mainPackageId?.adminId;
-        const admin = await adminModel.findById(adminId)
+        await newFranchisePointsLog.save()
 
         const newUserPackage = new userPackagesModel({
             userId,
             franchisePackageId
         })
-        // await newUserPackage.save()
+        await newUserPackage.save()
         return res.send({
             status: true, message: "Package alloted",
             packageDetails,
-            distributor,
-            franchise,
-            admin
+            newFranchisePointsLog,
+            newDistributorLog
         })
     } catch (error) {
         return res.send({ status: false, message: "Server error" });

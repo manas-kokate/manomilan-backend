@@ -122,7 +122,12 @@ const userSchema = new Schema({
     foodPreference: { type: String },
     bloodGroup: { type: String },
     specs: { type: String },
-    gotra: { type: String }
+    gotra: { type: String },
+
+    // addresses available
+    numberOfAddresses: {
+        type: Number
+    }
 }, { timestamps: true });
 
 export default model("user", userSchema);
