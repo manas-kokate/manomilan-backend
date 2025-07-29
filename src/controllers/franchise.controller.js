@@ -555,7 +555,7 @@ export const getPackages = async (req, res) => {
         if (!franchiseId) {
             return res.send({ status: false, message: "franchiseId required" })
         }
-        const franchisePackages = await franchisePackageModel.find({ franchiseId }).populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
+        const franchisePackages = await franchisePackageModel.find({ franchiseId }).populate('mainPackageId') || await franchisePackageModel.find({ franchiseId }).populate('vipPackage') || await franchisePackageModel.find({ franchiseId }).populate('addOnPackage');
         if (franchisePackages.length === 0) {
             return res.send({ status: false, message: "No packages alloted" })
         }

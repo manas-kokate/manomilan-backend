@@ -146,6 +146,7 @@ const userSchema = new Schema({
     numberOfAddresses: {
         type: Number
     },
+
 }, { timestamps: true });
 
 export default model("user", userSchema);
