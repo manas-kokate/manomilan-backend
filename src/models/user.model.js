@@ -146,6 +146,9 @@ const userSchema = new Schema({
     numberOfAddresses: {
         type: Number
     },
+    validity: {
+        type: Date
+    }
 
 }, { timestamps: true });
 
