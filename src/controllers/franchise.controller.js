@@ -568,137 +568,183 @@ export const getPackages = async (req, res) => {
 export const allotMainAddOnPackage = async (req, res) => {
     try {
         const { userId, franchisePackageId } = req.body;
+
         if (!userId || !franchisePackageId) {
-            return res.send({ status: false, message: "userId,franchisePackageId required" });
+            return res.send({ status: false, message: "userId, franchisePackageId required" });
         }
 
-        const packageDetails = await franchisePackageModel.findById(franchisePackageId).populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
-        const franchiseShare = parseInt(packageDetails.franchiseShare);
-        const distributorShare = parseInt(packageDetails.distributorShare)
-        const adminShare = parseInt(packageDetails.mainPackageId?.adminShare);
-        const memberCost = parseInt(packageDetails.mainPackageId?.memberCost);
+        const packageDetails = await franchisePackageModel.findById(franchisePackageId)
+            .populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
 
-        //user
+        if (!packageDetails) {
+            return res.send({ status: false, message: "Franchise Package not found" });
+        }
+
+        const mainPackage = packageDetails.mainPackageId;
+        if (!mainPackage || mainPackage.adminShare == null || mainPackage.memberCost == null) {
+            return res.send({ status: false, message: "Main package details missing or incomplete" });
+        }
+
+        const franchiseShare = parseInt(packageDetails.franchiseShare);
+        const distributorShare = parseInt(packageDetails.distributorShare);
+        const adminShare = parseInt(mainPackage.adminShare);
+        const memberCost = parseInt(mainPackage.memberCost);
+
         const user = await userModel.findById(userId);
         if (!user) {
-            return res.send({ status: false, message: "User not found" })
+            return res.send({ status: false, message: "User not found" });
         }
 
-        //distributor related to package
-        const distributorId = packageDetails.distributorId
-        const distributor = await distributorModel.findById(distributorId)
+        const distributor = await distributorModel.findById(packageDetails.distributorId);
+        if (!distributor) {
+            return res.send({ status: false, message: "Distributor not found" });
+        }
+
         distributor.points = parseInt(distributor.points) + distributorShare;
-        await distributor.save()
+        await distributor.save();
+
         const newDistributorLog = new distributorpointslogModel({
-            distributorId,
+            distributorId: distributor._id,
             points: distributorShare,
             Type: 'Credited',
-            By: `${user.loginEmail}`,
+            By: user.loginEmail,
             Balance: distributor.points
-        })
-        await newDistributorLog.save()
+        });
+        await newDistributorLog.save();
 
-        // franchise related to package
-        const franchiseId = packageDetails.franchiseId;
-        const franchise = await franchiseModel.findById(franchiseId);
-        franchise.points = parseInt(franchise.points) - (distributorShare + adminShare)
-        await franchise.save()
+        const franchise = await franchiseModel.findById(packageDetails.franchiseId);
+        if (!franchise) {
+            return res.send({ status: false, message: "Franchise not found" });
+        }
+
+        franchise.points = parseInt(franchise.points) - (distributorShare + adminShare);
+        await franchise.save();
+
         const newFranchisePointsLog = new franchisePointsLogModel({
-            franchiseId,
+            franchiseId: franchise._id,
             points: -(distributorShare + adminShare),
             Type: 'Debited',
             By: userId,
             Balance: franchise.points
-        })
-        await newFranchisePointsLog.save()
+        });
+        await newFranchisePointsLog.save();
 
         const newUserPackage = new userPackageTrackModel({
             userId,
             franchisePackage: packageDetails._id,
-        })
-        await newUserPackage.save()
-        user.numberOfAddresses = parseInt(user.numberOfAddresses) + parseInt(newUserPackage.assignedAddresses)
-        user.validity = new Date(Date.now() + newUserPackage.validity * 24 * 60 * 60 * 1000);
-        await user.save()
+        });
+        await newUserPackage.save();
+
+        user.numberOfAddresses = parseInt(user.numberOfAddresses || 0) + parseInt(newUserPackage.assignedAddresses || 0);
+        user.validity = new Date(Date.now() + (newUserPackage.validity || 0) * 24 * 60 * 60 * 1000);
+        await user.save();
+
         return res.send({
-            status: true, message: "Package alloted",
+            status: true,
+            message: "Main/AddOn Package allotted",
             packageDetails,
             newFranchisePointsLog,
             newDistributorLog
-        })
+        });
+
     } catch (error) {
-        return res.send({ status: false, message: "Server error" });
+        console.error("Error in allotMainAddOnPackage:", error);
+        return res.send({ status: false, message: "Server error", error: error.message });
     }
-}
+};
 
 export const allotVipPackage = async (req, res) => {
     try {
         const { userId, franchisePackageId } = req.body;
+
         if (!userId || !franchisePackageId) {
-            return res.send({ status: false, message: "userId,franchisePackageId required" });
+            return res.send({ status: false, message: "userId, franchisePackageId required" });
         }
 
-        const packageDetails = await franchisePackageModel.findById(franchisePackageId).populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
-        const franchiseShare = parseInt(packageDetails.franchiseShare);
-        const distributorShare = parseInt(packageDetails.distributorShare)
-        const adminShare = parseInt(packageDetails.vipPackage.adminShare);
-        const memberCost = parseInt(packageDetails.vipPackage.memberCost);
+        const packageDetails = await franchisePackageModel.findById(franchisePackageId)
+            .populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
 
-        //user
+        if (!packageDetails) {
+            return res.send({ status: false, message: "Franchise Package not found" });
+        }
+
+        const vipPackage = packageDetails.vipPackage;
+        if (!vipPackage || vipPackage.adminShare == null || vipPackage.memberCost == null) {
+            return res.send({ status: false, message: "VIP package details missing or incomplete" });
+        }
+
+        const franchiseShare = parseInt(packageDetails.franchiseShare);
+        const distributorShare = parseInt(packageDetails.distributorShare);
+        const adminShare = parseInt(vipPackage.adminShare);
+        const memberCost = parseInt(vipPackage.memberCost);
+
         const user = await userModel.findById(userId);
         if (!user) {
-            return res.send({ status: false, message: "User not found" })
-        }
-        if (!user.vipMember) {
-            return res.send({ status: false, message: "User is not Vip." })
+            return res.send({ status: false, message: "User not found" });
         }
 
-        //distributor related to package
-        const distributorId = packageDetails.distributorId
-        const distributor = await distributorModel.findById(distributorId)
+        if (!user.vipMember) {
+            return res.send({ status: false, message: "User is not a VIP member." });
+        }
+
+        const distributor = await distributorModel.findById(packageDetails.distributorId);
+        if (!distributor) {
+            return res.send({ status: false, message: "Distributor not found" });
+        }
+
         distributor.points = parseInt(distributor.points) + distributorShare;
-        await distributor.save()
+        await distributor.save();
+
         const newDistributorLog = new distributorpointslogModel({
-            distributorId,
+            distributorId: distributor._id,
             points: distributorShare,
             Type: 'Credited',
-            By: `${user.loginEmail}`,
+            By: user.loginEmail,
             Balance: distributor.points
-        })
-        await newDistributorLog.save()
+        });
+        await newDistributorLog.save();
 
-        // franchise related to package
-        const franchiseId = packageDetails.franchiseId;
-        const franchise = await franchiseModel.findById(franchiseId);
-        franchise.points = parseInt(franchise.points) - (distributorShare + adminShare)
-        await franchise.save()
+        const franchise = await franchiseModel.findById(packageDetails.franchiseId);
+        if (!franchise) {
+            return res.send({ status: false, message: "Franchise not found" });
+        }
+
+        franchise.points = parseInt(franchise.points) - (distributorShare + adminShare);
+        await franchise.save();
+
         const newFranchisePointsLog = new franchisePointsLogModel({
-            franchiseId,
+            franchiseId: franchise._id,
             points: -(distributorShare + adminShare),
             Type: 'Debited',
             By: userId,
             Balance: franchise.points
-        })
-        await newFranchisePointsLog.save()
+        });
+        await newFranchisePointsLog.save();
 
         const newUserPackage = new userPackageTrackModel({
             userId,
             franchisePackage: packageDetails._id,
-        })
-        await newUserPackage.save()
-        user.numberOfAddresses = parseInt(user.numberOfAddresses) + parseInt(newUserPackage.assignedAddresses)
-        user.validity = new Date(Date.now() + newUserPackage.validity * 24 * 60 * 60 * 1000);
-        await user.save()
+        });
+        await newUserPackage.save();
+
+        user.numberOfAddresses = parseInt(user.numberOfAddresses || 0) + parseInt(newUserPackage.assignedAddresses || 0);
+        user.validity = new Date(Date.now() + (newUserPackage.validity || 0) * 24 * 60 * 60 * 1000);
+        await user.save();
+
         return res.send({
-            status: true, message: "Package alloted",
+            status: true,
+            message: "VIP Package allotted",
             packageDetails,
             newFranchisePointsLog,
             newDistributorLog
-        })
+        });
+
     } catch (error) {
-        return res.send({ status: false, message: "Server error" });
+        console.error("Error in allotVipPackage:", error);
+        return res.send({ status: false, message: "Server error", error: error.message });
     }
-}
+};
+
 
 // === OFFICE INFO ===
 export const updateOfficeInformation = async (req, res) => {
