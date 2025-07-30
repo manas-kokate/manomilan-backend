@@ -26,7 +26,6 @@ const franchisePackageSchema = new mongoose.Schema({
     },
     distributorShare: {
         type: Number,
-        required: true
     }
 }, { timestamps: true })
 
