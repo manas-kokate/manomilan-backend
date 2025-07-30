@@ -645,6 +645,9 @@ export const allotVipPackage = async (req, res) => {
 
         //user
         const user = await userModel.findById(userId);
+        if (!user) {
+            return res.send({ status: false, message: "User not found" })
+        }
         if (!user.vipMember) {
             return res.send({ status: false, message: "User is not Vip." })
         }
