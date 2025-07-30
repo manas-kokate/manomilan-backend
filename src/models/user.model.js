@@ -131,7 +131,7 @@ const userSchema = new Schema({
     BodyType: { type: String },
     familyBackground: { type: String },
     features: { type: String },
-    height: { type: String },
+    officeHeight: { type: String },
     position: { type: String },
     vipMember: {
         type: Boolean,

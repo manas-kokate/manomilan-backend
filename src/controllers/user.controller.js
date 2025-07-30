@@ -673,6 +673,7 @@ export const editExpectaions = async (req, res) => {
   }
 }
 
+// === SUBSCRIBE ===
 export const subscribe = async (req, res) => {
   try {
     const userId = req.id;

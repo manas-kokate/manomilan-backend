@@ -5,10 +5,6 @@ import envCredentials from "../config/env.js";
 import distributorModel from "../models/distributor.model.js";
 import MessageModel from "../models/small_models/message.model.js";
 import adminModel from "../models/admin.model.js";
-import freepackageModel from '../models/small_models/freepackage.model.js'
-import addOnPackageModel from "../models/small_models/addOnPackage.model.js";
-import mainPackageModel from "../models/small_models/mainPackage.model.js";
-import vippackageModel from "../models/small_models/vippackage.model.js";
 import userPackageTrackModel from "../models/small_models/userPackageTrack.model.js";
 import franchisePackageModel from "../models/small_models/franchise.package.model.js";
 import userPackagesModel from "../models/userPackages.model.js";
@@ -710,7 +706,7 @@ export const updateOfficeInformation = async (req, res) => {
             BodyType,
             familyBackground,
             features,
-            height,
+            officeHeight,
             position,
             vipMember,
             Reference,
@@ -731,7 +727,7 @@ export const updateOfficeInformation = async (req, res) => {
         user.BodyType = BodyType || user.BodyType;
         user.familyBackground = familyBackground || user.familyBackground;
         user.features = features || user.features;
-        user.height = height || user.height;
+        user.officeHeight = officeHeight || user.officeHeight;
         user.position = position || user.position;
         user.vipMember = vipMember === 'true' || vipMember === true;
         user.Reference = Reference || user.Reference;

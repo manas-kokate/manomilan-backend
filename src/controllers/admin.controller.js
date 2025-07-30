@@ -25,7 +25,6 @@ import franchiseModel from "../models/franchise.model.js";
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
 import vippackageModel from "../models/small_models/vippackage.model.js";
 import mainPackageModel from "../models/small_models/mainPackage.model.js";
-import addOnPackage from "../models/small_models/addOnPackage.model.js";
 import addOnPackageModel from "../models/small_models/addOnPackage.model.js";
 import MessageModel from "../models/small_models/message.model.js";
 import adminPointsLogModel from "../models/small_models/adminPointsLog.model.js";
