@@ -882,11 +882,16 @@ export const getUserPackages = async (req, res) => {
     if (!userId) {
       return res.send({ status: false, message: "User ID not found" })
     }
-    const userPackages = await userPackagesModel.find({ userId }).populate('franchisePackageId').populate(['mainPackage', 'vipPackage', 'addOnPackage'])
+    const userPackages = await userPackageTrackModel.find({ userId }).populate({
+      path: 'franchisePackage',
+      populate: [
+        { path: 'mainPackageId' },
+        { path: 'vipPackage' },
+        { path: 'addOnPackage' }
+      ]
+    })
 
-    const franchisePackage = await franchisePackageModel.findById(userPackages.franchisePackageId).populate(['mainPackageId', 'vipPackage', 'addOnPackage'])
-
-    return res.send({ status: true, userPackages, franchisePackage })
+    return res.send({ status: true, userPackages })
 
   } catch (error) {
     return res.send({ status: false, message: "server error" })

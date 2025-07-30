@@ -614,9 +614,7 @@ export const allotMainAddOnPackage = async (req, res) => {
 
         const newUserPackage = new userPackageTrackModel({
             userId,
-            assignedAddresses: packageDetails.mainPackageId?.numberOfAddresses,
-            mainPackage: packageDetails.mainPackageId._id,
-            validity: packageDetails.mainPackageId?.numberOfAddresses || 0
+            franchisePackage: packageDetails._id,
         })
         await newUserPackage.save()
         user.numberOfAddresses = parseInt(user.numberOfAddresses) + parseInt(newUserPackage.assignedAddresses)
@@ -685,9 +683,7 @@ export const allotVipPackage = async (req, res) => {
 
         const newUserPackage = new userPackageTrackModel({
             userId,
-            vipPackage: packageDetails.vipPackage._id,
-            assignedAddresses: packageDetails.vipPackage?.numberOfAddresses,
-            validity: packageDetails.vipPackage?.numberOfAddresses || 0
+            franchisePackage: packageDetails._id,
         })
         await newUserPackage.save()
         user.numberOfAddresses = parseInt(user.numberOfAddresses) + parseInt(newUserPackage.assignedAddresses)
