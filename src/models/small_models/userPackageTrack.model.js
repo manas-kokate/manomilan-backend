@@ -19,18 +19,18 @@ const userPackageTrackSchema = new mongoose.Schema({
     allotmentDate: {
         type: Date
     },
-    vipPackage: [{
+    vipPackage: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'VipPackage'
-    }],
-    addOnPackage: [{
+    },
+    addOnPackage: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'AddOnPackage'
-    }],
-    mainPackage: [{
+    },
+    mainPackage: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'MainPackage'
-    }],
+    },
     freePackage: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'freePackage'
