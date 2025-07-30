@@ -573,7 +573,6 @@ export const allotMainAddOnPackage = async (req, res) => {
         }
 
         const packageDetails = await franchisePackageModel.findById(franchisePackageId).populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
-        console.log(packageDetails)
         const franchiseShare = parseInt(packageDetails.franchiseShare);
         const distributorShare = parseInt(packageDetails.distributorShare)
         const adminShare = parseInt(packageDetails.mainPackageId?.adminShare);
@@ -616,7 +615,7 @@ export const allotMainAddOnPackage = async (req, res) => {
         const newUserPackage = new userPackageTrackModel({
             userId,
             assignedAddresses: packageDetails.mainPackageId?.numberOfAddresses,
-            mainPackageId: packageDetails.mainPackageId._id,
+            mainPackage: packageDetails.mainPackageId._id,
             validity: packageDetails.mainPackageId?.numberOfAddresses || 0
         })
         await newUserPackage.save()
