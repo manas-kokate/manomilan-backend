@@ -43,7 +43,6 @@ router.post('/message/draft', franchiseAuth, draftMessageFromFranchise)
 router.get('/message/get-draftedMessages', franchiseAuth, getDraftedMessagesForFranchise);
 
 router.get('/message/replies', franchiseAuth, getRepliesForFranchise);
-
 router.get('/get-current-franchise', franchiseAuth, getCurrentFranchise)
 // === PACKAGES ===
 router.get('/get-packages/:franchiseId', getPackages)

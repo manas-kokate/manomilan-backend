@@ -889,7 +889,7 @@ export const getUserPackages = async (req, res) => {
         { path: 'vipPackage' },
         { path: 'addOnPackage' }
       ]
-    })
+    }).sort({ createdAt: -1 })
 
     return res.send({ status: true, userPackages })
 
