@@ -720,7 +720,6 @@ export const subscribe = async (req, res) => {
     return res.status(200).json({ status: true, message: "Subscribed successfully." });
 
   } catch (error) {
-    console.error("Subscribe Error:", error);
     return res.status(500).json({ status: false, message: "Server error." });
   }
 };
