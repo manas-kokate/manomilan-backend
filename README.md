@@ -102,4 +102,4 @@ This project is licensed under the MIT License.
 🙋‍♂️ Author
 Manas Kokate
 
-GitHub: @manas-kokate
+GitHub:https://github.com/manas-kokate
