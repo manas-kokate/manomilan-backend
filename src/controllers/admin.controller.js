@@ -1925,16 +1925,21 @@ export const getReports = async (req, res) => {
         if (filters.distributor) query["CreatedBy"] = filters.distributor;
         if (filters.franchise) query["franchiseUnder"] = filters.franchise;
 
-        // Build field projection
-        let projection = {};
+        // Build projection (fields to return)
+        let projection = null;
         if (fields && fields.length > 0) {
+            projection = {};
             fields.forEach(field => {
                 projection[field] = 1;
             });
+            // Optional: exclude _id if not needed
+            // projection["_id"] = 0;
         }
 
         // Query database
-        const users = await userModel.find(query, projection);
+        const users = projection
+            ? await userModel.find(query, projection)
+            : await userModel.find(query);
 
         res.status(200).json({
             success: true,

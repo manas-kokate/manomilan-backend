@@ -222,7 +222,6 @@ export const registerUser = async (req, res) => {
       packageLog: newPackageLog
     });
   } catch (error) {
-    console.error("Registration Error:", error);
     return res.status(500).send({
       status: false,
       message: "Server Error",
@@ -327,7 +326,6 @@ export const mutualMatching = async (req, res) => {
     const userId = req.id;
     const currentUser = await userModel.findById(userId).lean();
     if (!currentUser) {
-      console.log('User not found:', userId);
       return res.status(404).send({ status: false, message: "User not found" });
     }
 
@@ -354,8 +352,6 @@ export const mutualMatching = async (req, res) => {
             $lte: new Date(`${birthYearTo}-12-31`)
           }
         });
-      } else {
-        console.log('Skipping invalid age range:', { ageFrom, ageTo });
       }
     }
 
@@ -445,14 +441,11 @@ export const mutualMatching = async (req, res) => {
 
     const finalQuery = orConditions.length ? { $and: filterConditions, $or: orConditions } : { $and: filterConditions };
 
-    // console.log('One-way filter:', JSON.stringify(finalQuery, null, 2));
     const oneWayMatches = await userModel.find(finalQuery).lean().sort({ createdAt: -1 });
-    // console.log('One-way matches:', oneWayMatches.map(u => ({ _id: u._id.toString(), firstName: u.firstName, expectedWorkAbroad: u.expectedWorkAbroad, education: u.education })));
 
     // Mutual matching
     const mutualMatches = [];
     for (const match of oneWayMatches) {
-      // console.log(`Processing mutual match for user: ${match._id}, firstName: ${match.firstName}`);
       const reverseConditions = [
         { _id: userId },
         { ActiveStatus: true },
@@ -547,18 +540,13 @@ export const mutualMatching = async (req, res) => {
       }
 
       const reverseQuery = reverseOrConditions.length ? { $and: reverseConditions, $or: reverseOrConditions } : { $and: reverseConditions };
-
-      // console.log(`Mutual filter for ${match._id}:`, JSON.stringify(reverseQuery, null, 2));
       const mutual = await userModel.findOne(reverseQuery).lean();
       if (mutual) {
         mutualMatches.push(match);
       }
     }
-
-    // console.log('Mutual matches:', mutualMatches.map(u => ({ _id: u._id.toString(), firstName: u.firstName, education: u.education })));
     return res.status(200).send({ status: true, Matches: mutualMatches });
   } catch (err) {
-    // console.error('Error in matching:', err);
     return res.status(500).send({ status: false, message: 'Server error', error: err.message });
   }
 };
@@ -663,7 +651,6 @@ export const editExpectaions = async (req, res) => {
       updatedData: finalUser,
     });
   } catch (error) {
-    console.error('Error updating profile:', error);
     return res.status(500).send({
       status: false,
       message: "Server error",
