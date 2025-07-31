@@ -94,7 +94,6 @@ export const loginDistributor = async (req, res) => {
         if (!distributor) {
             distributor = await distributorModel.findOne({ mobileNumber: identifier })
         }
-        // console.log(distributor.password, password)
 
         if (!distributor) {
             return res.status(401).json({ status: false, message: "Invalid mobile number or email" });
@@ -112,11 +111,22 @@ export const loginDistributor = async (req, res) => {
             { expiresIn: "4h" }
         );
 
+        const franchisesUnder = await franchiseModel.find({ distributorUnder: distributor.distributorName });
+
+        const franchiseNames = franchisesUnder.map((ele) => {
+            return ele.franchiseName
+        })
+
+        const users = await userModel.find({ franchiseUnder: { $in: franchiseNames } })
+
         return res.json({
             status: true,
             message: "Login successful",
             token,
-            distributor
+            distributor,
+            accountBalance: distributor.points,
+            franchisesUnder: franchisesUnder.length,
+            users
         });
 
     } catch (error) {

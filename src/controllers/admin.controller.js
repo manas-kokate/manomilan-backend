@@ -1880,8 +1880,7 @@ export const getRepliesForAdmin = async (req, res) => {
     }
 };
 
-// === REPORTS ===
-// add parentsResidence field here 
+// === REPORTS === 
 export const getReports = async (req, res) => {
     try {
         const { filters = {}, fields = [] } = req.body;
@@ -1905,11 +1904,9 @@ export const getReports = async (req, res) => {
 
         // Career Info
         if (filters.education) {
-            if (Array.isArray(filters.education)) {
-                query["education"] = { $in: filters.education };
-            } else {
-                query["education"] = filters.education;
-            }
+            query["education"] = Array.isArray(filters.education)
+                ? { $in: filters.education }
+                : filters.education;
         }
         if (filters.occupation) query["occupation"] = filters.occupation;
         if (filters.monthlyIncome) {
@@ -1925,15 +1922,13 @@ export const getReports = async (req, res) => {
         if (filters.distributor) query["CreatedBy"] = filters.distributor;
         if (filters.franchise) query["franchiseUnder"] = filters.franchise;
 
-        // Build projection (fields to return)
+        // Build projection (fields to exclude)
         let projection = null;
         if (fields && fields.length > 0) {
             projection = {};
             fields.forEach(field => {
-                projection[field] = 1;
+                projection[field] = 0; // Exclude field
             });
-            // Optional: exclude _id if not needed
-            // projection["_id"] = 0;
         }
 
         // Query database
@@ -1954,6 +1949,7 @@ export const getReports = async (req, res) => {
         });
     }
 };
+
 
 export const searchUsers = async (req, res) => {
     try {
