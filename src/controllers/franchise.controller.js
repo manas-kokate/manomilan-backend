@@ -7,7 +7,6 @@ import MessageModel from "../models/small_models/message.model.js";
 import adminModel from "../models/admin.model.js";
 import userPackageTrackModel from "../models/small_models/userPackageTrack.model.js";
 import franchisePackageModel from "../models/small_models/franchise.package.model.js";
-import userPackagesModel from "../models/userPackages.model.js";
 import franchisePointsLogModel from "../models/small_models/franchisePointsLog.model.js";
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
 
@@ -576,6 +575,9 @@ export const allotMainAddOnPackage = async (req, res) => {
         const packageDetails = await franchisePackageModel.findById(franchisePackageId)
             .populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
 
+        if (parseInt(packageDetails.mainPackageId?.memberCost || packageDetails.addOnPackage?.memberCost) > parseInt(franchise.points)) {
+            return res.send({ status: false, message: "Insufficient points balance. Purchase new points." })
+        }
         if (!packageDetails) {
             return res.send({ status: false, message: "Franchise Package not found" });
         }
@@ -666,6 +668,10 @@ export const allotVipPackage = async (req, res) => {
 
         if (!packageDetails) {
             return res.send({ status: false, message: "Franchise Package not found" });
+        }
+
+        if (parseInt(packageDetails.vipPackage?.memberCost) > parseInt(franchise.points)) {
+            return res.send({ status: false, message: "Insufficient points balance. Purchase new points." })
         }
 
         const vipPackage = packageDetails.vipPackage;

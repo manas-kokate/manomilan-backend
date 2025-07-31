@@ -8,8 +8,6 @@ import adminModel from "../models/admin.model.js";
 import distributorModel from "../models/distributor.model.js";
 import freepackageModel from "../models/small_models/freepackage.model.js";
 import userPackageTrackModel from "../models/small_models/userPackageTrack.model.js";
-import userPackagesModel from "../models/userPackages.model.js";
-import franchisePackageModel from "../models/small_models/franchise.package.model.js";
 
 
 export const registerUser = async (req, res) => {

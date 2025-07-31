@@ -23,7 +23,7 @@ import distributorModel from "../models/distributor.model.js";
 import freepackageModel from "../models/small_models/freepackage.model.js";
 import franchiseModel from "../models/franchise.model.js";
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
-import vippackageModel from "../models/small_models/vippackage.model.js";
+import vipPackageModel from "../models/small_models/vipPackage.model.js";
 import mainPackageModel from "../models/small_models/mainPackage.model.js";
 import addOnPackageModel from "../models/small_models/addOnPackage.model.js";
 import MessageModel from "../models/small_models/message.model.js";
@@ -1508,11 +1508,11 @@ export const addVipPackage = async (req, res) => {
         }
 
         let packageId = 1;
-        const lastPackage = await vippackageModel.findOne({}).sort({ packageId: -1 })
+        const lastPackage = await vipPackageModel.findOne({}).sort({ packageId: -1 })
         if (lastPackage) {
             packageId = parseInt(lastPackage?.packageId) + 1;
         }
-        const newPackage = new vippackageModel({
+        const newPackage = new vipPackageModel({
             packageId,
             packageName,
             numberOfAddresses,
@@ -1520,7 +1520,7 @@ export const addVipPackage = async (req, res) => {
             adminShare,
             validity
         })
-        await vippackageModel.updateMany({}, { $set: { status: 'Inactive' } });
+        await vipPackageModel.updateMany({}, { $set: { status: 'Inactive' } });
 
         await newPackage.save()
 
@@ -1533,7 +1533,7 @@ export const addVipPackage = async (req, res) => {
 
 export const getAllVipPackages = async (req, res) => {
     try {
-        const packages = await vippackageModel.find().sort({ packageId: -1 });
+        const packages = await vipPackageModel.find().sort({ packageId: -1 });
         res.json(packages);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1885,7 +1885,6 @@ export const getRepliesForAdmin = async (req, res) => {
 export const getReports = async (req, res) => {
     try {
         const { filters = {}, fields = [] } = req.body;
-        // Step 1: Build MongoDB filter query
         let query = {};
 
         // Native Location
@@ -1905,9 +1904,18 @@ export const getReports = async (req, res) => {
         if (filters.motherTongue) query["motherTongue"] = filters.motherTongue;
 
         // Career Info
-        if (filters.education) query["education"] = { $in: filters.education };
+        if (filters.education) {
+            if (Array.isArray(filters.education)) {
+                query["education"] = { $in: filters.education };
+            } else {
+                query["education"] = filters.education;
+            }
+        }
         if (filters.occupation) query["occupation"] = filters.occupation;
-        if (filters.monthlyIncome) query["monthlyIncome"] = { $gte: filters.monthlyIncome };
+        if (filters.monthlyIncome) {
+            const income = Number(filters.monthlyIncome);
+            if (!isNaN(income)) query["monthlyIncome"] = { $gte: income };
+        }
 
         // Other Info
         if (filters.maritalStatus) query["maritalStatus"] = filters.maritalStatus;
@@ -1917,7 +1925,7 @@ export const getReports = async (req, res) => {
         if (filters.distributor) query["CreatedBy"] = filters.distributor;
         if (filters.franchise) query["franchiseUnder"] = filters.franchise;
 
-        // Step 2: Build field projection
+        // Build field projection
         let projection = {};
         if (fields && fields.length > 0) {
             fields.forEach(field => {
@@ -1925,8 +1933,7 @@ export const getReports = async (req, res) => {
             });
         }
 
-
-        // Step 3: Query database
+        // Query database
         const users = await userModel.find(query, projection);
 
         res.status(200).json({
@@ -1935,7 +1942,11 @@ export const getReports = async (req, res) => {
             data: users
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Server Error. Check your request body.", error });
+        res.status(500).json({
+            success: false,
+            message: "Server Error. Check your request body.",
+            error: error.message
+        });
     }
 };
 
@@ -1943,7 +1954,6 @@ export const searchUsers = async (req, res) => {
     try {
         const { searchTerm } = req.body;
 
-        // If no search term provided, return early
         if (!searchTerm) {
             return res.status(400).json({
                 status: false,
@@ -1951,96 +1961,68 @@ export const searchUsers = async (req, res) => {
             });
         }
 
-        // Create regex for case-insensitive partial matching
         const regex = new RegExp(searchTerm, 'i');
-
-        // Check if searchTerm is a number for numeric fields
-        const isNumber = !isNaN(searchTerm) && !isNaN(parseInt(searchTerm));
+        const isNumber = !isNaN(searchTerm);
         const numericValue = isNumber ? parseInt(searchTerm) : null;
 
-        // Define fields to search (excluding expectation fields and sensitive fields like password)
+        // Optional quick match by UserId
+        if (isNumber) {
+            const userById = await userModel.findOne({ UserId: numericValue }).select('-password');
+            if (userById) {
+                return res.status(200).json({
+                    success: true,
+                    totalCount: 1,
+                    message: 'User found by ID',
+                    data: [userById]
+                });
+            }
+        }
+
+        // Flat fields that can be regex-searched
         const searchFields = [
-            'loginEmail',
-            'loginNumber',
-            'firstName',
-            'lastName',
-            'midname',
-            'gender',
-            'timeOfBirth',
-            'placeOfBirth',
-            'maritalStatus',
-            'occupation',
-            'motherTongue',
-            'divyang',
-            'mothersName',
-            'fathersName',
-            'mamkul',
-            'parentsResidence',
-            'parentsCity',
-            'alternateNumber',
-            'brothers',
-            'sisters',
-            'otherInfo',
-            'nativeVillage',
-            'nativeCity.country',
-            'nativeCity.state',
-            'nativeCity.city',
-            'workAbroad',
-            'companyName',
-            'designation',
-            'candidateNumber',
-            'candidateEmail',
-            'workLocation',
-            'userPhotoStatus',
-            'sect',
-            'manglik',
-            'foodPreference',
-            'bloodGroup',
-            'specs',
-            'gotra',
-            'caste.religion',
-            'caste.caste',
-            'caste.subCaste'
+            'loginEmail', 'loginNumber', 'firstName', 'lastName', 'midname', 'gender',
+            'timeOfBirth', 'placeOfBirth', 'maritalStatus', 'occupation', 'motherTongue',
+            'divyang', 'mothersName', 'fathersName', 'mamkul', 'parentsResidence',
+            'parentsCity', 'alternateNumber', 'brothers', 'sisters', 'otherInfo',
+            'nativeVillage', 'companyName', 'designation', 'candidateNumber',
+            'candidateEmail', 'userPhotoStatus', 'sect', 'manglik', 'foodPreference',
+            'bloodGroup', 'specs', 'gotra',
+            // Nested fields with dot notation
+            'nativeCity.country', 'nativeCity.state', 'nativeCity.city',
+            'workLocation.country', 'workLocation.state', 'workLocation.city',
+            'caste.religion', 'caste.caste', 'caste.subCaste',
+            'children.gender', 'children.livesWith'
         ];
 
-        // Define numeric fields for exact matching
         const numericFields = [
-            'UserId',
-            'height',
-            'parentsContact',
-            'whatsApp',
-            'brothersCount',
-            'sistersExactCount',
-            'addressesAvailable'
+            'height', 'parentsContact', 'whatsApp',
+            'brothersCount', 'sistersExactCount', 'monthlyIncome',
+            'freeAddresses', 'numberOfAddresses'
         ];
 
-        // Build the $or query for all searchable fields
         const orQuery = [];
 
-        // Add string-based searches
         searchFields.forEach(field => {
             orQuery.push({ [field]: { $regex: regex } });
         });
 
-        // Add special handling for array fields
-        orQuery.push(
-            { nationality: { $in: [regex] } },
-            { education: { $in: [regex] } },
-            { 'children.gender': { $regex: regex } },
-            { 'children.livesWith': { $regex: regex } }
-        );
-
-        // Add numeric field searches if searchTerm is a number
         if (isNumber) {
             numericFields.forEach(field => {
-                orQuery.push({ [field]: { $eq: numericValue } });
+                orQuery.push({ [field]: numericValue });
             });
-            // Special handling for monthlyIncome (exact match) 
-            orQuery.push({ monthlyIncome: { $eq: numericValue } });
         }
 
-        // Perform the search
-        const users = await userModel.find({ $or: orQuery }).select('-password'); // Exclude password field
+        // Search in full name (concat)
+        orQuery.push({
+            $expr: {
+                $regexMatch: {
+                    input: { $concat: ['$firstName', ' ', '$midname', ' ', '$lastName'] },
+                    regex: regex
+                }
+            }
+        });
+
+        const users = await userModel.find({ $or: orQuery }).select('-password');
 
         if (!users || users.length === 0) {
             return res.status(404).json({

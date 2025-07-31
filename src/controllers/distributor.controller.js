@@ -10,8 +10,7 @@ import bcrypt from 'bcrypt'
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
 import franchisePackageModel from "../models/small_models/franchise.package.model.js";
 import mainPackageModel from "../models/small_models/mainPackage.model.js";
-import addOnPackageModel from "../models/small_models/addOnPackage.model.js";
-import vippackageModel from "../models/small_models/vippackage.model.js";
+import vipPackageModel from "../models/small_models/vipPackage.model.js";
 
 export const registerDistributor = async (req, res) => {
     const {
@@ -441,7 +440,7 @@ export const givePackageToFranchise = async (req, res) => {
         }
 
         const mainPackage = await mainPackageModel.findById(packageId) || null;
-        const vipPackage = await vippackageModel.findById(packageId) || null;
+        const vipPackage = await vipPackageModel.findById(packageId) || null;
         if (!mainPackage && !vipPackage) {
             return res.send({ status: false, message: "Package not found" })
         }
