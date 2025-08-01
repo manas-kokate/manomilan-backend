@@ -11,6 +11,8 @@ import distributorpointslogModel from "../models/small_models/distributorpointsl
 import franchisePackageModel from "../models/small_models/franchise.package.model.js";
 import mainPackageModel from "../models/small_models/mainPackage.model.js";
 import vipPackageModel from "../models/small_models/vipPackage.model.js";
+import sendMail from "../utils/mail.js";
+import otpModel from "../models/small_models/otp.model.js";
 
 export const registerDistributor = async (req, res) => {
     const {
@@ -62,31 +64,31 @@ export const registerDistributor = async (req, res) => {
         distributorPhoto = ''
     }
 
-    try {
-        const newDistributor = new distributorModel({
-            distributorName,
-            ownerName,
-            mobileNumber,
-            alternateNumber,
-            adharNumber,
-            panNumber,
-            password,
-            email,
-            address,
-            location,
-            distributorPhoto,
-            qrPhoto,
-            socialMedia,
-            pincode,
-            transactionPassword
-        })
-        const distributor = await newDistributor.save();
+    // try {
+    const newDistributor = new distributorModel({
+        distributorName,
+        ownerName,
+        mobileNumber,
+        alternateNumber,
+        adharNumber,
+        panNumber,
+        password,
+        email,
+        address,
+        location,
+        distributorPhoto,
+        qrPhoto,
+        socialMedia,
+        pincode,
+        transactionPassword
+    })
+    const distributor = await newDistributor.save();
 
-        await sendMail({
-            to: email,
-            subject: `New Distributor Registered – ${distributorName}`,
-            text: `A new distributor has been registered.\n\nName: ${distributorName}\nOwner: ${ownerName}\nEmail: ${email}\nPassword: ${password}`,
-            html: `
+    await sendMail({
+        to: email,
+        subject: `New Distributor Registered – ${distributorName}`,
+        text: `A new distributor has been registered.\n\nName: ${distributorName}\nOwner: ${ownerName}\nEmail: ${email}\nPassword: ${password}`,
+        html: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -178,12 +180,12 @@ export const registerDistributor = async (req, res) => {
 </body>
 </html>
 `
-        });
+    });
 
-        return res.send({ status: true, message: "Distributor registered successfully", distributor })
-    } catch (error) {
-        return res.send({ status: false, message: "Something went wrong. Send details properly." })
-    }
+    return res.send({ status: true, message: "Distributor registered successfully", distributor })
+    // } catch (error) {
+    //     return res.send({ status: false, message: "Something went wrong. Send details properly." })
+    // }
 }
 
 export const loginDistributor = async (req, res) => {

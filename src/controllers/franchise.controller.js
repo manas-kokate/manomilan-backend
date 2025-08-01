@@ -9,6 +9,8 @@ import userPackageTrackModel from "../models/small_models/userPackageTrack.model
 import franchisePackageModel from "../models/small_models/franchise.package.model.js";
 import franchisePointsLogModel from "../models/small_models/franchisePointsLog.model.js";
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
+import sendMail from "../utils/mail.js";
+import otpModel from "../models/small_models/otp.model.js";
 
 export const registerFranchise = async (req, res) => {
     const distributorId = req.id;
@@ -52,30 +54,30 @@ export const registerFranchise = async (req, res) => {
     }
 
 
-    try {
-        const currentDistributor = await distributorModel.findById(distributorId);
-        const newSchema = new franchiseModel({
-            franchiseName,
-            ownerName,
-            distributorUnder: currentDistributor.distributorName,
-            mobileNumber,
-            alternateNumber,
-            adharNumber,
-            panNumber,
-            password,
-            email,
-            address,
-            location,
-            socialMedia,
-            franchisePhoto,
-            qrPhoto
-        })
-        await newSchema.save()
-        sendMail({
-            to: newSchema.email,
-            subject: "Welcome to ManoMilan - Your Registration Details",
-            text: "You are the new franchise at ManoMilan.",
-            html: `
+    // try {
+    const currentDistributor = await distributorModel.findById(distributorId);
+    const newSchema = new franchiseModel({
+        franchiseName,
+        ownerName,
+        distributorUnder: currentDistributor.distributorName,
+        mobileNumber,
+        alternateNumber,
+        adharNumber,
+        panNumber,
+        password,
+        email,
+        address,
+        location,
+        socialMedia,
+        franchisePhoto,
+        qrPhoto
+    })
+    await newSchema.save()
+    sendMail({
+        to: newSchema.email,
+        subject: "Welcome to ManoMilan - Your Registration Details",
+        text: "You are the new franchise at ManoMilan.",
+        html: `
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -158,10 +160,18 @@ export const registerFranchise = async (req, res) => {
             </div>
             <div class="content">
               <p>Hi <strong>${newSchema.franchiseName}</strong>,</p>
-              <p>Thanks for registering with ManoMilan. Below are your login credentials:</p>
+              <p>Thanks for registering with ManoMilan. Below are your login details:</p>
               <div class="credentials-box">
-                <p>Email: ${newSchema.email}</p>
-                <p>Password:${password}</p>
+        <p>email:${email}</p>
+        <p>franchiseName:${franchiseName}</p>
+        <p>ownerName:${ownerName}</p>
+        <p>distributorUnder:${newSchema.distributorUnder}</p>
+        <p>mobileNumber:${mobileNumber}</p>
+        <p>alternateNumber:${alternateNumber}</p>
+        <p>adharNumber:${adharNumber}</p>
+        <p>panNumber:${panNumber}</p>
+        <p>password:${password}</p>
+        <p>address:${address}</p>
               </div>
             </div>
             <div class="footer">
@@ -171,11 +181,11 @@ export const registerFranchise = async (req, res) => {
         </body>
         </html>
         `
-        })
-        return res.send({ status: true, message: "Franchise registered successfully" });
-    } catch (error) {
-        return res.send({ status: false, message: "Something went wrong. Send data properly." })
-    }
+    })
+    return res.send({ status: true, message: "Franchise registered successfully" });
+    // } catch (error) {
+    //     return res.send({ status: false, message: "Something went wrong. Send data properly." })
+    // }
 }
 
 export const loginFranchise = async (req, res) => {
@@ -255,7 +265,6 @@ export const verifyOtpAndChangeFranchisePassword = async (req, res) => {
 
     return res.send({ status: true, message: "Password updated successfully." });
 };
-
 
 export const updateFranchiseProfile = async (req, res) => {
     const { franchiseId } = req.id;

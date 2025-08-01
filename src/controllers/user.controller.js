@@ -8,7 +8,7 @@ import adminModel from "../models/admin.model.js";
 import distributorModel from "../models/distributor.model.js";
 import freepackageModel from "../models/small_models/freepackage.model.js";
 import userPackageTrackModel from "../models/small_models/userPackageTrack.model.js";
-
+import otpModel from "../models/small_models/otp.model.js";
 
 export const registerUser = async (req, res) => {
   try {
