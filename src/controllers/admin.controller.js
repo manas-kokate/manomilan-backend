@@ -1881,28 +1881,94 @@ export const getRepliesForAdmin = async (req, res) => {
 };
 
 // === REPORTS === 
+// export const getReports = async (req, res) => {
+//     try {
+//         const { filters = {}, fields = [] } = req.body;
+//         let query = {};
+
+//         // Native Location
+//         if (filters.nativeCountry) query["nativeCity.country"] = filters.nativeCountry;
+//         if (filters.nativeState) query["nativeCity.state"] = filters.nativeState;
+//         if (filters.nativeCity) query["nativeCity.city"] = filters.nativeCity;
+
+//         // Working Location
+//         if (filters.workCountry) query["workLocation.country"] = filters.workCountry;
+//         if (filters.workState) query["workLocation.state"] = filters.workState;
+//         if (filters.workCity) query["workLocation.city"] = filters.workCity;
+
+//         // Community Info
+//         if (filters.religion) query["caste.religion"] = filters.religion;
+//         if (filters.caste) query["caste.caste"] = filters.caste;
+//         if (filters.subCaste) query["caste.subCaste"] = filters.subCaste;
+//         if (filters.motherTongue) query["motherTongue"] = filters.motherTongue;
+
+//         // Career Info
+//         if (filters.education) {
+//             query["education"] = Array.isArray(filters.education)
+//                 ? { $in: filters.education }
+//                 : filters.education;
+//         }
+//         if (filters.occupation) query["occupation"] = filters.occupation;
+//         if (filters.monthlyIncome) {
+//             const income = Number(filters.monthlyIncome);
+//             if (!isNaN(income)) query["monthlyIncome"] = { $gte: income };
+//         }
+
+//         // Other Info
+//         if (filters.maritalStatus) query["maritalStatus"] = filters.maritalStatus;
+//         if (filters.divyang) query["divyang"] = filters.divyang;
+
+//         // Hierarchy
+//         if (filters.distributor) query["CreatedBy"] = filters.distributor;
+//         if (filters.franchise) query["franchiseUnder"] = filters.franchise;
+
+//         // Build projection (fields to exclude)
+//         let projection = null;
+//         if (fields && fields.length > 0) {
+//             projection = {};
+//             fields.forEach(field => {
+//                 projection[field] = 0; // Exclude field
+//             });
+//         }
+
+//         // Query database
+//         const users = projection
+//             ? await userModel.find(query, projection)
+//             : await userModel.find(query);
+
+//         res.status(200).json({
+//             success: true,
+//             count: users.length,
+//             data: users
+//         });
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             message: "Server Error. Check your request body.",
+//             error: error.message
+//         });
+//     }
+// };
+
 export const getReports = async (req, res) => {
     try {
         const { filters = {}, fields = [] } = req.body;
         let query = {};
 
-        // Native Location
+        // Filters
         if (filters.nativeCountry) query["nativeCity.country"] = filters.nativeCountry;
         if (filters.nativeState) query["nativeCity.state"] = filters.nativeState;
         if (filters.nativeCity) query["nativeCity.city"] = filters.nativeCity;
 
-        // Working Location
         if (filters.workCountry) query["workLocation.country"] = filters.workCountry;
         if (filters.workState) query["workLocation.state"] = filters.workState;
         if (filters.workCity) query["workLocation.city"] = filters.workCity;
 
-        // Community Info
         if (filters.religion) query["caste.religion"] = filters.religion;
         if (filters.caste) query["caste.caste"] = filters.caste;
         if (filters.subCaste) query["caste.subCaste"] = filters.subCaste;
         if (filters.motherTongue) query["motherTongue"] = filters.motherTongue;
 
-        // Career Info
         if (filters.education) {
             query["education"] = Array.isArray(filters.education)
                 ? { $in: filters.education }
@@ -1914,32 +1980,51 @@ export const getReports = async (req, res) => {
             if (!isNaN(income)) query["monthlyIncome"] = { $gte: income };
         }
 
-        // Other Info
         if (filters.maritalStatus) query["maritalStatus"] = filters.maritalStatus;
         if (filters.divyang) query["divyang"] = filters.divyang;
 
-        // Hierarchy
         if (filters.distributor) query["CreatedBy"] = filters.distributor;
         if (filters.franchise) query["franchiseUnder"] = filters.franchise;
 
-        // Build projection (fields to exclude)
-        let projection = null;
-        if (fields && fields.length > 0) {
-            projection = {};
-            fields.forEach(field => {
-                projection[field] = 0; // Exclude field
-            });
-        }
+        // Mandatory fields
+        const mandatoryFields = [
+            "_id",
+            "UserId",
+            "firstName",
+            "lastName",
+            "loginEmail",
+            "franchiseUnder",
+            "userPhotoStatus",
+            "loginNumber",
+            "whatsApp",
+            "createdAt",
+            "updatedAt",
+            "ActiveStatus"
+        ];
 
-        // Query database
-        const users = projection
-            ? await userModel.find(query, projection)
-            : await userModel.find(query);
+        // Build projection: include mandatory + requested, skip password
+        let projection = {};
+
+        [...new Set([...mandatoryFields, ...fields])].forEach(field => {
+            if (field !== "password") {
+                projection[field] = 1;
+            }
+        });
+
+        // Query
+        const users = await userModel.find(query, projection);
+
+        // Remove password in case it exists in any doc
+        const sanitizedUsers = users.map(user => {
+            const userObj = user.toObject();
+            delete userObj.password;
+            return userObj;
+        });
 
         res.status(200).json({
             success: true,
-            count: users.length,
-            data: users
+            count: sanitizedUsers.length,
+            data: sanitizedUsers
         });
     } catch (error) {
         res.status(500).json({
