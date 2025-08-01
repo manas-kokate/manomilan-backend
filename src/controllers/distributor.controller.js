@@ -249,8 +249,216 @@ export const getOtpForDistributor = async (req, res) => {
     await sendMail({
         to: distributor.email,
         subject: "OTP for ManoMilan Distributor Password Reset",
-        html: `<p>Your OTP is <strong>${otp}</strong>. It will expire in 10 minutes.</p>`
+        text: "Your OTP Code for Verification",
+        html: `
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your OTP Code</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .email-container {
+            max-width: 500px;
+            margin: 20px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        .header {
+            background: linear-gradient(135deg, #007BFF 0%, #0056b3 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/></svg>') no-repeat center;
+            background-size: 80px 80px;
+            opacity: 0.3;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        .lock-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .description {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        .otp-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px dashed #007BFF;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            position: relative;
+        }
+        .otp-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .otp-code {
+            font-size: 36px;
+            font-weight: 700;
+            color: #007BFF;
+            letter-spacing: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+        }
+        .expiry-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 25px 0;
+        }
+        .expiry-info p {
+            margin: 0;
+            color: #856404;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .timer-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 25px 30px;
+            border-top: 1px solid #e9ecef;
+        }
+        .signature {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .company-name {
+            color: #007BFF;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        .security-note {
+            font-size: 12px;
+            color: #999;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+            line-height: 1.4;
+        }
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 10px;
+            }
+            .content {
+                padding: 30px 20px;
+            }
+            .header {
+                padding: 25px 20px;
+            }
+            .otp-code {
+                font-size: 28px;
+                letter-spacing: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="lock-icon">
+                <svg width="30" height="30" fill="white" viewBox="0 0 24 24">
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                </svg>
+            </div>
+            <h1>Verification Code</h1>
+        </div>
+        <div class="content">
+            <p class="greeting">Hello Distributor,</p>
+            <p class="description">
+                We’ve generated a secure one-time password for your ManoMilan distributor account. 
+                Please use the code below to reset your password.
+            </p>
+            <div class="otp-container">
+                <div class="otp-label">Your OTP Code</div>
+                <h2 class="otp-code">${otp}</h2>
+            </div>
+            <div class="expiry-info">
+                <p>
+                    <svg class="timer-icon" fill="#856404" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
+                    </svg>
+                    This code will expire in <strong>10 minutes</strong>.
+                </p>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="signature">
+                <p>Best regards,</p>
+                <p class="company-name">ManoMilan</p>
+            </div>
+            <div class="security-note">
+                <strong>Security Notice:</strong> Never share this code with anyone. If you didn't request this code, please contact ${distributor.email}.
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+    `
     });
+
 
     return res.send({ status: true, message: "OTP sent to email." });
 };

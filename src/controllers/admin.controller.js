@@ -473,48 +473,48 @@ export const getOtp = async (req, res) => {
 }
 
 export const verifyOtpAndChangePassword = async (req, res) => {
-    // try {
-    const { id, otp, newPassword } = req.body;
+    try {
+        const { id, otp, newPassword } = req.body;
 
-    if (!id || !otp || !newPassword) {
-        return res.send({ status: false, message: "All fields (id, otp, newPassword) are required." });
+        if (!id || !otp || !newPassword) {
+            return res.send({ status: false, message: "All fields (id, otp, newPassword) are required." });
+        }
+
+        // Check if newPassword is exactly 6 digits
+        const sixDigitPattern = /^\d{6}$/;
+        if (!sixDigitPattern.test(newPassword)) {
+            return res.send({ status: false, message: "Password must be exactly 6 digits (numbers only)." });
+        }
+
+        const otpEntry = await otpModel.findOne({ id }).sort({ createdAt: -1 });
+
+        if (!otpEntry) {
+            return res.send({ status: false, message: "OTP not found or expired. Please request a new one." });
+        }
+
+        const currentTime = new Date();
+        const otpCreationTime = new Date(otpEntry.createdAt);
+        const expiryTime = 10 * 60 * 1000; // 10 minutes in ms
+
+        if (currentTime - otpCreationTime > expiryTime) {
+            return res.send({ status: false, message: "OTP has expired. Please request a new one." });
+        }
+
+        if (parseInt(otp) !== otpEntry.otp) {
+            return res.send({ status: false, message: "Invalid OTP. Please check and try again." });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword.toString(), 10);
+        await adminModel.findByIdAndUpdate(id, { password: hashedPassword });
+
+        // Delete OTP after successful use
+        await otpModel.deleteMany({ id }); // or just deleteOne if you only store one per user
+
+        return res.send({ status: true, message: "Password changed successfully." });
+    } catch (error) {
+        console.error(error);
+        return res.send({ status: false, message: "Something went wrong. Please try again." });
     }
-
-    // Check if newPassword is exactly 6 digits
-    const sixDigitPattern = /^\d{6}$/;
-    if (!sixDigitPattern.test(newPassword)) {
-        return res.send({ status: false, message: "Password must be exactly 6 digits (numbers only)." });
-    }
-
-    const otpEntry = await otpModel.findOne({ id }).sort({ createdAt: -1 });
-
-    if (!otpEntry) {
-        return res.send({ status: false, message: "OTP not found or expired. Please request a new one." });
-    }
-
-    const currentTime = new Date();
-    const otpCreationTime = new Date(otpEntry.createdAt);
-    const expiryTime = 10 * 60 * 1000; // 10 minutes in ms
-
-    if (currentTime - otpCreationTime > expiryTime) {
-        return res.send({ status: false, message: "OTP has expired. Please request a new one." });
-    }
-
-    if (parseInt(otp) !== otpEntry.otp) {
-        return res.send({ status: false, message: "Invalid OTP. Please check and try again." });
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword.toString(), 10);
-    await adminModel.findByIdAndUpdate(id, { password: hashedPassword });
-
-    // Delete OTP after successful use
-    await otpModel.deleteMany({ id }); // or just deleteOne if you only store one per user
-
-    return res.send({ status: true, message: "Password changed successfully." });
-    // } catch (error) {
-    //     console.error(error);
-    //     return res.send({ status: false, message: "Something went wrong. Please try again." });
-    // }
 }
 
 
