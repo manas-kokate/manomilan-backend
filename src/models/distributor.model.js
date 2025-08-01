@@ -36,7 +36,7 @@ const distributorSchema = new mongoose.Schema({
         // match: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
     },
     password: {
-        type: Number,
+        type: String,
         required: true
     },
     email: {

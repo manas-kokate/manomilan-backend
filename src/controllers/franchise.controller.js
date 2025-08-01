@@ -11,6 +11,7 @@ import franchisePointsLogModel from "../models/small_models/franchisePointsLog.m
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
 import sendMail from "../utils/mail.js";
 import otpModel from "../models/small_models/otp.model.js";
+import { response } from "express";
 
 export const registerFranchise = async (req, res) => {
     const distributorId = req.id;
@@ -453,24 +454,28 @@ export const getOtpForFranchise = async (req, res) => {
 };
 
 export const verifyOtpAndChangeFranchisePassword = async (req, res) => {
-    const { id, otp, newPassword } = req.body;
-    if (!id || !otp || !newPassword)
-        return res.send({ status: false, message: "All fields required." });
+    try {
+        const { id, otp, newPassword } = req.body;
+        if (!id || !otp || !newPassword)
+            return res.send({ status: false, message: "All fields required." });
 
-    const otpEntry = await otpModel.findOne({ id }).sort({ createdAt: -1 });
-    if (!otpEntry) return res.send({ status: false, message: "OTP not found or expired." });
+        const otpEntry = await otpModel.findOne({ id }).sort({ createdAt: -1 });
+        if (!otpEntry) return res.send({ status: false, message: "OTP not found or expired." });
 
-    const isExpired = new Date() - new Date(otpEntry.createdAt) > 10 * 60 * 1000;
-    if (isExpired) return res.send({ status: false, message: "OTP expired." });
+        const isExpired = new Date() - new Date(otpEntry.createdAt) > 10 * 60 * 1000;
+        if (isExpired) return res.send({ status: false, message: "OTP expired." });
 
-    if (parseInt(otp) !== otpEntry.otp)
-        return res.send({ status: false, message: "Incorrect OTP." });
+        if (parseInt(otp) !== otpEntry.otp)
+            return res.send({ status: false, message: "Incorrect OTP." });
 
-    const hashedPassword = await bcrypt.hash(newPassword.toString(), 10);
-    await franchiseModel.findByIdAndUpdate(id, { password: hashedPassword });
-    await otpModel.deleteMany({ id });
+        const hashedPassword = await bcrypt.hash(newPassword.toString(), 10);
+        await franchiseModel.findByIdAndUpdate(id, { password: hashedPassword });
+        await otpModel.deleteMany({ id });
 
-    return res.send({ status: true, message: "Password updated successfully." });
+        return res.send({ status: true, message: "Password updated successfully." });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
 };
 
 export const updateFranchiseProfile = async (req, res) => {

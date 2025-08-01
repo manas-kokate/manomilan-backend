@@ -465,24 +465,28 @@ export const getOtpForDistributor = async (req, res) => {
 
 // VERIFY OTP AND CHANGE PASSWORD
 export const verifyOtpAndChangeDistributorPassword = async (req, res) => {
-    const { id, otp, newPassword } = req.body;
-    if (!id || !otp || !newPassword)
-        return res.send({ status: false, message: "All fields required." });
+    try {
+        const { id, otp, newPassword } = req.body;
+        if (!id || !otp || !newPassword)
+            return res.send({ status: false, message: "All fields required." });
 
-    const otpEntry = await otpModel.findOne({ id }).sort({ createdAt: -1 });
-    if (!otpEntry) return res.send({ status: false, message: "OTP not found or expired." });
+        const otpEntry = await otpModel.findOne({ id }).sort({ createdAt: -1 });
+        if (!otpEntry) return res.send({ status: false, message: "OTP not found or expired." });
 
-    const isExpired = new Date() - new Date(otpEntry.createdAt) > 10 * 60 * 1000;
-    if (isExpired) return res.send({ status: false, message: "OTP expired." });
+        const isExpired = new Date() - new Date(otpEntry.createdAt) > 10 * 60 * 1000;
+        if (isExpired) return res.send({ status: false, message: "OTP expired." });
 
-    if (parseInt(otp) !== otpEntry.otp)
-        return res.send({ status: false, message: "Incorrect OTP." });
+        if (parseInt(otp) !== otpEntry.otp)
+            return res.send({ status: false, message: "Incorrect OTP." });
 
-    const hashedPassword = await bcrypt.hash(newPassword.toString(), 10);
-    await distributorModel.findByIdAndUpdate(id, { password: hashedPassword });
-    await otpModel.deleteMany({ id });
+        const hashedPassword = await bcrypt.hash(newPassword.toString(), 10);
+        await distributorModel.findByIdAndUpdate(id, { password: hashedPassword });
+        await otpModel.deleteMany({ id });
 
-    return res.send({ status: true, message: "Password updated successfully." });
+        return res.send({ status: true, message: "Password updated successfully." });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
 };
 
 export const getAllUsers = async (req, res) => {

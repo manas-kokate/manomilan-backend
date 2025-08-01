@@ -689,7 +689,6 @@ export const getOtpForUser = async (req, res) => {
   `
   });
 
-
   return res.send({ status: true, message: "OTP sent to email." });
 };
 
@@ -713,7 +712,6 @@ export const verifyOtpAndChangeUserPassword = async (req, res) => {
 
   return res.send({ status: true, message: "Password updated successfully." });
 };
-
 
 export const editProfile = async (req, res) => {
   const { newUpdates } = req.body;
