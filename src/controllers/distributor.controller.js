@@ -236,6 +236,34 @@ export const loginDistributor = async (req, res) => {
     }
 };
 
+export const changeTransactionPassword = async (req, res) => {
+    try {
+        const { transactionPassword, newTransactionPassword, id } = req.body;
+
+        if (!transactionPassword || !newTransactionPassword || !id) {
+            return res.send({ status: false, message: "id, transactionPassword and newTransactionPassword required" });
+        }
+
+        const distributor = await distributorModel.findById(id);
+        if (!distributor) {
+            return res.send({ status: false, message: "Distributor not found" });
+        }
+
+        const isMatch = await bcrypt.compare(transactionPassword, distributor.transactionPassword);
+        if (!isMatch) {
+            return res.send({ status: false, message: "Transaction password didn't match" });
+        }
+
+        distributor.transactionPassword = await bcrypt.hash(newTransactionPassword, 10);
+        await distributor.save();
+
+        return res.send({ status: true, message: 'New transaction password set successfully.' });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
+
 export const getOtpForDistributor = async (req, res) => {
     const { id } = req.body;
     if (!id) return res.send({ status: false, message: "ID required" });

@@ -89,7 +89,9 @@ import {
     getDistributorPointsLog,
     getCurrentAdmin,
     getOtp,
-    verifyOtpAndChangePassword
+    verifyOtpAndChangePassword,
+    changeTransactionPassword,
+    changeGivePointsPassword
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
@@ -105,6 +107,8 @@ router.get('/current-admin', adminAuth, getCurrentAdmin);
 // === OTP ===
 router.post('/forgot-password-otp', getOtp);
 router.post('/change-password', verifyOtpAndChangePassword)
+router.post('/change-transactionPassword', changeTransactionPassword)
+router.post('/change-givePointsPassword', changeGivePointsPassword)
 
 // === USER ==== 
 router.get('/get-users', getUsers);

@@ -515,6 +515,58 @@ export const verifyOtpAndChangePassword = async (req, res) => {
     }
 }
 
+export const changeTransactionPassword = async (req, res) => {
+    try {
+        const { transactionPassword, newTransactionPassword, id } = req.body;
+        if (!transactionPassword || !newTransactionPassword || !id) {
+            return res.send({ status: false, message: "id , transactionPassword and newTransactionPassword required" })
+        }
+        const admin = await adminModel.findById(id);
+        if (!admin) {
+            return res.send({ status: "admin not found" })
+        }
+
+        if (!await bcrypt.compare(transactionPassword, admin.transactionPassword)) {
+            return res.send({ status: false, message: "Transaction password didn't matched" })
+        }
+        admin.transactionPassword = await bcrypt.hash(newTransactionPassword, 10)
+        admin.save()
+        return res.send({ status: true, message: 'New transaction password set successfully.' })
+    } catch (error) {
+        return res.send({ status: false, message: "server error" })
+    }
+}
+
+export const changeGivePointsPassword = async (req, res) => {
+    try {
+        const { givePointsPassword, newGivePointsPassword, id } = req.body;
+
+        if (!givePointsPassword || !newGivePointsPassword || !id) {
+            return res.send({
+                status: false,
+                message: "id, givePointsPassword and newGivePointsPassword required"
+            });
+        }
+
+        const admin = await adminModel.findById(id);
+        if (!admin) {
+            return res.send({ status: false, message: "Admin not found" });
+        }
+
+        const isMatch = await bcrypt.compare(givePointsPassword, admin.givePointsPassword);
+        if (!isMatch) {
+            return res.send({ status: false, message: "Give points password didn't match" });
+        }
+
+        admin.givePointsPassword = await bcrypt.hash(newGivePointsPassword, 10);
+        await admin.save();
+
+        return res.send({ status: true, message: 'New give points password set successfully.' });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
 
 export const getCurrentAdmin = async (req, res) => {
     try {

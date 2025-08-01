@@ -15,7 +15,8 @@ import {
     getFranchisePointsLog,
     givePackageToFranchise,
     getOtpForDistributor,
-    verifyOtpAndChangeDistributorPassword
+    verifyOtpAndChangeDistributorPassword,
+    changeTransactionPassword
 } from "../controllers/distributor.controller.js";
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
@@ -29,6 +30,7 @@ router.post('/register', uploadMiddleware, registerDistributor);
 router.post('/login', loginDistributor);
 router.post('/get-otp', getOtpForDistributor);
 router.post('/verify-otp-reset-password', verifyOtpAndChangeDistributorPassword);
+router.post('/change-transactionPassword', changeTransactionPassword)
 
 router.post('/get-all-users', distributorAuth, getAllUsers);
 router.get('/get-single-user', getSingleUser);
