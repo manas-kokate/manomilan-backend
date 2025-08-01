@@ -87,7 +87,9 @@ import {
     searchUsers,
     updateMainPackages,
     getDistributorPointsLog,
-    getCurrentAdmin
+    getCurrentAdmin,
+    getOtp,
+    verifyOtpAndChangePassword
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
@@ -98,7 +100,11 @@ const router = express.Router();
 
 router.post('/register', registerAdmin);
 router.post('/login', loginAdmin);
-router.get('/current-admin', adminAuth, getCurrentAdmin)
+router.get('/current-admin', adminAuth, getCurrentAdmin);
+
+// === OTP ===
+router.post('/forgot-password-otp', getOtp);
+router.post('/change-password', verifyOtpAndChangePassword)
 
 // === USER ==== 
 router.get('/get-users', getUsers);
