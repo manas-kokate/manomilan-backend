@@ -215,6 +215,205 @@ export const registerUser = async (req, res) => {
       freePackage: freePackage._id
     })
     await newPackageLog.save()
+    // send mail to user
+    sendMail({
+      to: user.loginEmail,
+      subject: "Welcome to ManoMilan – Your Registration Details",
+      text: "Thank you for registering at ManoMilan.",
+      html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome to ManoMilan</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #7d0a0a 0%, #a81313 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .email-container {
+      max-width: 600px;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      margin: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, #7d0a0a 0%, #a81313 100%);
+      padding: 30px;
+      text-align: center;
+      color: white;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 600;
+    }
+    .content {
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .content p {
+      font-size: 16px;
+      color: #444;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .credentials-box {
+      background: #f8f8f8;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      border: 1px dashed #7d0a0a;
+    }
+    .credentials-box p {
+      margin: 6px 0;
+      font-weight: 600;
+    }
+    .login-button {
+      background: #7d0a0a;
+      color: white;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      display: inline-block;
+      font-weight: 600;
+    }
+    .footer {
+      background: #f9f9f9;
+      padding: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>Welcome to ManoMilan</h1>
+    </div>
+    <div class="content">
+      <p>Hi <strong>${user.firstName} ${user.midname} ${user.lastName}</strong>,</p>
+      <p>Thanks for registering with ManoMilan. Below are your login credentials:</p>
+      <div class="credentials-box">
+        <p>Email: ${user.loginEmail}</p>
+        <p>Password:${password}</p>
+      </div>
+    </div>
+    <div class="footer">
+      &copy; 2025 ManoMilan Matrimony
+    </div>
+  </div>
+</body>
+</html>
+`
+    })
+
+    const franchise = await franchiseModel.findOne({ franchiseName: SavedNewUser.franchiseUnder });
+    // send mail to franchise 
+    sendMail({
+      to: franchise.email,
+      subject: `New User Registered - ${user.loginEmail}`,
+      text: `A new user has registered.\n\nName:${user.loginEmail}\nPassword: ${password}`,
+      html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>New User Registered</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #7d0a0a 0%, #a81313 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .email-container {
+      max-width: 600px;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      margin: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, #7d0a0a 0%, #a81313 100%);
+      padding: 30px;
+      text-align: center;
+      color: white;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .content {
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .content p {
+      font-size: 16px;
+      color: #444;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .info-box {
+      background: #f8f8f8;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      border: 1px dashed #7d0a0a;
+      text-align: left;
+    }
+    .info-box p {
+      margin: 8px 0;
+      font-weight: 500;
+    }
+    .footer {
+      background: #f9f9f9;
+      padding: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>New User Registered</h1>
+    </div>
+    <div class="content">
+      <p>A new user has registered under your franchise.</p>
+      <div class="info-box">
+        <p><strong>Full Name:</strong> ${user.firstName} ${user.midname || ''} ${user.lastName}</p>
+        <p><strong>Email:</strong> ${user.loginEmail}</p>
+        <p><strong>Password:</strong> ${password}</p>
+      </div>
+      <p>Please ensure their onboarding and support process is followed as per franchise protocols.</p>
+    </div>
+    <div class="footer">
+      &copy; 2025 ManoMilan Franchise Portal
+    </div>
+  </div>
+</body>
+</html>
+`
+    });
+
     return res.status(200).send({
       status: true,
       message: "User registered successfully.",
@@ -267,6 +466,47 @@ export const login = async (req, res) => {
     return res.send({ status: false, message: "Server Error" });
   }
 };
+
+export const getOtpForUser = async (req, res) => {
+  const { id } = req.body;
+  if (!id) return res.send({ status: false, message: "ID required" });
+
+  const user = await userModel.findById(id);
+  if (!user) return res.send({ status: false, message: "User not found." });
+
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  await otpModel.create({ id, otp });
+
+  await sendMail({
+    to: user.loginEmail,
+    subject: "OTP for User Password Reset",
+    html: `<p>Your OTP is <strong>${otp}</strong>. It will expire in 10 minutes.</p>`
+  });
+
+  return res.send({ status: true, message: "OTP sent to email." });
+};
+
+export const verifyOtpAndChangeUserPassword = async (req, res) => {
+  const { id, otp, newPassword } = req.body;
+  if (!id || !otp || !newPassword)
+    return res.send({ status: false, message: "All fields required." });
+
+  const otpEntry = await otpModel.findOne({ id }).sort({ createdAt: -1 });
+  if (!otpEntry) return res.send({ status: false, message: "OTP not found or expired." });
+
+  const isExpired = new Date() - new Date(otpEntry.createdAt) > 10 * 60 * 1000;
+  if (isExpired) return res.send({ status: false, message: "OTP expired." });
+
+  if (parseInt(otp) !== otpEntry.otp)
+    return res.send({ status: false, message: "Incorrect OTP." });
+
+  const hashedPassword = await bcrypt.hash(newPassword.toString(), 10);
+  await userModel.findByIdAndUpdate(id, { password: hashedPassword });
+  await otpModel.deleteMany({ id });
+
+  return res.send({ status: true, message: "Password updated successfully." });
+};
+
 
 export const editProfile = async (req, res) => {
   const { newUpdates } = req.body;

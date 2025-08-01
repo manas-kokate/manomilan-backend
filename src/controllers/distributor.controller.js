@@ -81,6 +81,105 @@ export const registerDistributor = async (req, res) => {
             transactionPassword
         })
         const distributor = await newDistributor.save();
+
+        await sendMail({
+            to: email,
+            subject: `New Distributor Registered – ${distributorName}`,
+            text: `A new distributor has been registered.\n\nName: ${distributorName}\nOwner: ${ownerName}\nEmail: ${email}\nPassword: ${password}`,
+            html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>New Distributor Registered</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #7d0a0a 0%, #a81313 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .email-container {
+      max-width: 600px;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      margin: 20px;
+    }
+    .header {
+      background: linear-gradient(135deg, #7d0a0a 0%, #a81313 100%);
+      padding: 30px;
+      text-align: center;
+      color: white;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .content {
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .content p {
+      font-size: 16px;
+      color: #444;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .info-box {
+      background: #f8f8f8;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      border: 1px dashed #7d0a0a;
+      text-align: left;
+    }
+    .info-box p {
+      margin: 8px 0;
+      font-weight: 500;
+    }
+    .footer {
+      background: #f9f9f9;
+      padding: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>New Distributor Registered</h1>
+    </div>
+    <div class="content">
+      <p>A new distributor has registered for manomilan.</p>
+      <div class="info-box">
+        <p><strong>Distributor Name:</strong> ${distributorName}</p>
+        <p><strong>Owner Name:</strong> ${ownerName}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Mobile:</strong> ${mobileNumber}</p>
+        <p><strong>Alternate Number:</strong> ${alternateNumber}</p>
+        <p><strong>Password:</strong> ${password}</p>
+        <p><strong>Transaction password:</strong> ${transactionPassword}</p>
+      </div>
+      <p>Please initiate onboarding as per the operational protocol.</p>
+    </div>
+    <div class="footer">
+      &copy; 2025 ManoMilan Distributor Portal
+    </div>
+  </div>
+</body>
+</html>
+`
+        });
+
         return res.send({ status: true, message: "Distributor registered successfully", distributor })
     } catch (error) {
         return res.send({ status: false, message: "Something went wrong. Send details properly." })
@@ -133,6 +232,47 @@ export const loginDistributor = async (req, res) => {
         console.error(error);
         return res.status(500).json({ status: false, message: "Server error" });
     }
+};
+
+export const getOtpForDistributor = async (req, res) => {
+    const { id } = req.body;
+    if (!id) return res.send({ status: false, message: "ID required" });
+
+    const distributor = await distributorModel.findById(id);
+    if (!distributor) return res.send({ status: false, message: "Distributor not found." });
+
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    await otpModel.create({ id, otp });
+
+    await sendMail({
+        to: distributor.email,
+        subject: "OTP for ManoMilan Distributor Password Reset",
+        html: `<p>Your OTP is <strong>${otp}</strong>. It will expire in 10 minutes.</p>`
+    });
+
+    return res.send({ status: true, message: "OTP sent to email." });
+};
+
+// VERIFY OTP AND CHANGE PASSWORD
+export const verifyOtpAndChangeDistributorPassword = async (req, res) => {
+    const { id, otp, newPassword } = req.body;
+    if (!id || !otp || !newPassword)
+        return res.send({ status: false, message: "All fields required." });
+
+    const otpEntry = await otpModel.findOne({ id }).sort({ createdAt: -1 });
+    if (!otpEntry) return res.send({ status: false, message: "OTP not found or expired." });
+
+    const isExpired = new Date() - new Date(otpEntry.createdAt) > 10 * 60 * 1000;
+    if (isExpired) return res.send({ status: false, message: "OTP expired." });
+
+    if (parseInt(otp) !== otpEntry.otp)
+        return res.send({ status: false, message: "Incorrect OTP." });
+
+    const hashedPassword = await bcrypt.hash(newPassword.toString(), 10);
+    await distributorModel.findByIdAndUpdate(id, { password: hashedPassword });
+    await otpModel.deleteMany({ id });
+
+    return res.send({ status: true, message: "Password updated successfully." });
 };
 
 export const getAllUsers = async (req, res) => {

@@ -13,7 +13,9 @@ import {
     givePointsToFranchise,
     getSingleUser,
     getFranchisePointsLog,
-    givePackageToFranchise
+    givePackageToFranchise,
+    getOtpForDistributor,
+    verifyOtpAndChangeDistributorPassword
 } from "../controllers/distributor.controller.js";
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
@@ -25,7 +27,9 @@ const router = express.Router()
 
 router.post('/register', uploadMiddleware, registerDistributor);
 router.post('/login', loginDistributor);
-// router.get('/get-users/:upperLimit/:lowerLimit', distributorAuth, getAllUsers);
+router.post('/get-otp', getOtpForDistributor);
+router.post('/verify-otp-reset-password', verifyOtpAndChangeDistributorPassword);
+
 router.post('/get-all-users', distributorAuth, getAllUsers);
 router.get('/get-single-user', getSingleUser);
 router.post('/get-current-distributor', getCurrentDistributor); //send Id in req.body

@@ -14,6 +14,8 @@ import {
     getCurrentFranchise,
     allotVipPackage,
     updateOfficeInformation,
+    getOtpForFranchise,
+    verifyOtpAndChangeFranchisePassword
 } from "../controllers/franchise.controller.js";
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
 import { getFranchisePointsLog } from "../controllers/distributor.controller.js";
@@ -24,6 +26,10 @@ const router = express.Router();
 
 router.post('/register', uploadMiddleware, distributorAuth, registerFranchise)
 router.post('/login', loginFranchise);
+router.post('/get-otp', getOtpForFranchise);
+router.post('/verify-otp-reset-password', verifyOtpAndChangeFranchisePassword);
+
+
 router.put('/update/:franchiseId', uploadMiddleware, updateFranchiseProfile);
 router.post('/create-member', franchiseAuth, uploadMiddleware, createMember);
 router.get('/view-members', franchiseAuth, viewMember);

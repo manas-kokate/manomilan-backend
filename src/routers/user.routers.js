@@ -1,6 +1,6 @@
 import express from "express"
 import { uploadMiddleware } from "../utils/upload.js";
-import { registerUser, login, getLoggedInUser, editProfile, getFranchises, mutualMatching, sendMessageFromUser, draftMessageFromUser, getSentMessagesForUser, getDraftedMessagesForUser, getRepliesForUser, getFrachiseAndDistributorAndAdmin, getCurrentUser, editExpectaions, getUserPackages, subscribe, subscribed } from "../controllers/user.controller.js";
+import { registerUser, login, getLoggedInUser, editProfile, getFranchises, mutualMatching, sendMessageFromUser, draftMessageFromUser, getSentMessagesForUser, getDraftedMessagesForUser, getRepliesForUser, getFrachiseAndDistributorAndAdmin, getCurrentUser, editExpectaions, getUserPackages, subscribe, subscribed, verifyOtpAndChangeUserPassword, getOtpForUser } from "../controllers/user.controller.js";
 import { userAuth } from "../middlewares/auth.js"
 import {
     getCountry, getDegreesByStream, getFoodPref, getReligion,
@@ -27,6 +27,9 @@ const router = express.Router();
 // === USER ===
 router.post('/register', uploadMiddleware, registerUser);
 router.post('/login', login);
+router.post('/get-otp', getOtpForUser);
+router.post('/verify-otp-reset-password', verifyOtpAndChangeUserPassword);
+
 router.put('/editprofile', userAuth, editProfile)
 router.get('/getcurrentuser', userAuth, getLoggedInUser);
 router.get('/getCurrentUser/:userId', getCurrentUser)

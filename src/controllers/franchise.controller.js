@@ -71,6 +71,107 @@ export const registerFranchise = async (req, res) => {
             qrPhoto
         })
         await newSchema.save()
+        sendMail({
+            to: newSchema.email,
+            subject: "Welcome to ManoMilan - Your Registration Details",
+            text: "You are the new franchise at ManoMilan.",
+            html: `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+          <title>Welcome to ManoMilan</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 0;
+              background: linear-gradient(135deg, #7d0a0a 0%, #a81313 100%);
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              min-height: 100vh;
+            }
+            .email-container {
+              max-width: 600px;
+              background: #ffffff;
+              border-radius: 16px;
+              overflow: hidden;
+              box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+              margin: 20px;
+            }
+            .header {
+              background: linear-gradient(135deg, #7d0a0a 0%, #a81313 100%);
+              padding: 30px;
+              text-align: center;
+              color: white;
+            }
+            .header h1 {
+              margin: 0;
+              font-size: 26px;
+              font-weight: 600;
+            }
+            .content {
+              padding: 40px 30px;
+              text-align: center;
+            }
+            .content p {
+              font-size: 16px;
+              color: #444;
+              line-height: 1.5;
+              margin-bottom: 20px;
+            }
+            .credentials-box {
+              background: #f8f8f8;
+              padding: 20px;
+              border-radius: 12px;
+              margin-bottom: 30px;
+              border: 1px dashed #7d0a0a;
+            }
+            .credentials-box p {
+              margin: 6px 0;
+              font-weight: 600;
+            }
+            .login-button {
+              background: #7d0a0a;
+              color: white;
+              text-decoration: none;
+              padding: 12px 24px;
+              border-radius: 8px;
+              display: inline-block;
+              font-weight: 600;
+            }
+            .footer {
+              background: #f9f9f9;
+              padding: 20px;
+              text-align: center;
+              font-size: 14px;
+              color: #999;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="email-container">
+            <div class="header">
+              <h1>Welcome to ManoMilan</h1>
+            </div>
+            <div class="content">
+              <p>Hi <strong>${newSchema.franchiseName}</strong>,</p>
+              <p>Thanks for registering with ManoMilan. Below are your login credentials:</p>
+              <div class="credentials-box">
+                <p>Email: ${newSchema.email}</p>
+                <p>Password:${password}</p>
+              </div>
+            </div>
+            <div class="footer">
+              &copy; 2025 ManoMilan Matrimony
+            </div>
+          </div>
+        </body>
+        </html>
+        `
+        })
         return res.send({ status: true, message: "Franchise registered successfully" });
     } catch (error) {
         return res.send({ status: false, message: "Something went wrong. Send data properly." })
@@ -114,6 +215,47 @@ export const loginFranchise = async (req, res) => {
         return res.send({ status: false, message: "Server Error" })
     }
 };
+
+export const getOtpForFranchise = async (req, res) => {
+    const { id } = req.body;
+    if (!id) return res.send({ status: false, message: "ID required" });
+
+    const franchise = await franchiseModel.findById(id);
+    if (!franchise) return res.send({ status: false, message: "Franchise not found." });
+
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    await otpModel.create({ id, otp });
+
+    await sendMail({
+        to: franchise.email,
+        subject: "OTP for Franchise Password Reset",
+        html: `<p>Your OTP is <strong>${otp}</strong>. It will expire in 10 minutes.</p>`
+    });
+
+    return res.send({ status: true, message: "OTP sent to email." });
+};
+
+export const verifyOtpAndChangeFranchisePassword = async (req, res) => {
+    const { id, otp, newPassword } = req.body;
+    if (!id || !otp || !newPassword)
+        return res.send({ status: false, message: "All fields required." });
+
+    const otpEntry = await otpModel.findOne({ id }).sort({ createdAt: -1 });
+    if (!otpEntry) return res.send({ status: false, message: "OTP not found or expired." });
+
+    const isExpired = new Date() - new Date(otpEntry.createdAt) > 10 * 60 * 1000;
+    if (isExpired) return res.send({ status: false, message: "OTP expired." });
+
+    if (parseInt(otp) !== otpEntry.otp)
+        return res.send({ status: false, message: "Incorrect OTP." });
+
+    const hashedPassword = await bcrypt.hash(newPassword.toString(), 10);
+    await franchiseModel.findByIdAndUpdate(id, { password: hashedPassword });
+    await otpModel.deleteMany({ id });
+
+    return res.send({ status: true, message: "Password updated successfully." });
+};
+
 
 export const updateFranchiseProfile = async (req, res) => {
     const { franchiseId } = req.id;
