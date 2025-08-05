@@ -598,7 +598,7 @@ export const getSingleUser = async (req, res) => {
         if (!id) {
             return res.send({ status: false, message: "User Id required" })
         }
-        const user = await userModel.findById(userId);
+        const user = await userModel.findById(id);
         if (!user) {
             return res.send({ status: false, message: "User not found" })
         }
