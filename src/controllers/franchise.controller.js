@@ -770,7 +770,7 @@ export const InactivateUser = async (req, res) => {
         const user = await userModel.findById(userId);
         user.ActiveStatus = false;
         await user.save()
-        return res.send({ status: false, message: "User inactivated successfully." })
+        return res.send({ status: true, message: "User inactivated successfully." })
     } catch (error) {
         return res.send({ status: false, message: 'Server error' })
     }
