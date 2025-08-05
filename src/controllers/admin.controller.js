@@ -635,10 +635,10 @@ export const updateUserPfp = async (req, res) => {
                     return ({ message: "Photo deleted successfully." })
                 }
             })
-            userToUpdate.profilePicStatus = 'Rejected'
+            userToUpdate.userPhotoStatus = 'Rejected'
         }
         if (userStatus === 'Approved') {
-            userToUpdate.profilePicStatus = 'Approved'
+            userToUpdate.userPhotoStatus = 'Approved'
         }
         await userToUpdate.save()
 
