@@ -445,6 +445,9 @@ export const login = async (req, res) => {
     if (!findUser) {
       return res.send({ status: false, message: "Invalid email or phone number" })
     }
+    if (!findUser.ActiveStatus) {
+      return res.send({ status: false, message: "This account is inactive.Please register and create new account." })
+    }
 
     if (Number(password) != findUser.password) {
       return res.send({ status: false, message: "Wrong Password" });
