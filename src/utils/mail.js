@@ -21,14 +21,12 @@ export default async function sendMail({ to, subject, text, html }) {
         text: text,
         html: html
     }
-
-
     await transporter.sendMail(mailOption, (err, info) => {
         if (!err) {
-            return res.send({ status: true, message: "Mail Sent Successfully." })
+            return ({ status: true, message: "Mail Sent Successfully." })
         }
         else {
-            return res.send({ status: false, message: "Mail Not Sent." })
+            return ({ status: false, message: "Mail Not Sent." })
         }
     })
 
