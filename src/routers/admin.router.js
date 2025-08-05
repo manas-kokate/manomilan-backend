@@ -91,7 +91,8 @@ import {
     getOtp,
     verifyOtpAndChangePassword,
     changeTransactionPassword,
-    changeGivePointsPassword
+    changeGivePointsPassword,
+    getSingleUser
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
@@ -113,6 +114,7 @@ router.post('/change-givePointsPassword', changeGivePointsPassword)
 // === USER ==== 
 router.get('/get-users', getUsers);
 router.put('/update-userpfp', adminAuth, updateUserPfp);
+router.get('/get-single-user/:id', getSingleUser)
 
 // === COUNTRY === 
 router.get('/get-country', getCountry);

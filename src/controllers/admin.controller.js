@@ -173,7 +173,6 @@ export const registerAdmin = async (req, res) => {
     } catch (error) {
         return res.send({ status: false, message: "Admin Not Registered.Something went wrong." });
     }
-
 }
 
 export const loginAdmin = async (req, res) => {
@@ -589,6 +588,22 @@ export const getUsers = async (req, res) => {
         return res.send({ status: true, users: AllUsers });
     } catch (error) {
         return res.send({ status: false, message: "Something went wrong. Internal server error" })
+    }
+}
+
+export const getSingleUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!userId) {
+            return res.send({ status: false, message: "User Id required" })
+        }
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.send({ status: false, message: "User not found" })
+        }
+        return res.send({ status: true, user })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
     }
 }
 

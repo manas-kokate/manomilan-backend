@@ -29,5 +29,4 @@ export default async function sendMail({ to, subject, text, html }) {
             return ({ status: false, message: "Mail Not Sent." })
         }
     })
-
 }
