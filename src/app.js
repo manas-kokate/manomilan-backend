@@ -4,9 +4,18 @@ import cors from 'cors'
 import adminRouter from './routers/admin.router.js'
 import franchiseRouter from "./routers/franchise.router.js"
 import distributorRouter from "./routers/distributor.router.js"
+import path from "path";
+import { fileURLToPath } from 'url';
+
+// Emulate __dirname in ES module scope
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 // #7d0a0a and white 
 
 const app = express();
+
+// Static middleware to serve files from 'upload/'
+app.use('/upload', express.static(path.join(__dirname, 'upload')));
 
 app.use(cors())
 
@@ -18,6 +27,7 @@ app.use((err, req, res, next) => {
     }
     next()
 })
+
 
 app.use("/api/user", userRouter);
 app.use("/api/admin", adminRouter);

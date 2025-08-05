@@ -418,7 +418,7 @@ export const registerUser = async (req, res) => {
       status: true,
       message: "User registered successfully.",
       user: SavedNewUser,
-      packageLog: newPackageLog
+      packageLog: newPackageLog,
     });
   } catch (error) {
     return res.status(500).send({
@@ -456,11 +456,21 @@ export const login = async (req, res) => {
       { expiresIn: "4h" }
     );
 
-    res.send({
+    // // Static path for photos
+    // const baseUrl = `${req.protocol}://${req.get('host')}`
+    // const profilePic = findUser.profilePic ? `${baseUrl}/upload/${findUser.profilePic}` : "";
+    // const userPhotoOne = findUser.userPhotoOne ? `${baseUrl}/upload/${findUser.userPhotoOne}` : "";
+    // const userPhotoTwo = findUser.userPhotoTwo ? `${baseUrl}/upload/${findUser.userPhotoTwo}` : "";
+    // const userPhotoThree = findUser.userPhotoThree ? `${baseUrl}/upload/${findUser.userPhotoThree}` : "";
+    // const userPhotoFour = findUser.userPhotoFour ? `${baseUrl}/upload/${findUser.userPhotoFour}` : "";
+    // const userPhotoFive = findUser.userPhotoFive ? `${baseUrl}/upload/${findUser.userPhotoFive}` : "";
+    // const userPhotoSix = findUser.userPhotoSix ? `${baseUrl}/upload/${findUser.userPhotoSix}` : "";
+
+    return res.send({
       status: true,
       message: "User Logged in successfully",
       token: token,
-      User: findUser
+      User: findUser,
     });
   } catch (error) {
     return res.send({ status: false, message: "Server Error" });
@@ -727,7 +737,8 @@ export const editProfile = async (req, res) => {
 
   const update = await userModel.findByIdAndUpdate(userId, newUpdates);
 
-  const finUpdatedUser = await userModel.findById(userId, '-_id -__v -updatedAt -createdAt');
+  const finUpdatedUser = await userModel.findById(userId, '-password -__v -updatedAt -createdAt');
+
   if (update && finUpdatedUser) {
     return res.send({ status: true, message: "user updated successfully", updatedData: finUpdatedUser })
   }
@@ -762,8 +773,6 @@ export const getCurrentUserWithoutAuth = async (req, res) => {
   } catch (error) {
     return res.send({ status: false, message: "Server error" })
   }
-
-
 }
 
 export const mutualMatching = async (req, res) => {

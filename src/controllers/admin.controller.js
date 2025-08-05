@@ -567,7 +567,6 @@ export const changeGivePointsPassword = async (req, res) => {
     }
 };
 
-
 export const getCurrentAdmin = async (req, res) => {
     try {
         const adminId = req.id;

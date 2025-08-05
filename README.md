@@ -9,7 +9,7 @@ Welcome to the **Manomilan Backend**, a RESTful API server designed for a matchm
 - 🔐 JWT-based Authentication & Authorization  
 - 📝 User Registration & Profile Management  
 - ❤️ Partner Preference Matching  
-- 📷 Profile Picture Upload (via Cloudinary)  
+- 📷 Profile Picture Upload (via Multer)  
 - 🌐 RESTful API architecture  
 - 🔒 Secure password storage using bcrypt  
 - 🧪 Modular code structure for scalability  

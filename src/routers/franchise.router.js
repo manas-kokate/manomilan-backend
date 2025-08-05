@@ -20,7 +20,6 @@ import {
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
 import { getFranchisePointsLog } from "../controllers/distributor.controller.js";
 import { getCurrentUser } from "../controllers/user.controller.js";
-import sendMail from "../utils/mail.js";
 
 
 const router = express.Router();
