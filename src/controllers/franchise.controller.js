@@ -11,7 +11,6 @@ import franchisePointsLogModel from "../models/small_models/franchisePointsLog.m
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
 import sendMail from "../utils/mail.js";
 import otpModel from "../models/small_models/otp.model.js";
-import { response } from "express";
 
 export const registerFranchise = async (req, res) => {
     const distributorId = req.id;
@@ -762,6 +761,20 @@ export const getSingleUser = async (req, res) => {
     }
 }
 
+export const InactivateUser = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) {
+            return res.send({ status: false, message: "User id required" })
+        }
+        const user = await userModel.findById(userId);
+        user.ActiveStatus = false;
+        await user.save()
+        return res.send({ status: false, message: "User inactivated successfully." })
+    } catch (error) {
+        return res.send({ status: false, message: 'Server error' })
+    }
+}
 // === MESSAGES === 
 
 export const getDistributorAndAdmin = async (req, res) => {
@@ -1113,7 +1126,6 @@ export const allotVipPackage = async (req, res) => {
         return res.send({ status: false, message: "Server error", error: error.message });
     }
 };
-
 
 // === OFFICE INFO ===
 export const updateOfficeInformation = async (req, res) => {
