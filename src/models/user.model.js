@@ -116,7 +116,7 @@ const userSchema = new Schema({
     userPhotoFour: { type: String },
     userPhotoFive: { type: String },
     userPhotoSix: { type: String },
-    userPhotoStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+    userPhotoStatus: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
 
     // Special info
     sect: { type: String },

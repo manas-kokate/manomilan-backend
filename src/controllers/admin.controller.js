@@ -30,6 +30,7 @@ import MessageModel from "../models/small_models/message.model.js";
 import adminPointsLogModel from "../models/small_models/adminPointsLog.model.js";
 import otpModel from "../models/small_models/otp.model.js";
 import sendMail from "../utils/mail.js";
+import fs from 'fs'
 
 export const registerAdmin = async (req, res) => {
     const { name, email, password, transactionPassword, givePointsPassword } = req.body;
@@ -594,7 +595,7 @@ export const getUsers = async (req, res) => {
 export const getSingleUser = async (req, res) => {
     try {
         const { id } = req.params;
-        if (!userId) {
+        if (!id) {
             return res.send({ status: false, message: "User Id required" })
         }
         const user = await userModel.findById(userId);
@@ -616,14 +617,29 @@ export const updateUserPfp = async (req, res) => {
         return res.send({ status: false, message: "Invalid Update Status." });
     }
 
-    const userToUpdate = await userModel.findById({ _id: userId });
+
+    const userToUpdate = await userModel.findById(userId);
     if (!userToUpdate) {
         return res.send({ status: true, message: "User not found." });
     }
 
     try {
-
-        userToUpdate.profilePicStatus = userStatus;
+        const baseUrl = `${req.protocol}://${req.get('host')}`
+        if (userStatus === 'Rejected') {
+            userToUpdate.profilePic = ""
+            fs.unlink(`${baseUrl}/upload/${userToUpdate.profilePic}`, (err) => {
+                if (err) {
+                    return ({ message: "Error.Photo not deleted.", err })
+                }
+                else {
+                    return ({ message: "Photo deleted successfully." })
+                }
+            })
+            userToUpdate.profilePicStatus = 'Rejected'
+        }
+        if (userStatus === 'Approved') {
+            userToUpdate.profilePicStatus = 'Approved'
+        }
         await userToUpdate.save()
 
         return res.send({ status: true, message: "Updated Successfuly" })
