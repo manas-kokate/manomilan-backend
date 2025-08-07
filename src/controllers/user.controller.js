@@ -136,7 +136,7 @@ export const registerUser = async (req, res) => {
       timeOfBirth,
       placeOfBirth,
       maritalStatus,
-      children: typeof children === 'string' ? JSON.parse(children) : children,
+      children: typeof children === 'string' ? JSON.parse(children) : '',
       height,
       occupation,
       monthlyIncome,
