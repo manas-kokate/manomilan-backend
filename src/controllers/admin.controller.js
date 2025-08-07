@@ -26,7 +26,7 @@ import distributorpointslogModel from "../models/small_models/distributorpointsl
 import vipPackageModel from "../models/small_models/vipPackage.model.js";
 import mainPackageModel from "../models/small_models/mainPackage.model.js";
 import addOnPackageModel from "../models/small_models/addOnPackage.model.js";
-import MessageModel from "../models/small_models/message.model.js";
+import MessageModel from "../models/small_models/Message.model.js";
 import adminPointsLogModel from "../models/small_models/adminPointsLog.model.js";
 import otpModel from "../models/small_models/otp.model.js";
 import sendMail from "../utils/mail.js";

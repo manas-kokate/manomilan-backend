@@ -3,7 +3,7 @@ import sendMail from "../utils/mail.js";
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
 import franchiseModel from "../models/franchise.model.js";
-import MessageModel from "../models/small_models/message.model.js";
+import MessageModel from "../models/small_models/Message.model.js";
 import adminModel from "../models/admin.model.js";
 import distributorModel from "../models/distributor.model.js";
 import freepackageModel from "../models/small_models/freepackage.model.js";

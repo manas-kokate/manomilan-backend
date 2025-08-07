@@ -3,7 +3,7 @@ import userModel from "../models/user.model.js"
 import jwt from "jsonwebtoken";
 import envCredentials from "../config/env.js";
 import distributorModel from "../models/distributor.model.js";
-import MessageModel from "../models/small_models/message.model.js";
+import MessageModel from "../models/small_models/Message.model.js";
 import adminModel from "../models/admin.model.js";
 import userPackageTrackModel from "../models/small_models/userPackageTrack.model.js";
 import franchisePackageModel from "../models/small_models/franchise.package.model.js";

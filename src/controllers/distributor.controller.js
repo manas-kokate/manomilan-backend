@@ -4,7 +4,7 @@ import envCredentials from "../config/env.js";
 import userModel from "../models/user.model.js";
 import franchiseModel from "../models/franchise.model.js";
 import adminModel from "../models/admin.model.js";
-import MessageModel from "../models/small_models/message.model.js";
+import MessageModel from "../models/small_models/Message.model.js";
 import franchisePointsLogModel from "../models/small_models/franchisePointsLog.model.js";
 import bcrypt from 'bcrypt'
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
