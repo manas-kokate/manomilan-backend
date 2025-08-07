@@ -10,424 +10,6 @@ import freepackageModel from "../models/small_models/freepackage.model.js";
 import userPackageTrackModel from "../models/small_models/userPackageTrack.model.js";
 import otpModel from "../models/small_models/otp.model.js";
 
-// export const registerUser = async (req, res) => {
-//   try {
-//     const {
-//       // Login credentials
-//       loginEmail,
-//       loginNumber,
-//       password,
-//       franchiseUnder,
-
-//       // Personal Info
-//       firstName,
-//       lastName,
-//       midname,
-//       gender,
-//       dob,
-//       timeOfBirth,
-//       placeOfBirth,
-//       maritalStatus,
-//       children,
-//       height,
-//       occupation,
-//       monthlyIncome,
-//       nationality,
-//       caste, // should be an object { religion, caste, subCaste }
-//       motherTongue,
-//       divyang,
-//       mothersName,
-//       fathersName,
-//       mamkul,
-//       parentsResidence,
-//       parentsCity,
-//       parentsContact,
-//       whatsApp,
-//       alternateNumber,
-//       brothersCount,
-//       brothers,
-//       sisters,
-//       sistersExactCount,
-//       otherInfo,
-//       nativeVillage,
-//       nativeCity, // should be an object { country, state, city }
-
-//       // Education & Career
-//       education,
-//       companyName,
-//       designation,
-//       candidateNumber,
-//       candidateEmail,
-//       workLocation,
-//       isWorking,
-
-//       // Expectations
-//       ageFrom,
-//       ageTo,
-//       heightFrom,
-//       heightTo,
-//       expectedEducation,
-//       expectedOccupation,
-//       expectedMonthlyIncome,
-//       expectedWorkAbroad,
-//       divyangPrefer,
-//       expectedMaritalStatus,
-//       expectedNationality,
-//       childAccepted,
-//       expectedReligion, // array of { religion, caste, subCaste }
-//       expectedNativeLocation, // array of { country, state, city }
-//       expectedWorkingLocation, // array of { country, state, city }
-
-//       // Special Info
-//       sect,
-//       manglik,
-//       gotra,
-//       foodPreference,
-//       specs,
-//       bloodGroup,
-//     } = req.body;
-
-//     if (!loginEmail || !loginNumber || !password || !franchiseUnder) {
-//       return res.status(400).send({ status: false, message: "Login credentials required to register" });
-//     }
-
-//     // Check for existing user
-//     const existingUser = await userModel.findOne({
-//       $or: [{ loginEmail }, { loginNumber }],
-//     });
-
-//     if (existingUser) {
-//       return res.status(400).send({
-//         status: false,
-//         message: "User already exists with this email or number.",
-//       });
-//     }
-
-//     // File Handling
-//     let profilePic = req?.files?.profilePic?.[0]?.filename || "";
-//     let userPhotoOne = req?.files?.userPhotoOne?.[0]?.filename || "";
-//     let userPhotoTwo = req?.files?.userPhotoTwo?.[0]?.filename || "";
-//     let userPhotoThree = req?.files?.userPhotoThree?.[0]?.filename || "";
-//     let userPhotoFour = req?.files?.userPhotoFour?.[0]?.filename || "";
-
-//     // Generate new UserId
-//     const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
-//     const UserId = LastIdUser ? Number(LastIdUser.UserId) + 1 : 1;
-
-//     // Active free package 
-//     const freePackage = await freepackageModel.findOne({ status: 'Active' })
-
-//     // Prepare user object
-//     const user = new userModel({
-//       // Login credentials
-//       UserId,
-//       loginEmail,
-//       loginNumber,
-//       password,
-//       CreatedBy: "user",
-//       franchiseUnder,
-
-//       // Personal Info
-//       firstName,
-//       lastName,
-//       midname,
-//       gender,
-//       dob,
-//       timeOfBirth,
-//       placeOfBirth,
-//       maritalStatus,
-//       children: typeof children === 'string' ? JSON.parse(children) : children,
-//       height,
-//       occupation,
-//       monthlyIncome,
-//       nationality: nationality || ["India"],
-//       caste, // assumed to be { religion, caste, subCaste } 1
-//       motherTongue,
-//       divyang,
-//       mothersName,
-//       fathersName,
-//       mamkul,
-//       parentsResidence,
-//       parentsCity,
-//       parentsContact,
-//       whatsApp,
-//       alternateNumber,
-//       brothersCount,
-//       brothers,
-//       sisters,
-//       sistersExactCount,
-//       otherInfo,
-//       nativeVillage,
-//       nativeCity, // { country, state, city }
-//       workAbroad: req.body.workAbroad || "No",
-
-//       // Education & Career
-//       education,
-//       companyName,
-//       designation,
-//       candidateNumber,
-//       candidateEmail,
-//       workLocation,
-//       isWorking: isWorking !== undefined ? isWorking : true,
-
-//       // Expectations
-//       ageFrom,
-//       ageTo,
-//       heightFrom,
-//       heightTo,
-//       expectedEducation,
-//       expectedOccupation,
-//       expectedMonthlyIncome,
-//       expectedWorkAbroad,
-//       divyangPrefer,
-//       expectedMaritalStatus,
-//       expectedNationality,
-//       childAccepted,
-
-//       expectedReligion: typeof expectedReligion === 'string' ? JSON.parse(expectedReligion) : expectedReligion,
-
-//       expectedNativeLocation: typeof expectedNativeLocation === "string" ? JSON.parse(expectedNativeLocation) : expectedNativeLocation,
-
-//       expectedWorkingLocation: typeof expectedWorkingLocation === "string" ? JSON.parse(expectedWorkingLocation) : expectedWorkingLocation,
-
-//       // Photos
-//       profilePic,
-//       userPhotoOne,
-//       userPhotoTwo,
-//       userPhotoThree,
-//       userPhotoFour,
-
-//       // Special Info
-//       sect,
-//       manglik,
-//       gotra,
-//       foodPreference,
-//       specs,
-//       bloodGroup,
-//       numberOfAddresses: freePackage.NumOfFreeAddress
-//     });
-
-//     const SavedNewUser = await user.save();
-
-//     const newPackageLog = new userPackageTrackModel({
-//       userId: SavedNewUser._id,
-//       freeAddresses: freePackage.NumOfFreeAddress,
-//       freePackage: freePackage._id
-//     })
-//     await newPackageLog.save()
-//     // send mail to user
-//     sendMail({
-//       to: user.loginEmail,
-//       subject: "Welcome to ManoMilan – Your Registration Details",
-//       text: "Thank you for registering at ManoMilan.",
-//       html: `
-// <!DOCTYPE html>
-// <html lang="en">
-// <head>
-//   <meta charset="UTF-8" />
-//   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-//   <title>Welcome to ManoMilan</title>
-//   <style>
-//     body {
-//       margin: 0;
-//       padding: 0;
-//       background: linear-gradient(135deg, #7d0a0a 0%, #a81313 100%);
-//       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-//       display: flex;
-//       justify-content: center;
-//       align-items: center;
-//       min-height: 100vh;
-//     }
-//     .email-container {
-//       max-width: 600px;
-//       background: #ffffff;
-//       border-radius: 16px;
-//       overflow: hidden;
-//       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-//       margin: 20px;
-//     }
-//     .header {
-//       background: linear-gradient(135deg, #7d0a0a 0%, #a81313 100%);
-//       padding: 30px;
-//       text-align: center;
-//       color: white;
-//     }
-//     .header h1 {
-//       margin: 0;
-//       font-size: 26px;
-//       font-weight: 600;
-//     }
-//     .content {
-//       padding: 40px 30px;
-//       text-align: center;
-//     }
-//     .content p {
-//       font-size: 16px;
-//       color: #444;
-//       line-height: 1.5;
-//       margin-bottom: 20px;
-//     }
-//     .credentials-box {
-//       background: #f8f8f8;
-//       padding: 20px;
-//       border-radius: 12px;
-//       margin-bottom: 30px;
-//       border: 1px dashed #7d0a0a;
-//     }
-//     .credentials-box p {
-//       margin: 6px 0;
-//       font-weight: 600;
-//     }
-//     .login-button {
-//       background: #7d0a0a;
-//       color: white;
-//       text-decoration: none;
-//       padding: 12px 24px;
-//       border-radius: 8px;
-//       display: inline-block;
-//       font-weight: 600;
-//     }
-//     .footer {
-//       background: #f9f9f9;
-//       padding: 20px;
-//       text-align: center;
-//       font-size: 14px;
-//       color: #999;
-//     }
-//   </style>
-// </head>
-// <body>
-//   <div class="email-container">
-//     <div class="header">
-//       <h1>Welcome to ManoMilan</h1>
-//     </div>
-//     <div class="content">
-//       <p>Hi <strong>${user.firstName} ${user.midname} ${user.lastName}</strong>,</p>
-//       <p>Thanks for registering with ManoMilan. Below are your login credentials:</p>
-//       <div class="credentials-box">
-//         <p>Email: ${user.loginEmail}</p>
-//         <p>Password:${password}</p>
-//       </div>
-//     </div>
-//     <div class="footer">
-//       &copy; 2025 ManoMilan Matrimony
-//     </div>
-//   </div>
-// </body>
-// </html>
-// `
-//     })
-
-//     const franchise = await franchiseModel.findOne({ franchiseName: SavedNewUser.franchiseUnder });
-//     // send mail to franchise 
-//     sendMail({
-//       to: franchise.email,
-//       subject: `New User Registered - ${user.loginEmail}`,
-//       text: `A new user has registered.\n\nName:${user.loginEmail}\nPassword: ${password}`,
-//       html: `
-// <!DOCTYPE html>
-// <html lang="en">
-// <head>
-//   <meta charset="UTF-8" />
-//   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-//   <title>New User Registered</title>
-//   <style>
-//     body {
-//       margin: 0;
-//       padding: 0;
-//       background: linear-gradient(135deg, #7d0a0a 0%, #a81313 100%);
-//       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-//       display: flex;
-//       justify-content: center;
-//       align-items: center;
-//       min-height: 100vh;
-//     }
-//     .email-container {
-//       max-width: 600px;
-//       background: #ffffff;
-//       border-radius: 16px;
-//       overflow: hidden;
-//       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-//       margin: 20px;
-//     }
-//     .header {
-//       background: linear-gradient(135deg, #7d0a0a 0%, #a81313 100%);
-//       padding: 30px;
-//       text-align: center;
-//       color: white;
-//     }
-//     .header h1 {
-//       margin: 0;
-//       font-size: 24px;
-//     }
-//     .content {
-//       padding: 40px 30px;
-//       text-align: center;
-//     }
-//     .content p {
-//       font-size: 16px;
-//       color: #444;
-//       line-height: 1.5;
-//       margin-bottom: 20px;
-//     }
-//     .info-box {
-//       background: #f8f8f8;
-//       padding: 20px;
-//       border-radius: 12px;
-//       margin-bottom: 30px;
-//       border: 1px dashed #7d0a0a;
-//       text-align: left;
-//     }
-//     .info-box p {
-//       margin: 8px 0;
-//       font-weight: 500;
-//     }
-//     .footer {
-//       background: #f9f9f9;
-//       padding: 20px;
-//       text-align: center;
-//       font-size: 14px;
-//       color: #999;
-//     }
-//   </style>
-// </head>
-// <body>
-//   <div class="email-container">
-//     <div class="header">
-//       <h1>New User Registered</h1>
-//     </div>
-//     <div class="content">
-//       <p>A new user has registered under your franchise.</p>
-//       <div class="info-box">
-//         <p><strong>Full Name:</strong> ${user.firstName} ${user.midname || ''} ${user.lastName}</p>
-//         <p><strong>Email:</strong> ${user.loginEmail}</p>
-//         <p><strong>Password:</strong> ${password}</p>
-//       </div>
-//       <p>Please ensure their onboarding and support process is followed as per franchise protocols.</p>
-//     </div>
-//     <div class="footer">
-//       &copy; 2025 ManoMilan Franchise Portal
-//     </div>
-//   </div>
-// </body>
-// </html>
-// `
-//     });
-
-//     return res.status(200).send({
-//       status: true,
-//       message: "User registered successfully.",
-//       user: SavedNewUser,
-//       packageLog: newPackageLog,
-//     });
-//   } catch (error) {
-//     return res.status(500).send({
-//       status: false,
-//       message: "Server Error",
-//     });
-//   }
-// };
-
 export const registerUser = async (req, res) => {
   try {
     const {
@@ -451,7 +33,7 @@ export const registerUser = async (req, res) => {
       occupation,
       monthlyIncome,
       nationality,
-      caste,
+      caste, // should be an object { religion, caste, subCaste }
       motherTongue,
       divyang,
       mothersName,
@@ -468,8 +50,7 @@ export const registerUser = async (req, res) => {
       sistersExactCount,
       otherInfo,
       nativeVillage,
-      nativeCity,
-      workAbroad,
+      nativeCity, // should be an object { country, state, city }
 
       // Education & Career
       education,
@@ -493,9 +74,9 @@ export const registerUser = async (req, res) => {
       expectedMaritalStatus,
       expectedNationality,
       childAccepted,
-      expectedReligion,
-      expectedNativeLocation,
-      expectedWorkingLocation,
+      expectedReligion, // array of { religion, caste, subCaste }
+      expectedNativeLocation, // array of { country, state, city }
+      expectedWorkingLocation, // array of { country, state, city }
 
       // Special Info
       sect,
@@ -506,7 +87,6 @@ export const registerUser = async (req, res) => {
       bloodGroup,
     } = req.body;
 
-    // Validate required login credentials
     if (!loginEmail || !loginNumber || !password || !franchiseUnder) {
       return res.status(400).send({ status: false, message: "Login credentials required to register" });
     }
@@ -534,20 +114,8 @@ export const registerUser = async (req, res) => {
     const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
     const UserId = LastIdUser ? Number(LastIdUser.UserId) + 1 : 1;
 
-    // Active free package
-    const freePackage = await freepackageModel.findOne({ status: 'Active' });
-
-    // Parse fields that may be strings
-    const parsedNationality = typeof nationality === 'string' ? JSON.parse(nationality) : nationality || ["India"];
-    const parsedCaste = typeof caste === 'string' ? JSON.parse(caste) : caste;
-    const parsedNativeCity = typeof nativeCity === 'string' ? JSON.parse(nativeCity) : nativeCity;
-    const parsedEducation = typeof education === 'string' ? JSON.parse(education) : education;
-    const parsedExpectedEducation = typeof expectedEducation === 'string' ? JSON.parse(expectedEducation) : expectedEducation;
-    const parsedExpectedNationality = typeof expectedNationality === 'string' ? JSON.parse(expectedNationality) : expectedNationality;
-    const parsedChildren = typeof children === 'string' ? JSON.parse(children) : children;
-    const parsedExpectedReligion = typeof expectedReligion === 'string' ? JSON.parse(expectedReligion) : expectedReligion;
-    const parsedExpectedNativeLocation = typeof expectedNativeLocation === 'string' ? JSON.parse(expectedNativeLocation) : expectedNativeLocation;
-    const parsedExpectedWorkingLocation = typeof expectedWorkingLocation === 'string' ? JSON.parse(expectedWorkingLocation) : expectedWorkingLocation;
+    // Active free package 
+    const freePackage = await freepackageModel.findOne({ status: 'Active' })
 
     // Prepare user object
     const user = new userModel({
@@ -568,12 +136,12 @@ export const registerUser = async (req, res) => {
       timeOfBirth,
       placeOfBirth,
       maritalStatus,
-      children: parsedChildren,
+      children: typeof children === 'string' ? JSON.parse(children) : children,
       height,
       occupation,
       monthlyIncome,
-      nationality: parsedNationality,
-      caste: parsedCaste,
+      nationality: nationality || ["India"],
+      caste: typeof caste === String ? JSON.parse(caste) : '', // assumed to be { religion, caste, subCaste } 1
       motherTongue,
       divyang,
       mothersName,
@@ -590,11 +158,11 @@ export const registerUser = async (req, res) => {
       sistersExactCount,
       otherInfo,
       nativeVillage,
-      nativeCity: parsedNativeCity,
-      workAbroad: workAbroad || "No",
+      nativeCity, // { country, state, city }
+      workAbroad: req.body.workAbroad || "No",
 
       // Education & Career
-      education: parsedEducation,
+      education,
       companyName,
       designation,
       candidateNumber,
@@ -607,17 +175,20 @@ export const registerUser = async (req, res) => {
       ageTo,
       heightFrom,
       heightTo,
-      expectedEducation: parsedExpectedEducation,
+      expectedEducation,
       expectedOccupation,
       expectedMonthlyIncome,
       expectedWorkAbroad,
       divyangPrefer,
       expectedMaritalStatus,
-      expectedNationality: parsedExpectedNationality,
+      expectedNationality,
       childAccepted,
-      expectedReligion: parsedExpectedReligion,
-      expectedNativeLocation: parsedExpectedNativeLocation,
-      expectedWorkingLocation: parsedExpectedWorkingLocation,
+
+      expectedReligion: typeof expectedReligion === 'string' ? JSON.parse(expectedReligion) : expectedReligion,
+
+      expectedNativeLocation: typeof expectedNativeLocation === "string" ? JSON.parse(expectedNativeLocation) : expectedNativeLocation,
+
+      expectedWorkingLocation: typeof expectedWorkingLocation === "string" ? JSON.parse(expectedWorkingLocation) : expectedWorkingLocation,
 
       // Photos
       profilePic,
@@ -633,20 +204,19 @@ export const registerUser = async (req, res) => {
       foodPreference,
       specs,
       bloodGroup,
-      numberOfAddresses: freePackage?.NumOfFreeAddress || 0,
+      numberOfAddresses: freePackage.NumOfFreeAddress
     });
 
     const SavedNewUser = await user.save();
 
     const newPackageLog = new userPackageTrackModel({
       userId: SavedNewUser._id,
-      freeAddresses: freePackage?.NumOfFreeAddress || 0,
-      freePackage: freePackage?._id,
-    });
-    await newPackageLog.save();
-
-    // Send mail to user
-    await sendMail({
+      freeAddresses: freePackage.NumOfFreeAddress,
+      freePackage: freePackage._id
+    })
+    await newPackageLog.save()
+    // send mail to user
+    sendMail({
       to: user.loginEmail,
       subject: "Welcome to ManoMilan – Your Registration Details",
       text: "Thank you for registering at ManoMilan.",
@@ -732,11 +302,11 @@ export const registerUser = async (req, res) => {
       <h1>Welcome to ManoMilan</h1>
     </div>
     <div class="content">
-      <p>Hi <strong>${user.firstName} ${user.midname || ''} ${user.lastName}</strong>,</p>
+      <p>Hi <strong>${user.firstName} ${user.midname} ${user.lastName}</strong>,</p>
       <p>Thanks for registering with ManoMilan. Below are your login credentials:</p>
       <div class="credentials-box">
         <p>Email: ${user.loginEmail}</p>
-        <p>Password: ${password}</p>
+        <p>Password:${password}</p>
       </div>
     </div>
     <div class="footer">
@@ -745,17 +315,16 @@ export const registerUser = async (req, res) => {
   </div>
 </body>
 </html>
-`,
-    });
+`
+    })
 
-    // Find franchise and send mail
     const franchise = await franchiseModel.findOne({ franchiseName: SavedNewUser.franchiseUnder });
-    if (franchise) {
-      await sendMail({
-        to: franchise.email,
-        subject: `New User Registered - ${user.loginEmail}`,
-        text: `A new user has registered.\n\nName: ${user.loginEmail}\nPassword: ${password}`,
-        html: `
+    // send mail to franchise 
+    sendMail({
+      to: franchise.email,
+      subject: `New User Registered - ${user.loginEmail}`,
+      text: `A new user has registered.\n\nName:${user.loginEmail}\nPassword: ${password}`,
+      html: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -842,9 +411,8 @@ export const registerUser = async (req, res) => {
   </div>
 </body>
 </html>
-`,
-      });
-    }
+`
+    });
 
     return res.status(200).send({
       status: true,
@@ -853,13 +421,13 @@ export const registerUser = async (req, res) => {
       packageLog: newPackageLog,
     });
   } catch (error) {
-    console.error(error);
     return res.status(500).send({
       status: false,
       message: "Server Error",
     });
   }
 };
+
 
 export const login = async (req, res) => {
   const { identifier, password } = req.body;
