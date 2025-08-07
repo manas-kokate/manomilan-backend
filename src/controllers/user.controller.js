@@ -141,7 +141,7 @@ export const registerUser = async (req, res) => {
       occupation,
       monthlyIncome,
       nationality: nationality || ["India"],
-      caste: typeof caste === String ? JSON.parse(caste) : '', // assumed to be { religion, caste, subCaste } 1
+      caste: typeof caste === String ? JSON.parse(caste) : '', // assumed to be { religion, caste, subCaste } 
       motherTongue,
       divyang,
       mothersName,
