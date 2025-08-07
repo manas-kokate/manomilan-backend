@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const positionsSchema = new mongoose.Schema({
-  positions: {
+  position: {
     type: String,
   },
 });

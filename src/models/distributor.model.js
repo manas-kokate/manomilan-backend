@@ -74,6 +74,11 @@ const distributorSchema = new mongoose.Schema({
     transactionPassword: {
         type: String,
         required: true
+    },
+    status: {
+        type: String,
+        enum: ['Active', 'Inactive'],
+        default: 'Active'
     }
 });
 

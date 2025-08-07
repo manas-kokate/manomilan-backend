@@ -1649,7 +1649,7 @@ export const addPosition = async (req, res) => {
             return res.send({ status: false, message: "Position already exists" });
         }
 
-        const newData = new positionsModel({ position });
+        const newData = new positionsModel({ positions: position });
         await newData.save();
         return res.send({ status: true, message: "Position added successfully" });
     } catch (error) {
@@ -1659,7 +1659,7 @@ export const addPosition = async (req, res) => {
 
 export const getPositions = async (req, res) => {
     try {
-        const data = await positionsModel.find({}, '-__v -_id');
+        const data = await positionsModel.find({});
         return res.send({ status: true, result: data });
     } catch (error) {
         return res.send({ status: false, message: "Server error" });
@@ -1779,6 +1779,21 @@ export const getDistributors = async (req, res) => {
         return res.send({ status: true, result: distributors })
     } catch ({ error }) {
         return res.send({ status: false, message: "Something went wrong. Server error." })
+    }
+}
+
+export const inactivateDistributor = async (req, res) => {
+    try {
+        const { distributorId } = req.body;
+        const distributor = await distributorModel.findById(distributorId);
+        if (!distributor) {
+            return res.send({ status: false, message: 'Distributor not found. Check Id properly.' })
+        }
+        distributor.status == 'Inactive';
+        await distributor.save()
+        return res.send({ status: true, message: 'Distributor inactivated.' })
+    } catch (error) {
+        return res.send({ status: false, message: 'Server error.' })
     }
 }
 
@@ -2007,30 +2022,107 @@ export const addVipPackage = async (req, res) => {
         } = req.body;
 
         if (!packageName || !numberOfAddresses || !memberCost || !adminShare || !validity) {
-            return res.send({ status: false, message: "all fields required" })
+            return res.send({ status: false, message: "All fields are required" });
         }
 
+        // Generate new packageId
         let packageId = 1;
-        const lastPackage = await vipPackageModel.findOne({}).sort({ packageId: -1 })
+        const lastPackage = await vipPackageModel.findOne({}).sort({ packageId: -1 });
         if (lastPackage) {
-            packageId = parseInt(lastPackage?.packageId) + 1;
+            packageId = parseInt(lastPackage.packageId) + 1;
         }
+
+        // Create and save the new package
         const newPackage = new vipPackageModel({
             packageId,
             packageName,
             numberOfAddresses,
             memberCost,
             adminShare,
-            validity
-        })
+            validity,
+            status: 'Active'
+        });
+
+        await newPackage.save();
+
+        // Get the latest 3 packages (including newly added one)
+        const latestPackages = await vipPackageModel
+            .find({})
+            .sort({ createdAt: -1 })
+            .limit(3)
+            .select('_id');
+
+        const latestIds = latestPackages.map(pkg => pkg._id);
+
+        // Set all packages to Inactive
         await vipPackageModel.updateMany({}, { $set: { status: 'Inactive' } });
 
-        await newPackage.save()
+        // Activate only the latest 3
+        await vipPackageModel.updateMany(
+            { _id: { $in: latestIds } },
+            { $set: { status: 'Active' } }
+        );
 
-        return res.send({ status: true, message: 'New vip package added.', newPackage })
+        return res.send({
+            status: true,
+            message: 'New VIP Package added and status updated accordingly',
+            newPackage
+        });
 
     } catch (error) {
-        res.status(400).json({ error: "Server error" });
+        console.error('Error in addVipPackage:', error);
+        res.status(500).send({ status: false, message: "Server error" });
+    }
+};
+
+export const updateVipPackages = async (req, res) => {
+    try {
+        const { activatePackageIds } = req.body;
+
+        // Validate input
+        if (!activatePackageIds || !Array.isArray(activatePackageIds) || activatePackageIds.length === 0) {
+            return res.status(400).send({ status: false, message: "Valid package IDs are required" });
+        }
+
+        if (activatePackageIds.length > 3) {
+            return res.status(400).send({ status: false, message: "Cannot activate more than 3 packages" });
+        }
+
+        // Get current active packages
+        const activePackages = await vipPackageModel
+            .find({ status: 'Active' })
+            .sort({ createdAt: 1 })
+            .select('_id');
+
+        const slotsNeeded = Math.max(0, activatePackageIds.length - (3 - activePackages.length));
+
+        // Deactivate oldest if needed
+        if (slotsNeeded > 0) {
+            const packagesToDeactivate = activePackages.slice(0, slotsNeeded);
+            const deactivateIds = packagesToDeactivate.map(pkg => pkg._id);
+
+            await vipPackageModel.updateMany(
+                { _id: { $in: deactivateIds } },
+                { $set: { status: 'Inactive' } }
+            );
+        }
+
+        // Activate the new packages
+        await Promise.all(
+            activatePackageIds.map(id =>
+                vipPackageModel.findByIdAndUpdate(
+                    id,
+                    { $set: { status: 'Active' } },
+                    { new: true }
+                )
+            )
+        );
+
+        return res.status(200).send({ status: true, message: "VIP Packages updated successfully" });
+
+    } catch (error) {
+        console.error('Error updating VIP packages:', error);
+        return res.status(500).send({ status: false, message: "Server error" });
     }
 };
 

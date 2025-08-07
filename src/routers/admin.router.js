@@ -92,7 +92,8 @@ import {
     verifyOtpAndChangePassword,
     changeTransactionPassword,
     changeGivePointsPassword,
-    getSingleUser
+    getSingleUser,
+    inactivateDistributor
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
@@ -212,7 +213,8 @@ router.delete('/delete-mother-tongue', deleteMotherTongue);
 
 // === DISTRIBUTORS ===
 router.get('/get-distributors', getDistributors);
-router.get('/get-franchise-under/:id', getFranchiseUnder)
+router.get('/get-franchise-under/:id', getFranchiseUnder);
+router.put('/inactivate-distributor', inactivateDistributor)
 
 // === POINTS ===
 router.post('/add-points', adminAuth, addNewPoints);
