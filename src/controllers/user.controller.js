@@ -157,8 +157,8 @@ export const registerUser = async (req, res) => {
       sisters,
       sistersExactCount,
       otherInfo,
-      nativeVillage,
-      nativeCity, // { country, state, city }
+      nativeVillage: JSON.parse(nativeVillage) || '',
+      nativeCity: JSON.parse(nativeCity) || '', // { country, state, city }
       workAbroad: req.body.workAbroad || "No",
 
       // Education & Career
@@ -204,7 +204,7 @@ export const registerUser = async (req, res) => {
       foodPreference,
       specs,
       bloodGroup,
-      numberOfAddresses: freePackage.NumOfFreeAddress
+      freeAddresses: freePackage.NumOfFreeAddress
     });
 
     const SavedNewUser = await user.save();

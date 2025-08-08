@@ -13,71 +13,71 @@ import sendMail from "../utils/mail.js";
 import otpModel from "../models/small_models/otp.model.js";
 
 export const registerFranchise = async (req, res) => {
-    const distributorId = req.id;
-    const {
-        franchiseName,
-        ownerName,
-        mobileNumber,
-        alternateNumber,
-        adharNumber,
-        panNumber,
-        password,
-        email,
-        address,
-        location,
-        socialMedia
-    } = req.body;
+  const distributorId = req.id;
+  const {
+    franchiseName,
+    ownerName,
+    mobileNumber,
+    alternateNumber,
+    adharNumber,
+    panNumber,
+    password,
+    email,
+    address,
+    location,
+    socialMedia
+  } = req.body;
 
-    if (!franchiseName || !ownerName || !mobileNumber || !adharNumber || !panNumber || !email || !address) {
-        return res.send({ status: false, message: "All fields required" })
+  if (!franchiseName || !ownerName || !mobileNumber || !adharNumber || !panNumber || !email || !address) {
+    return res.send({ status: false, message: "All fields required" })
+  }
+
+  const existingUser = await franchiseModel.findOne({
+    $or: [{ adharNumber }, { panNumber }, { email }, { mobileNumber }]
+  })
+
+  if (existingUser) {
+    return res.send({ status: false, message: "Sorry user already exists." })
+  }
+
+  let franchisePhoto = '';
+  let qrPhoto = '';
+  try {
+    if (
+      (req.files?.franchisePhoto || req.files.franchisePhoto.length !== 0) && (req.files?.qrPhoto || req.files.qrPhoto.length !== 0)) {
+      franchisePhoto = req.files.franchisePhoto[0].filename;
+      qrPhoto = req.files.qrPhoto[0].filename;
     }
-
-    const existingUser = await franchiseModel.findOne({
-        $or: [{ adharNumber }, { panNumber }, { email }, { mobileNumber }]
-    })
-
-    if (existingUser) {
-        return res.send({ status: false, message: "Sorry user already exists." })
-    }
-
-    let franchisePhoto = '';
-    let qrPhoto = '';
-    try {
-        if (
-            (req.files?.franchisePhoto || req.files.franchisePhoto.length !== 0) && (req.files?.qrPhoto || req.files.qrPhoto.length !== 0)) {
-            franchisePhoto = req.files.franchisePhoto[0].filename;
-            qrPhoto = req.files.qrPhoto[0].filename;
-        }
-    } catch (error) {
-        franchisePhoto = '';
-        qrPhoto = '';
-    }
+  } catch (error) {
+    franchisePhoto = '';
+    qrPhoto = '';
+  }
 
 
-    // try {
+  try {
     const currentDistributor = await distributorModel.findById(distributorId);
     const newSchema = new franchiseModel({
-        franchiseName,
-        ownerName,
-        distributorUnder: currentDistributor.distributorName,
-        mobileNumber,
-        alternateNumber,
-        adharNumber,
-        panNumber,
-        password,
-        email,
-        address,
-        location,
-        socialMedia,
-        franchisePhoto,
-        qrPhoto
+      franchiseName,
+      ownerName,
+      distributorUnder: currentDistributor.distributorName,
+      mobileNumber,
+      alternateNumber,
+      adharNumber,
+      panNumber,
+      password,
+      email,
+      address,
+      location,
+      socialMedia,
+      franchisePhoto,
+      qrPhoto
     })
     await newSchema.save()
     sendMail({
-        to: newSchema.email,
-        subject: "Welcome to ManoMilan - Your Registration Details",
-        text: "You are the new franchise at ManoMilan.",
-        html: `
+      to: newSchema.email,
+      subject: "Welcome to ManoMilan - Your Registration Details",
+      text: "You are the new franchise at ManoMilan.",
+      html: `
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -183,64 +183,64 @@ export const registerFranchise = async (req, res) => {
         `
     })
     return res.send({ status: true, message: "Franchise registered successfully" });
-    // } catch (error) {
-    //     return res.send({ status: false, message: "Something went wrong. Send data properly." })
-    // }
+  } catch (error) {
+    return res.send({ status: false, message: "Something went wrong. Send data properly." })
+  }
 }
 
 export const loginFranchise = async (req, res) => {
-    try {
-        const { identifier, password } = req.body;
+  try {
+    const { identifier, password } = req.body;
 
-        if (!identifier || !password) {
-            return res.send({ status: false, message: "identifier and password are required" });
-        }
-
-        // identifier can be adharNumber, panNumber, or email
-        const franchise = await franchiseModel.findOne({
-            $or: [
-                { adharNumber: identifier },
-                { panNumber: identifier },
-                { email: identifier },
-                { mobileNumber: identifier }
-            ]
-        });
-
-        if (password != franchise.password) {
-            return res.send({ status: false, message: "Invalid password" })
-        }
-
-        if (!franchise) {
-            return res.send({ status: false, message: "Invalid credentials" });
-        }
-
-        const token = jwt.sign(
-            { id: franchise._id },
-            envCredentials.secretKey,
-            { expiresIn: "4h" }
-        );
-
-        return res.send({ status: true, message: "Login successful", data: franchise, token: token });
-    } catch (error) {
-        return res.send({ status: false, message: "Server Error" })
+    if (!identifier || !password) {
+      return res.send({ status: false, message: "identifier and password are required" });
     }
+
+    // identifier can be adharNumber, panNumber, or email
+    const franchise = await franchiseModel.findOne({
+      $or: [
+        { adharNumber: identifier },
+        { panNumber: identifier },
+        { email: identifier },
+        { mobileNumber: identifier }
+      ]
+    });
+
+    if (password != franchise.password) {
+      return res.send({ status: false, message: "Invalid password" })
+    }
+
+    if (!franchise) {
+      return res.send({ status: false, message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { id: franchise._id },
+      envCredentials.secretKey,
+      { expiresIn: "4h" }
+    );
+
+    return res.send({ status: true, message: "Login successful", data: franchise, token: token });
+  } catch (error) {
+    return res.send({ status: false, message: "Server Error" })
+  }
 };
 
 export const getOtpForFranchise = async (req, res) => {
-    const { id } = req.body;
-    if (!id) return res.send({ status: false, message: "ID required" });
+  const { id } = req.body;
+  if (!id) return res.send({ status: false, message: "ID required" });
 
-    const franchise = await franchiseModel.findById(id);
-    if (!franchise) return res.send({ status: false, message: "Franchise not found." });
+  const franchise = await franchiseModel.findById(id);
+  if (!franchise) return res.send({ status: false, message: "Franchise not found." });
 
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    await otpModel.create({ id, otp });
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  await otpModel.create({ id, otp });
 
-    await sendMail({
-        to: franchise.email,
-        subject: "OTP for Franchise Password Reset",
-        text: "Your OTP Code for Verification",
-        html: `
+  await sendMail({
+    to: franchise.email,
+    subject: "OTP for Franchise Password Reset",
+    text: "Your OTP Code for Verification",
+    html: `
     <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -446,289 +446,289 @@ export const getOtpForFranchise = async (req, res) => {
 </body>
 </html>
     `
-    });
+  });
 
 
-    return res.send({ status: true, message: "OTP sent to email." });
+  return res.send({ status: true, message: "OTP sent to email." });
 };
 
 export const verifyOtpAndChangeFranchisePassword = async (req, res) => {
-    try {
-        const { id, otp, newPassword } = req.body;
-        if (!id || !otp || !newPassword)
-            return res.send({ status: false, message: "All fields required." });
+  try {
+    const { id, otp, newPassword } = req.body;
+    if (!id || !otp || !newPassword)
+      return res.send({ status: false, message: "All fields required." });
 
-        const otpEntry = await otpModel.findOne({ id }).sort({ createdAt: -1 });
-        if (!otpEntry) return res.send({ status: false, message: "OTP not found or expired." });
+    const otpEntry = await otpModel.findOne({ id }).sort({ createdAt: -1 });
+    if (!otpEntry) return res.send({ status: false, message: "OTP not found or expired." });
 
-        const isExpired = new Date() - new Date(otpEntry.createdAt) > 10 * 60 * 1000;
-        if (isExpired) return res.send({ status: false, message: "OTP expired." });
+    const isExpired = new Date() - new Date(otpEntry.createdAt) > 10 * 60 * 1000;
+    if (isExpired) return res.send({ status: false, message: "OTP expired." });
 
-        if (parseInt(otp) !== otpEntry.otp)
-            return res.send({ status: false, message: "Incorrect OTP." });
+    if (parseInt(otp) !== otpEntry.otp)
+      return res.send({ status: false, message: "Incorrect OTP." });
 
-        const hashedPassword = await bcrypt.hash(newPassword.toString(), 10);
-        await franchiseModel.findByIdAndUpdate(id, { password: hashedPassword });
-        await otpModel.deleteMany({ id });
+    const hashedPassword = await bcrypt.hash(newPassword.toString(), 10);
+    await franchiseModel.findByIdAndUpdate(id, { password: hashedPassword });
+    await otpModel.deleteMany({ id });
 
-        return res.send({ status: true, message: "Password updated successfully." });
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
-    }
+    return res.send({ status: true, message: "Password updated successfully." });
+  } catch (error) {
+    return res.send({ status: false, message: "Server error" })
+  }
 };
 
 export const updateFranchiseProfile = async (req, res) => {
-    const { franchiseId } = req.id;
-    const updateData = req.body;
+  const { franchiseId } = req.id;
+  const updateData = req.body;
 
-    if (!franchiseId) {
-        return res.send({ status: false, message: "Franchise ID is required" });
+  if (!franchiseId) {
+    return res.send({ status: false, message: "Franchise ID is required" });
+  }
+
+  if (!updateData) {
+    return res.send({ status: false, message: "Please send update data" })
+  }
+
+  try {
+    const existingFranchise = await franchiseModel.findById(franchiseId);
+
+    if (!existingFranchise) {
+      return res.send({ status: false, message: "Franchise not found" });
     }
 
-    if (!updateData) {
-        return res.send({ status: false, message: "Please send update data" })
+    // Handle file uploads
+    if (req.files?.franchisePhoto?.[0]) {
+      updateData.franchisePhoto = req.files.franchisePhoto[0].filename;
     }
 
-    try {
-        const existingFranchise = await franchiseModel.findById(franchiseId);
-
-        if (!existingFranchise) {
-            return res.send({ status: false, message: "Franchise not found" });
-        }
-
-        // Handle file uploads
-        if (req.files?.franchisePhoto?.[0]) {
-            updateData.franchisePhoto = req.files.franchisePhoto[0].filename;
-        }
-
-        if (req.files?.qrPhoto?.[0]) {
-            updateData.qrPhoto = req.files.qrPhoto[0].filename;
-        }
-
-        const updatedFranchise = await franchiseModel.findByIdAndUpdate(
-            franchiseId,
-            updateData,
-            { new: true }
-        );
-
-        return res.send({ status: true, message: "Profile updated successfully", data: updatedFranchise });
-
-    } catch (error) {
-        return res.status(500).send({ status: false, message: "Something went wrong", error: error.message });
+    if (req.files?.qrPhoto?.[0]) {
+      updateData.qrPhoto = req.files.qrPhoto[0].filename;
     }
+
+    const updatedFranchise = await franchiseModel.findByIdAndUpdate(
+      franchiseId,
+      updateData,
+      { new: true }
+    );
+
+    return res.send({ status: true, message: "Profile updated successfully", data: updatedFranchise });
+
+  } catch (error) {
+    return res.status(500).send({ status: false, message: "Something went wrong", error: error.message });
+  }
 };
 
 export const createMember = async (req, res) => {
-    try {
-        const {
-            // Login credentials
-            loginEmail,
-            loginNumber,
-            password,
-            franchiseUnder,
+  try {
+    const {
+      // Login credentials
+      loginEmail,
+      loginNumber,
+      password,
+      franchiseUnder,
 
-            // Personal Info
-            firstName,
-            lastName,
-            midname,
-            gender,
-            dob,
-            timeOfBirth,
-            placeOfBirth,
-            maritalStatus,
-            children,
-            height,
-            occupation,
-            monthlyIncome,
-            nationality,
-            caste, // should be an object { religion, caste, subCaste }
-            motherTongue,
-            divyang,
-            mothersName,
-            fathersName,
-            mamkul,
-            parentsResidence,
-            parentsCity,
-            parentsContact,
-            whatsApp,
-            alternateNumber,
-            brothersCount,
-            brothers,
-            sisters,
-            sistersExactCount,
-            otherInfo,
-            nativeVillage,
-            nativeCity, // should be an object { country, state, city }
+      // Personal Info
+      firstName,
+      lastName,
+      midname,
+      gender,
+      dob,
+      timeOfBirth,
+      placeOfBirth,
+      maritalStatus,
+      children,
+      height,
+      occupation,
+      monthlyIncome,
+      nationality,
+      caste, // should be an object { religion, caste, subCaste }
+      motherTongue,
+      divyang,
+      mothersName,
+      fathersName,
+      mamkul,
+      parentsResidence,
+      parentsCity,
+      parentsContact,
+      whatsApp,
+      alternateNumber,
+      brothersCount,
+      brothers,
+      sisters,
+      sistersExactCount,
+      otherInfo,
+      nativeVillage,
+      nativeCity, // should be an object { country, state, city }
 
-            // Education & Career
-            education,
-            companyName,
-            designation,
-            candidateNumber,
-            candidateEmail,
-            workLocation,
-            isWorking,
+      // Education & Career
+      education,
+      companyName,
+      designation,
+      candidateNumber,
+      candidateEmail,
+      workLocation,
+      isWorking,
 
-            // Expectations
-            ageFrom,
-            ageTo,
-            heightFrom,
-            heightTo,
-            expectedEducation,
-            expectedOccupation,
-            expectedMonthlyIncome,
-            expectedWorkAbroad,
-            divyangPrefer,
-            expectedMaritalStatus,
-            expectedNationality,
-            childAccepted,
-            expectedReligion, // array of { religion, caste, subCaste }
-            expectedNativeLocation, // array of { country, state, city }
-            expectedWorkingLocation, // array of { country, state, city }
+      // Expectations
+      ageFrom,
+      ageTo,
+      heightFrom,
+      heightTo,
+      expectedEducation,
+      expectedOccupation,
+      expectedMonthlyIncome,
+      expectedWorkAbroad,
+      divyangPrefer,
+      expectedMaritalStatus,
+      expectedNationality,
+      childAccepted,
+      expectedReligion, // array of { religion, caste, subCaste }
+      expectedNativeLocation, // array of { country, state, city }
+      expectedWorkingLocation, // array of { country, state, city }
 
-            // Special Info
-            sect,
-            manglik,
-            gotra,
-            foodPreference,
-            specs,
-            bloodGroup,
-        } = req.body;
+      // Special Info
+      sect,
+      manglik,
+      gotra,
+      foodPreference,
+      specs,
+      bloodGroup,
+    } = req.body;
 
-        if (!loginEmail || !loginNumber || !password || !franchiseUnder) {
-            return res.status(400).send({ status: false, message: "Login credentials required to register" });
-        }
+    if (!loginEmail || !loginNumber || !password || !franchiseUnder) {
+      return res.status(400).send({ status: false, message: "Login credentials required to register" });
+    }
 
-        // Check for existing user
-        const existingUser = await userModel.findOne({
-            $or: [{ loginEmail }, { loginNumber }],
-        });
+    // Check for existing user
+    const existingUser = await userModel.findOne({
+      $or: [{ loginEmail }, { loginNumber }],
+    });
 
-        if (existingUser) {
-            return res.status(400).send({
-                status: false,
-                message: "User already exists with this email or number.",
-            });
-        }
+    if (existingUser) {
+      return res.status(400).send({
+        status: false,
+        message: "User already exists with this email or number.",
+      });
+    }
 
-        // File Handling
-        let profilePic = req?.files?.profilePic?.[0]?.filename || "";
-        let userPhotoOne = req?.files?.userPhotoOne?.[0]?.filename || "";
-        let userPhotoTwo = req?.files?.userPhotoTwo?.[0]?.filename || "";
-        let userPhotoThree = req?.files?.userPhotoThree?.[0]?.filename || "";
-        let userPhotoFour = req?.files?.userPhotoFour?.[0]?.filename || "";
+    // File Handling
+    let profilePic = req?.files?.profilePic?.[0]?.filename || "";
+    let userPhotoOne = req?.files?.userPhotoOne?.[0]?.filename || "";
+    let userPhotoTwo = req?.files?.userPhotoTwo?.[0]?.filename || "";
+    let userPhotoThree = req?.files?.userPhotoThree?.[0]?.filename || "";
+    let userPhotoFour = req?.files?.userPhotoFour?.[0]?.filename || "";
 
-        // Generate new UserId
-        const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
-        const UserId = LastIdUser ? Number(LastIdUser.UserId) + 1 : 1;
+    // Generate new UserId
+    const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
+    const UserId = LastIdUser ? Number(LastIdUser.UserId) + 1 : 1;
 
-        // Active free package 
-        const freePackage = await freepackageModel.findOne({ status: 'Active' })
+    // Active free package 
+    const freePackage = await freepackageModel.findOne({ status: 'Active' })
 
-        // Prepare user object
-        const user = new userModel({
-            // Login credentials
-            UserId,
-            loginEmail,
-            loginNumber,
-            password,
-            CreatedBy: "user",
-            franchiseUnder,
+    // Prepare user object
+    const user = new userModel({
+      // Login credentials
+      UserId,
+      loginEmail,
+      loginNumber,
+      password,
+      CreatedBy: "user",
+      franchiseUnder,
 
-            // Personal Info
-            firstName,
-            lastName,
-            midname,
-            gender,
-            dob,
-            timeOfBirth,
-            placeOfBirth,
-            maritalStatus,
-            children: typeof children === 'string' ? JSON.parse(children) : '',
-            height,
-            occupation,
-            monthlyIncome,
-            nationality: nationality || ["India"],
-            caste: typeof caste === String ? JSON.parse(caste) : '', // assumed to be { religion, caste, subCaste } 
-            motherTongue,
-            divyang,
-            mothersName,
-            fathersName,
-            mamkul,
-            parentsResidence,
-            parentsCity,
-            parentsContact,
-            whatsApp,
-            alternateNumber,
-            brothersCount,
-            brothers,
-            sisters,
-            sistersExactCount,
-            otherInfo,
-            nativeVillage,
-            nativeCity, // { country, state, city }
-            workAbroad: req.body.workAbroad || "No",
+      // Personal Info
+      firstName,
+      lastName,
+      midname,
+      gender,
+      dob,
+      timeOfBirth,
+      placeOfBirth,
+      maritalStatus,
+      children: typeof children === 'string' ? JSON.parse(children) : '',
+      height,
+      occupation,
+      monthlyIncome,
+      nationality: nationality || ["India"],
+      caste: JSON.parse(caste) || '', // assumed to be { religion, caste, subCaste } 
+      motherTongue,
+      divyang,
+      mothersName,
+      fathersName,
+      mamkul,
+      parentsResidence,
+      parentsCity,
+      parentsContact,
+      whatsApp,
+      alternateNumber,
+      brothersCount,
+      brothers,
+      sisters,
+      sistersExactCount,
+      otherInfo,
+      nativeVillage: JSON.parse(nativeVillage) || '',
+      nativeCity: JSON.parse(nativeCity) || '', // { country, state, city }
+      workAbroad: req.body.workAbroad || "No",
 
-            // Education & Career
-            education,
-            companyName,
-            designation,
-            candidateNumber,
-            candidateEmail,
-            workLocation,
-            isWorking: isWorking !== undefined ? isWorking : true,
+      // Education & Career
+      education,
+      companyName,
+      designation,
+      candidateNumber,
+      candidateEmail,
+      workLocation,
+      isWorking: isWorking !== undefined ? isWorking : true,
 
-            // Expectations
-            ageFrom,
-            ageTo,
-            heightFrom,
-            heightTo,
-            expectedEducation,
-            expectedOccupation,
-            expectedMonthlyIncome,
-            expectedWorkAbroad,
-            divyangPrefer,
-            expectedMaritalStatus,
-            expectedNationality,
-            childAccepted,
+      // Expectations
+      ageFrom,
+      ageTo,
+      heightFrom,
+      heightTo,
+      expectedEducation,
+      expectedOccupation,
+      expectedMonthlyIncome,
+      expectedWorkAbroad,
+      divyangPrefer,
+      expectedMaritalStatus,
+      expectedNationality,
+      childAccepted,
 
-            expectedReligion: typeof expectedReligion === 'string' ? JSON.parse(expectedReligion) : expectedReligion,
+      expectedReligion: typeof expectedReligion === 'string' ? JSON.parse(expectedReligion) : expectedReligion,
 
-            expectedNativeLocation: typeof expectedNativeLocation === "string" ? JSON.parse(expectedNativeLocation) : expectedNativeLocation,
+      expectedNativeLocation: typeof expectedNativeLocation === "string" ? JSON.parse(expectedNativeLocation) : expectedNativeLocation,
 
-            expectedWorkingLocation: typeof expectedWorkingLocation === "string" ? JSON.parse(expectedWorkingLocation) : expectedWorkingLocation,
+      expectedWorkingLocation: typeof expectedWorkingLocation === "string" ? JSON.parse(expectedWorkingLocation) : expectedWorkingLocation,
 
-            // Photos
-            profilePic,
-            userPhotoOne,
-            userPhotoTwo,
-            userPhotoThree,
-            userPhotoFour,
+      // Photos
+      profilePic,
+      userPhotoOne,
+      userPhotoTwo,
+      userPhotoThree,
+      userPhotoFour,
 
-            // Special Info
-            sect,
-            manglik,
-            gotra,
-            foodPreference,
-            specs,
-            bloodGroup,
-            numberOfAddresses: freePackage.NumOfFreeAddress
-        });
+      // Special Info
+      sect,
+      manglik,
+      gotra,
+      foodPreference,
+      specs,
+      bloodGroup,
+      freeAddresses: freePackage.NumOfFreeAddress
+    });
 
-        const SavedNewUser = await user.save();
+    const SavedNewUser = await user.save();
 
-        const newPackageLog = new userPackageTrackModel({
-            userId: SavedNewUser._id,
-            freeAddresses: freePackage.NumOfFreeAddress,
-            freePackage: freePackage._id
-        })
-        await newPackageLog.save()
-        // send mail to user
-        sendMail({
-            to: user.loginEmail,
-            subject: "Welcome to ManoMilan – Your Registration Details",
-            text: "Thank you for registering at ManoMilan.",
-            html: `
+    const newPackageLog = new userPackageTrackModel({
+      userId: SavedNewUser._id,
+      freeAddresses: freePackage.NumOfFreeAddress,
+      freePackage: freePackage._id
+    })
+    await newPackageLog.save()
+    // send mail to user
+    sendMail({
+      to: user.loginEmail,
+      subject: "Welcome to ManoMilan – Your Registration Details",
+      text: "Thank you for registering at ManoMilan.",
+      html: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -824,15 +824,15 @@ export const createMember = async (req, res) => {
 </body>
 </html>
 `
-        })
+    })
 
-        const franchise = await franchiseModel.findOne({ franchiseName: SavedNewUser.franchiseUnder });
-        // send mail to franchise 
-        sendMail({
-            to: franchise.email,
-            subject: `New User Registered - ${user.loginEmail}`,
-            text: `A new user has registered.\n\nName:${user.loginEmail}\nPassword: ${password}`,
-            html: `
+    const franchise = await franchiseModel.findOne({ franchiseName: SavedNewUser.franchiseUnder });
+    // send mail to franchise 
+    sendMail({
+      to: franchise.email,
+      subject: `New User Registered - ${user.loginEmail}`,
+      text: `A new user has registered.\n\nName:${user.loginEmail}\nPassword: ${password}`,
+      html: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -920,478 +920,478 @@ export const createMember = async (req, res) => {
 </body>
 </html>
 `
-        });
+    });
 
-        return res.status(200).send({
-            status: true,
-            message: "User registered successfully.",
-            user: SavedNewUser,
-            packageLog: newPackageLog,
-        });
-    } catch (error) {
-        return res.status(500).send({
-            status: false,
-            message: "Server Error",
-        });
-    }
+    return res.status(200).send({
+      status: true,
+      message: "User registered successfully.",
+      user: SavedNewUser,
+      packageLog: newPackageLog,
+    });
+  } catch (error) {
+    return res.status(500).send({
+      status: false,
+      message: "Server Error",
+    });
+  }
 };
 
 export const viewMember = async (req, res) => {
-    try {
-        const franchiseId = req.id;
-        const currentFranchise = await franchiseModel.findById(franchiseId);
+  try {
+    const franchiseId = req.id;
+    const currentFranchise = await franchiseModel.findById(franchiseId);
 
-        const lowerLimit = parseInt(req.query.lowerLimit) || 0;  // start from 0
-        const upperLimit = parseInt(req.query.upperLimit) || 10; // number of results
+    const lowerLimit = parseInt(req.query.lowerLimit) || 0;  // start from 0
+    const upperLimit = parseInt(req.query.upperLimit) || 10; // number of results
 
-        const allUsers = await userModel
-            .find({ CreatedBy: currentFranchise.franchiseName }, '-_id -__v -franchiseUnder -createdBy -password')
-            .skip(lowerLimit)
-            .limit(upperLimit);
+    const allUsers = await userModel
+      .find({ CreatedBy: currentFranchise.franchiseName }, '-_id -__v -franchiseUnder -createdBy -password')
+      .skip(lowerLimit)
+      .limit(upperLimit);
 
-        return res.send({ status: true, result: allUsers });
+    return res.send({ status: true, result: allUsers });
 
-    } catch (error) {
-        console.error(error);
-        return res.send({ status: false, message: "Server Error" });
-    }
+  } catch (error) {
+    console.error(error);
+    return res.send({ status: false, message: "Server Error" });
+  }
 }
 
 export const getSingleUser = async (req, res) => {
-    try {
-        const franchiseId = req.id;
-        const { userId } = req.params;
-        if (!userId) {
-            return res.send({ status: false, message: "User Id not found" })
-        }
-        const franchise = await franchiseModel.findById(franchiseId);
-        const user = await userModel.findById(userId);
-        const isUnderFranchise = user?.franchiseUnder === franchise.franchiseName ? true : false;
-        if (!isUnderFranchise) {
-            return res.send({ status: false, message: 'Sorry this user is not under your frachise. Contact admin.' });
-        }
-        return res.send({ status: true, user })
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
+  try {
+    const franchiseId = req.id;
+    const { userId } = req.params;
+    if (!userId) {
+      return res.send({ status: false, message: "User Id not found" })
     }
+    const franchise = await franchiseModel.findById(franchiseId);
+    const user = await userModel.findById(userId);
+    const isUnderFranchise = user?.franchiseUnder === franchise.franchiseName ? true : false;
+    if (!isUnderFranchise) {
+      return res.send({ status: false, message: 'Sorry this user is not under your frachise. Contact admin.' });
+    }
+    return res.send({ status: true, user })
+  } catch (error) {
+    return res.send({ status: false, message: "Server error" })
+  }
 }
 
 export const InactivateUser = async (req, res) => {
-    try {
-        const { userId } = req.body;
-        if (!userId) {
-            return res.send({ status: false, message: "User id required" })
-        }
-        const user = await userModel.findById(userId);
-        user.ActiveStatus = false;
-        await user.save()
-        return res.send({ status: true, message: "User inactivated successfully." })
-    } catch (error) {
-        return res.send({ status: false, message: 'Server error' })
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.send({ status: false, message: "User id required" })
     }
+    const user = await userModel.findById(userId);
+    user.ActiveStatus = false;
+    await user.save()
+    return res.send({ status: true, message: "User inactivated successfully." })
+  } catch (error) {
+    return res.send({ status: false, message: 'Server error' })
+  }
 }
 // === MESSAGES === 
 
 export const getDistributorAndAdmin = async (req, res) => {
-    const franchiseId = req.id;
-    const franchise = await franchiseModel.findById(franchiseId);
+  const franchiseId = req.id;
+  const franchise = await franchiseModel.findById(franchiseId);
 
-    const users = await userModel.find({ franchiseUnder: franchise.franchiseName })
-    const distributor = await distributorModel.find({ distributorName: franchise.distributorUnder })
-    const admin = await adminModel.find({}, '-points -transactionPassword -givePointsPassword -password -__v -createdAt -updatedAt')
+  const users = await userModel.find({ franchiseUnder: franchise.franchiseName })
+  const distributor = await distributorModel.find({ distributorName: franchise.distributorUnder })
+  const admin = await adminModel.find({}, '-points -transactionPassword -givePointsPassword -password -__v -createdAt -updatedAt')
 
-    return res.send({ status: true, distributor, admin, users })
+  return res.send({ status: true, distributor, admin, users })
 }
 
 export const sendMessageFromFranchise = async (req, res) => {
-    try {
-        const getUserNameById = async (id) => {
-            let user = await adminModel.findById(id) || await distributorModel.findById(id) || await franchiseModel.findById(id) || await userModel.findById(id);
-            return user
-                ? user.firstName
-                    ? `${user.firstName} ${user.midname} ${user.lastName}`
-                    : user.franchiseName || user.distributorName || user.name
-                : 'Unknown';
-        };
+  try {
+    const getUserNameById = async (id) => {
+      let user = await adminModel.findById(id) || await distributorModel.findById(id) || await franchiseModel.findById(id) || await userModel.findById(id);
+      return user
+        ? user.firstName
+          ? `${user.firstName} ${user.midname} ${user.lastName}`
+          : user.franchiseName || user.distributorName || user.name
+        : 'Unknown';
+    };
 
-        const senderId = req.id;
-        const { receiverIds, message } = req.body;
+    const senderId = req.id;
+    const { receiverIds, message } = req.body;
 
-        if (!message) return res.send({ status: false, message: "Message content is missing" });
-        if (!receiverIds || receiverIds.length === 0) return res.send({ status: false, message: "Receiver IDs are missing" });
+    if (!message) return res.send({ status: false, message: "Message content is missing" });
+    if (!receiverIds || receiverIds.length === 0) return res.send({ status: false, message: "Receiver IDs are missing" });
 
-        const franchise = await franchiseModel.findById(senderId);
-        if (!franchise) return res.send({ status: false, message: "Franchise not found" });
+    const franchise = await franchiseModel.findById(senderId);
+    if (!franchise) return res.send({ status: false, message: "Franchise not found" });
 
-        const to = await Promise.all(receiverIds.map(id => getUserNameById(id)));
+    const to = await Promise.all(receiverIds.map(id => getUserNameById(id)));
 
-        const newMessage = new MessageModel({
-            senderId,
-            receiverId: receiverIds,
-            from: franchise.franchiseName || 'Franchise User',
-            to,
-            message,
-            status: 'sent'
-        });
+    const newMessage = new MessageModel({
+      senderId,
+      receiverId: receiverIds,
+      from: franchise.franchiseName || 'Franchise User',
+      to,
+      message,
+      status: 'sent'
+    });
 
-        await newMessage.save();
-        return res.send({ status: true, message: "Message sent successfully" });
-    } catch (error) {
-        return res.send({ status: false, message: "Error sending message", error });
-    }
+    await newMessage.save();
+    return res.send({ status: true, message: "Message sent successfully" });
+  } catch (error) {
+    return res.send({ status: false, message: "Error sending message", error });
+  }
 };
 
 export const draftMessageFromFranchise = async (req, res) => {
-    try {
-        const getUserNameById = async (id) => {
-            let user = await adminModel.findById(id) || await distributorModel.findById(id) || await franchiseModel.findById(id) || await userModel.findById(id);
-            return user
-                ? user.firstName
-                    ? `${user.firstName} ${user.midname} ${user.lastName}`
-                    : user.franchiseName || user.distributorName || user.name
-                : 'Unknown';
-        };
+  try {
+    const getUserNameById = async (id) => {
+      let user = await adminModel.findById(id) || await distributorModel.findById(id) || await franchiseModel.findById(id) || await userModel.findById(id);
+      return user
+        ? user.firstName
+          ? `${user.firstName} ${user.midname} ${user.lastName}`
+          : user.franchiseName || user.distributorName || user.name
+        : 'Unknown';
+    };
 
-        const senderId = req.id;
-        const { receiverIds, message } = req.body;
+    const senderId = req.id;
+    const { receiverIds, message } = req.body;
 
-        if (!message) return res.send({ status: false, message: "Message content is missing" });
-        if (!receiverIds || receiverIds.length === 0) return res.send({ status: false, message: "Receiver IDs are missing" });
+    if (!message) return res.send({ status: false, message: "Message content is missing" });
+    if (!receiverIds || receiverIds.length === 0) return res.send({ status: false, message: "Receiver IDs are missing" });
 
-        const franchise = await franchiseModel.findById(senderId);
-        if (!franchise) return res.send({ status: false, message: "Franchise not found" });
+    const franchise = await franchiseModel.findById(senderId);
+    if (!franchise) return res.send({ status: false, message: "Franchise not found" });
 
-        const to = await Promise.all(receiverIds.map(id => getUserNameById(id)));
+    const to = await Promise.all(receiverIds.map(id => getUserNameById(id)));
 
-        const draftMessage = new MessageModel({
-            senderId,
-            receiverId: receiverIds,
-            from: franchise.franchiseName || 'Franchise User',
-            to,
-            message,
-            status: 'drafted'
-        });
+    const draftMessage = new MessageModel({
+      senderId,
+      receiverId: receiverIds,
+      from: franchise.franchiseName || 'Franchise User',
+      to,
+      message,
+      status: 'drafted'
+    });
 
-        await draftMessage.save();
-        return res.send({ status: true, message: "Message drafted successfully" });
-    } catch (error) {
-        return res.send({ status: false, message: "Error drafting message", error });
-    }
+    await draftMessage.save();
+    return res.send({ status: true, message: "Message drafted successfully" });
+  } catch (error) {
+    return res.send({ status: false, message: "Error drafting message", error });
+  }
 };
 
 export const getSentMessagesForFranchise = async (req, res) => {
-    try {
-        const senderId = req.id;
+  try {
+    const senderId = req.id;
 
-        const messages = await MessageModel.find({
-            senderId,
-            status: 'sent'
-        }).sort({ createdAt: -1 });
+    const messages = await MessageModel.find({
+      senderId,
+      status: 'sent'
+    }).sort({ createdAt: -1 });
 
-        return res.send({ status: true, data: messages });
-    } catch (error) {
-        return res.send({ status: false, message: "Error fetching sent messages", error });
-    }
+    return res.send({ status: true, data: messages });
+  } catch (error) {
+    return res.send({ status: false, message: "Error fetching sent messages", error });
+  }
 };
 
 export const getDraftedMessagesForFranchise = async (req, res) => {
-    try {
-        const senderId = req.id;
+  try {
+    const senderId = req.id;
 
-        const drafts = await MessageModel.find({
-            senderId,
-            status: 'drafted'
-        }).sort({ updatedAt: -1 });
+    const drafts = await MessageModel.find({
+      senderId,
+      status: 'drafted'
+    }).sort({ updatedAt: -1 });
 
-        return res.send({ status: true, data: drafts });
-    } catch (error) {
-        return res.send({ status: false, message: "Error fetching drafted messages", error });
-    }
+    return res.send({ status: true, data: drafts });
+  } catch (error) {
+    return res.send({ status: false, message: "Error fetching drafted messages", error });
+  }
 };
 
 export const getRepliesForFranchise = async (req, res) => {
-    try {
-        const userId = req.id;
+  try {
+    const userId = req.id;
 
-        const replies = await MessageModel.find({
-            receiverId: userId,
-            status: 'sent'
-        }).sort({ createdAt: -1 });
+    const replies = await MessageModel.find({
+      receiverId: userId,
+      status: 'sent'
+    }).sort({ createdAt: -1 });
 
-        return res.send({ status: true, data: replies });
-    } catch (error) {
-        return res.send({ status: false, message: "Error fetching replies", error });
-    }
+    return res.send({ status: true, data: replies });
+  } catch (error) {
+    return res.send({ status: false, message: "Error fetching replies", error });
+  }
 };
 
 export const getCurrentFranchise = async (req, res) => {
-    try {
-        const franchiseId = req.id
-        const franchise = await franchiseModel.findById(franchiseId);
-        return res.send({ status: true, franchise })
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
-    }
+  try {
+    const franchiseId = req.id
+    const franchise = await franchiseModel.findById(franchiseId);
+    return res.send({ status: true, franchise })
+  } catch (error) {
+    return res.send({ status: false, message: "Server error" })
+  }
 }
 
 // === ALLOT PACKAGE ===
 export const getPackages = async (req, res) => {
-    try {
-        const { franchiseId } = req.params;
-        if (!franchiseId) {
-            return res.send({ status: false, message: "franchiseId required" })
-        }
-        const franchisePackages = await franchisePackageModel
-            .find({ franchiseId })
-            .populate('mainPackageId')
-            .populate('vipPackage')
-            .populate('addOnPackage');
-        if (franchisePackages.length === 0) {
-            return res.send({ status: false, message: "No packages alloted" })
-        }
-        return res.send({ status: true, franchisePackages })
-    } catch (error) {
-        return res.send({ status: false, message: "Server error" })
+  try {
+    const { franchiseId } = req.params;
+    if (!franchiseId) {
+      return res.send({ status: false, message: "franchiseId required" })
     }
+    const franchisePackages = await franchisePackageModel
+      .find({ franchiseId })
+      .populate('mainPackageId')
+      .populate('vipPackage')
+      .populate('addOnPackage');
+    if (franchisePackages.length === 0) {
+      return res.send({ status: false, message: "No packages alloted" })
+    }
+    return res.send({ status: true, franchisePackages })
+  } catch (error) {
+    return res.send({ status: false, message: "Server error" })
+  }
 }
 
 export const allotMainAddOnPackage = async (req, res) => {
-    try {
-        const { userId, franchisePackageId } = req.body;
+  try {
+    const { userId, franchisePackageId } = req.body;
 
-        if (!userId || !franchisePackageId) {
-            return res.send({ status: false, message: "userId, franchisePackageId required" });
-        }
-
-        const packageDetails = await franchisePackageModel.findById(franchisePackageId)
-            .populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
-
-        if (parseInt(packageDetails.mainPackageId?.memberCost || packageDetails.addOnPackage?.memberCost) > parseInt(franchise.points)) {
-            return res.send({ status: false, message: "Insufficient points balance. Purchase new points." })
-        }
-        if (!packageDetails) {
-            return res.send({ status: false, message: "Franchise Package not found" });
-        }
-
-        const mainPackage = packageDetails.mainPackageId;
-        if (!mainPackage || mainPackage.adminShare == null || mainPackage.memberCost == null) {
-            return res.send({ status: false, message: "Main package details missing or incomplete" });
-        }
-
-        const franchiseShare = parseInt(packageDetails.franchiseShare);
-        const distributorShare = parseInt(packageDetails.distributorShare);
-        const adminShare = parseInt(mainPackage.adminShare);
-        const memberCost = parseInt(mainPackage.memberCost);
-
-        const user = await userModel.findById(userId);
-        if (!user) {
-            return res.send({ status: false, message: "User not found" });
-        }
-
-        const distributor = await distributorModel.findById(packageDetails.distributorId);
-        if (!distributor) {
-            return res.send({ status: false, message: "Distributor not found" });
-        }
-
-        distributor.points = parseInt(distributor.points) + distributorShare;
-        await distributor.save();
-
-        const newDistributorLog = new distributorpointslogModel({
-            distributorId: distributor._id,
-            points: distributorShare,
-            Type: 'Credited',
-            By: user.loginEmail,
-            Balance: distributor.points
-        });
-        await newDistributorLog.save();
-
-        const franchise = await franchiseModel.findById(packageDetails.franchiseId);
-        if (!franchise) {
-            return res.send({ status: false, message: "Franchise not found" });
-        }
-
-        franchise.points = parseInt(franchise.points) - (distributorShare + adminShare);
-        await franchise.save();
-
-        const newFranchisePointsLog = new franchisePointsLogModel({
-            franchiseId: franchise._id,
-            points: -(distributorShare + adminShare),
-            Type: 'Debited',
-            By: userId,
-            Balance: franchise.points
-        });
-        await newFranchisePointsLog.save();
-
-        const newUserPackage = new userPackageTrackModel({
-            userId,
-            franchisePackage: packageDetails._id,
-        });
-        await newUserPackage.save();
-
-        user.numberOfAddresses = parseInt(user.numberOfAddresses || 0) + parseInt(newUserPackage.assignedAddresses || 0);
-        user.validity = new Date(Date.now() + (newUserPackage.validity || 0) * 24 * 60 * 60 * 1000);
-        await user.save();
-
-        return res.send({
-            status: true,
-            message: "Main/AddOn Package allotted",
-            packageDetails,
-            newFranchisePointsLog,
-            newDistributorLog
-        });
-
-    } catch (error) {
-        console.error("Error in allotMainAddOnPackage:", error);
-        return res.send({ status: false, message: "Server error", error: error.message });
+    if (!userId || !franchisePackageId) {
+      return res.send({ status: false, message: "userId, franchisePackageId required" });
     }
+
+    const packageDetails = await franchisePackageModel.findById(franchisePackageId)
+      .populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
+
+    if (parseInt(packageDetails.mainPackageId?.memberCost || packageDetails.addOnPackage?.memberCost) > parseInt(franchise.points)) {
+      return res.send({ status: false, message: "Insufficient points balance. Purchase new points." })
+    }
+    if (!packageDetails) {
+      return res.send({ status: false, message: "Franchise Package not found" });
+    }
+
+    const mainPackage = packageDetails.mainPackageId;
+    if (!mainPackage || mainPackage.adminShare == null || mainPackage.memberCost == null) {
+      return res.send({ status: false, message: "Main package details missing or incomplete" });
+    }
+
+    const franchiseShare = parseInt(packageDetails.franchiseShare);
+    const distributorShare = parseInt(packageDetails.distributorShare);
+    const adminShare = parseInt(mainPackage.adminShare);
+    const memberCost = parseInt(mainPackage.memberCost);
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.send({ status: false, message: "User not found" });
+    }
+
+    const distributor = await distributorModel.findById(packageDetails.distributorId);
+    if (!distributor) {
+      return res.send({ status: false, message: "Distributor not found" });
+    }
+
+    distributor.points = parseInt(distributor.points) + distributorShare;
+    await distributor.save();
+
+    const newDistributorLog = new distributorpointslogModel({
+      distributorId: distributor._id,
+      points: distributorShare,
+      Type: 'Credited',
+      By: user.loginEmail,
+      Balance: distributor.points
+    });
+    await newDistributorLog.save();
+
+    const franchise = await franchiseModel.findById(packageDetails.franchiseId);
+    if (!franchise) {
+      return res.send({ status: false, message: "Franchise not found" });
+    }
+
+    franchise.points = parseInt(franchise.points) - (distributorShare + adminShare);
+    await franchise.save();
+
+    const newFranchisePointsLog = new franchisePointsLogModel({
+      franchiseId: franchise._id,
+      points: -(distributorShare + adminShare),
+      Type: 'Debited',
+      By: userId,
+      Balance: franchise.points
+    });
+    await newFranchisePointsLog.save();
+
+    const newUserPackage = new userPackageTrackModel({
+      userId,
+      franchisePackage: packageDetails._id,
+    });
+    await newUserPackage.save();
+
+    user.numberOfAddresses = parseInt(user.numberOfAddresses || 0) + parseInt(newUserPackage.assignedAddresses || 0);
+    user.validity = new Date(Date.now() + (newUserPackage.validity || 0) * 24 * 60 * 60 * 1000);
+    await user.save();
+
+    return res.send({
+      status: true,
+      message: "Main/AddOn Package allotted",
+      packageDetails,
+      newFranchisePointsLog,
+      newDistributorLog
+    });
+
+  } catch (error) {
+    console.error("Error in allotMainAddOnPackage:", error);
+    return res.send({ status: false, message: "Server error", error: error.message });
+  }
 };
 
 export const allotVipPackage = async (req, res) => {
-    try {
-        const { userId, franchisePackageId } = req.body;
+  try {
+    const { userId, franchisePackageId } = req.body;
 
-        if (!userId || !franchisePackageId) {
-            return res.send({ status: false, message: "userId, franchisePackageId required" });
-        }
-
-        const packageDetails = await franchisePackageModel.findById(franchisePackageId)
-            .populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
-
-        if (!packageDetails) {
-            return res.send({ status: false, message: "Franchise Package not found" });
-        }
-
-        if (parseInt(packageDetails.vipPackage?.memberCost) > parseInt(franchise.points)) {
-            return res.send({ status: false, message: "Insufficient points balance. Purchase new points." })
-        }
-
-        const vipPackage = packageDetails.vipPackage;
-        if (!vipPackage || vipPackage.adminShare == null || vipPackage.memberCost == null) {
-            return res.send({ status: false, message: "VIP package details missing or incomplete" });
-        }
-
-        const franchiseShare = parseInt(packageDetails.franchiseShare);
-        const distributorShare = parseInt(packageDetails.distributorShare);
-        const adminShare = parseInt(vipPackage.adminShare);
-        const memberCost = parseInt(vipPackage.memberCost);
-
-        const user = await userModel.findById(userId);
-        if (!user) {
-            return res.send({ status: false, message: "User not found" });
-        }
-
-        if (!user.vipMember) {
-            return res.send({ status: false, message: "User is not a VIP member." });
-        }
-
-        const distributor = await distributorModel.findById(packageDetails.distributorId);
-        if (!distributor) {
-            return res.send({ status: false, message: "Distributor not found" });
-        }
-
-        distributor.points = parseInt(distributor.points) + distributorShare;
-        await distributor.save();
-
-        const newDistributorLog = new distributorpointslogModel({
-            distributorId: distributor._id,
-            points: distributorShare,
-            Type: 'Credited',
-            By: user.loginEmail,
-            Balance: distributor.points
-        });
-        await newDistributorLog.save();
-
-        const franchise = await franchiseModel.findById(packageDetails.franchiseId);
-        if (!franchise) {
-            return res.send({ status: false, message: "Franchise not found" });
-        }
-
-        franchise.points = parseInt(franchise.points) - (distributorShare + adminShare);
-        await franchise.save();
-
-        const newFranchisePointsLog = new franchisePointsLogModel({
-            franchiseId: franchise._id,
-            points: -(distributorShare + adminShare),
-            Type: 'Debited',
-            By: userId,
-            Balance: franchise.points
-        });
-        await newFranchisePointsLog.save();
-
-        const newUserPackage = new userPackageTrackModel({
-            userId,
-            franchisePackage: packageDetails._id,
-        });
-        await newUserPackage.save();
-
-        user.numberOfAddresses = parseInt(user.numberOfAddresses || 0) + parseInt(newUserPackage.assignedAddresses || 0);
-        user.validity = new Date(Date.now() + (newUserPackage.validity || 0) * 24 * 60 * 60 * 1000);
-        await user.save();
-
-        return res.send({
-            status: true,
-            message: "VIP Package allotted",
-            packageDetails,
-            newFranchisePointsLog,
-            newDistributorLog
-        });
-
-    } catch (error) {
-        console.error("Error in allotVipPackage:", error);
-        return res.send({ status: false, message: "Server error", error: error.message });
+    if (!userId || !franchisePackageId) {
+      return res.send({ status: false, message: "userId, franchisePackageId required" });
     }
+
+    const packageDetails = await franchisePackageModel.findById(franchisePackageId)
+      .populate(['mainPackageId', 'vipPackage', 'addOnPackage']);
+
+    if (!packageDetails) {
+      return res.send({ status: false, message: "Franchise Package not found" });
+    }
+
+    if (parseInt(packageDetails.vipPackage?.memberCost) > parseInt(franchise.points)) {
+      return res.send({ status: false, message: "Insufficient points balance. Purchase new points." })
+    }
+
+    const vipPackage = packageDetails.vipPackage;
+    if (!vipPackage || vipPackage.adminShare == null || vipPackage.memberCost == null) {
+      return res.send({ status: false, message: "VIP package details missing or incomplete" });
+    }
+
+    const franchiseShare = parseInt(packageDetails.franchiseShare);
+    const distributorShare = parseInt(packageDetails.distributorShare);
+    const adminShare = parseInt(vipPackage.adminShare);
+    const memberCost = parseInt(vipPackage.memberCost);
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.send({ status: false, message: "User not found" });
+    }
+
+    if (!user.vipMember) {
+      return res.send({ status: false, message: "User is not a VIP member." });
+    }
+
+    const distributor = await distributorModel.findById(packageDetails.distributorId);
+    if (!distributor) {
+      return res.send({ status: false, message: "Distributor not found" });
+    }
+
+    distributor.points = parseInt(distributor.points) + distributorShare;
+    await distributor.save();
+
+    const newDistributorLog = new distributorpointslogModel({
+      distributorId: distributor._id,
+      points: distributorShare,
+      Type: 'Credited',
+      By: user.loginEmail,
+      Balance: distributor.points
+    });
+    await newDistributorLog.save();
+
+    const franchise = await franchiseModel.findById(packageDetails.franchiseId);
+    if (!franchise) {
+      return res.send({ status: false, message: "Franchise not found" });
+    }
+
+    franchise.points = parseInt(franchise.points) - (distributorShare + adminShare);
+    await franchise.save();
+
+    const newFranchisePointsLog = new franchisePointsLogModel({
+      franchiseId: franchise._id,
+      points: -(distributorShare + adminShare),
+      Type: 'Debited',
+      By: userId,
+      Balance: franchise.points
+    });
+    await newFranchisePointsLog.save();
+
+    const newUserPackage = new userPackageTrackModel({
+      userId,
+      franchisePackage: packageDetails._id,
+    });
+    await newUserPackage.save();
+
+    user.numberOfAddresses = parseInt(user.numberOfAddresses || 0) + parseInt(newUserPackage.assignedAddresses || 0);
+    user.validity = new Date(Date.now() + (newUserPackage.validity || 0) * 24 * 60 * 60 * 1000);
+    await user.save();
+
+    return res.send({
+      status: true,
+      message: "VIP Package allotted",
+      packageDetails,
+      newFranchisePointsLog,
+      newDistributorLog
+    });
+
+  } catch (error) {
+    console.error("Error in allotVipPackage:", error);
+    return res.send({ status: false, message: "Server error", error: error.message });
+  }
 };
 
 // === OFFICE INFO ===
 export const updateOfficeInformation = async (req, res) => {
-    try {
-        const {
-            userId,
-            Complexion,
-            BodyType,
-            familyBackground,
-            features,
-            officeHeight,
-            position,
-            vipMember,
-            Reference,
-            ReferenceMobile,
-        } = req.body;
+  try {
+    const {
+      userId,
+      Complexion,
+      BodyType,
+      familyBackground,
+      features,
+      officeHeight,
+      position,
+      vipMember,
+      Reference,
+      ReferenceMobile,
+    } = req.body;
 
-        if (!userId) {
-            return res.status(400).json({ message: "User ID is required" });
-        }
-
-        const user = await userModel.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        // Update basic fields
-        user.Complexion = Complexion || user.Complexion;
-        user.BodyType = BodyType || user.BodyType;
-        user.familyBackground = familyBackground || user.familyBackground;
-        user.features = features || user.features;
-        user.officeHeight = officeHeight || user.officeHeight;
-        user.position = position || user.position;
-        user.vipMember = vipMember === 'true' || vipMember === true;
-        user.Reference = Reference || user.Reference;
-        user.ReferenceMobile = ReferenceMobile || user.ReferenceMobile;
-
-        // Handle uploaded files (Multer adds req.files)
-        user.userPhotoFive = req?.files?.userPhotoFive?.[0]?.filename || "";
-        user.userPhotoSix = req?.files?.userPhotoSix?.[0]?.filename || "";
-
-
-        await user.save();
-
-        res.status(200).json({
-            message: "Office information updated successfully",
-            data: user
-        });
-
-    } catch (error) {
-        console.error("Error in updateOfficeInformation:", error);
-        res.status(500).json({ message: "Internal server error", error: error.message });
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
     }
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update basic fields
+    user.Complexion = Complexion || user.Complexion;
+    user.BodyType = BodyType || user.BodyType;
+    user.familyBackground = familyBackground || user.familyBackground;
+    user.features = features || user.features;
+    user.officeHeight = officeHeight || user.officeHeight;
+    user.position = position || user.position;
+    user.vipMember = vipMember === 'true' || vipMember === true;
+    user.Reference = Reference || user.Reference;
+    user.ReferenceMobile = ReferenceMobile || user.ReferenceMobile;
+
+    // Handle uploaded files (Multer adds req.files)
+    user.userPhotoFive = req?.files?.userPhotoFive?.[0]?.filename || "";
+    user.userPhotoSix = req?.files?.userPhotoSix?.[0]?.filename || "";
+
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Office information updated successfully",
+      data: user
+    });
+
+  } catch (error) {
+    console.error("Error in updateOfficeInformation:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
+  }
 };
