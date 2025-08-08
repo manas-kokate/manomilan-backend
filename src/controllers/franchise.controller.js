@@ -665,8 +665,8 @@ export const createMember = async (req, res) => {
       sisters,
       sistersExactCount,
       otherInfo,
-      nativeVillage: JSON.parse(nativeVillage) || '',
-      nativeCity: JSON.parse(nativeCity) || '', // { country, state, city }
+      nativeVillage,
+      nativeCity, // { country, state, city }
       workAbroad: req.body.workAbroad || "No",
 
       // Education & Career
@@ -712,7 +712,7 @@ export const createMember = async (req, res) => {
       foodPreference,
       specs,
       bloodGroup,
-      freeAddresses: freePackage.NumOfFreeAddress
+      numberOfAddresses: freePackage.NumOfFreeAddress
     });
 
     const SavedNewUser = await user.save();
