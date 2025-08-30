@@ -481,11 +481,11 @@ export const login = async (req, res) => {
 };
 
 export const getOtpForUser = async (req, res) => {
-  const { id } = req.body;
-  if (!id) return res.send({ status: false, message: "ID required" });
+  const { email } = req.body;
+  if (!email) return res.send({ status: false, message: "email required" });
 
-  const user = await userModel.findById(id);
-  if (!user) return res.send({ status: false, message: "User not found." });
+  const user = await userModel.findOne({ loginEmail: email });
+  if (!user) return res.send({ status: false, message: "User not found.Check email you entered." });
 
   const otp = Math.floor(100000 + Math.random() * 900000);
   await otpModel.create({ id, otp });
@@ -706,12 +706,15 @@ export const getOtpForUser = async (req, res) => {
 };
 
 export const verifyOtpAndChangeUserPassword = async (req, res) => {
-  const { id, otp, newPassword } = req.body;
-  if (!id || !otp || !newPassword)
+  const { email, otp, newPassword } = req.body; // send email , otp and newpassword
+  if (!email || !otp || !newPassword)
     return res.send({ status: false, message: "All fields required." });
 
+  const user = await userModel.findOne({ loginEmail: email });
+  const id = user._id;
+
   const otpEntry = await otpModel.findOne({ id }).sort({ createdAt: -1 });
-  if (!otpEntry) return res.send({ status: false, message: "OTP not found or expired." });
+  if (!otpEntry) return res.send({ status: false, message: "OTP not found." });
 
   const isExpired = new Date() - new Date(otpEntry.createdAt) > 10 * 60 * 1000;
   if (isExpired) return res.send({ status: false, message: "OTP expired." });
