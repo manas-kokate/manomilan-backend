@@ -485,6 +485,7 @@ export const getOtpForUser = async (req, res) => {
   if (!email) return res.send({ status: false, message: "email required" });
 
   const user = await userModel.findOne({ loginEmail: email });
+  const id = user._id
   if (!user) return res.send({ status: false, message: "User not found.Check email you entered." });
 
   const otp = Math.floor(100000 + Math.random() * 900000);
