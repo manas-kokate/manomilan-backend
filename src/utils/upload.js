@@ -38,7 +38,7 @@ const upload = multer({ storage: storage }).fields([
 export const uploadMiddleware = (req, res, next) => {
     upload(req, res, (err) => {
         if (err) {
-            return res.send({ status: false, message: "file not uploaded" })
+            return res.send({ status: false, message: "file not uploaded", err })
         }
         next()
     })

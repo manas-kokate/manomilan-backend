@@ -11,216 +11,216 @@ import userPackageTrackModel from "../models/small_models/userPackageTrack.model
 import otpModel from "../models/small_models/otp.model.js";
 
 export const registerUser = async (req, res) => {
-  try {
-    const {
-      // Login credentials
-      loginEmail,
-      loginNumber,
-      password,
-      franchiseUnder,
+  // try {
+  const {
+    // Login credentials
+    loginEmail,
+    loginNumber,
+    password,
+    franchiseUnder,
 
-      // Personal Info
-      firstName,
-      lastName,
-      midname,
-      gender,
-      dob,
-      timeOfBirth,
-      placeOfBirth,
-      maritalStatus,
-      children,
-      height,
-      occupation,
-      monthlyIncome,
-      nationality,
-      caste, // should be an object { religion, caste, subCaste }
-      motherTongue,
-      divyang,
-      mothersName,
-      fathersName,
-      mamkul,
-      parentsResidence,
-      parentsCity,
-      parentsContact,
-      whatsApp,
-      alternateNumber,
-      brothersCount,
-      brothers,
-      sisters,
-      sistersExactCount,
-      otherInfo,
-      nativeVillage,
-      nativeCity, // should be an object { country, state, city }
+    // Personal Info
+    firstName,
+    lastName,
+    midname,
+    gender,
+    dob,
+    timeOfBirth,
+    placeOfBirth,
+    maritalStatus,
+    children,
+    height,
+    occupation,
+    monthlyIncome,
+    nationality,
+    caste, // should be an object { religion, caste, subCaste }
+    motherTongue,
+    divyang,
+    mothersName,
+    fathersName,
+    mamkul,
+    parentsResidence,
+    parentsCity,
+    parentsContact,
+    whatsApp,
+    alternateNumber,
+    brothersCount,
+    brothers,
+    sisters,
+    sistersExactCount,
+    otherInfo,
+    nativeVillage,
+    nativeCity, // should be an object { country, state, city }
 
-      // Education & Career
-      education,
-      companyName,
-      designation,
-      candidateNumber,
-      candidateEmail,
-      workLocation,
-      isWorking,
+    // Education & Career
+    education,
+    companyName,
+    designation,
+    candidateNumber,
+    candidateEmail,
+    workLocation,
+    isWorking,
 
-      // Expectations
-      ageFrom,
-      ageTo,
-      heightFrom,
-      heightTo,
-      expectedEducation,
-      expectedOccupation,
-      expectedMonthlyIncome,
-      expectedWorkAbroad,
-      divyangPrefer,
-      expectedMaritalStatus,
-      expectedNationality,
-      childAccepted,
-      expectedReligion, // array of { religion, caste, subCaste }
-      expectedNativeLocation, // array of { country, state, city }
-      expectedWorkingLocation, // array of { country, state, city }
+    // Expectations
+    ageFrom,
+    ageTo,
+    heightFrom,
+    heightTo,
+    expectedEducation,
+    expectedOccupation,
+    expectedMonthlyIncome,
+    expectedWorkAbroad,
+    divyangPrefer,
+    expectedMaritalStatus,
+    expectedNationality,
+    childAccepted,
+    expectedReligion, // array of { religion, caste, subCaste }
+    expectedNativeLocation, // array of { country, state, city }
+    expectedWorkingLocation, // array of { country, state, city }
 
-      // Special Info
-      sect,
-      manglik,
-      gotra,
-      foodPreference,
-      specs,
-      bloodGroup,
-    } = req.body;
+    // Special Info
+    sect,
+    manglik,
+    gotra,
+    foodPreference,
+    specs,
+    bloodGroup,
+  } = req.body;
 
-    if (!loginEmail || !loginNumber || !password || !franchiseUnder) {
-      return res.status(400).send({ status: false, message: "Login credentials required to register" });
-    }
+  if (!loginEmail || !loginNumber || !password || !franchiseUnder) {
+    return res.status(400).send({ status: false, message: "Login credentials required to register" });
+  }
 
-    // Check for existing user
-    const existingUser = await userModel.findOne({
-      $or: [{ loginEmail }, { loginNumber }],
+  // Check for existing user
+  const existingUser = await userModel.findOne({
+    $or: [{ loginEmail }, { loginNumber }],
+  });
+
+  if (existingUser) {
+    return res.status(400).send({
+      status: false,
+      message: "User already exists with this email or number.",
     });
+  }
 
-    if (existingUser) {
-      return res.status(400).send({
-        status: false,
-        message: "User already exists with this email or number.",
-      });
-    }
+  // File Handling
+  let profilePic = req?.files?.profilePic?.[0]?.filename || "";
+  let userPhotoOne = req?.files?.userPhotoOne?.[0]?.filename || "";
+  let userPhotoTwo = req?.files?.userPhotoTwo?.[0]?.filename || "";
+  let userPhotoThree = req?.files?.userPhotoThree?.[0]?.filename || "";
+  let userPhotoFour = req?.files?.userPhotoFour?.[0]?.filename || "";
 
-    // File Handling
-    let profilePic = req?.files?.profilePic?.[0]?.filename || "";
-    let userPhotoOne = req?.files?.userPhotoOne?.[0]?.filename || "";
-    let userPhotoTwo = req?.files?.userPhotoTwo?.[0]?.filename || "";
-    let userPhotoThree = req?.files?.userPhotoThree?.[0]?.filename || "";
-    let userPhotoFour = req?.files?.userPhotoFour?.[0]?.filename || "";
+  // Generate new UserId
+  const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
+  const UserId = LastIdUser ? Number(LastIdUser.UserId) + 1 : 1;
 
-    // Generate new UserId
-    const LastIdUser = await userModel.findOne().sort({ UserId: -1 });
-    const UserId = LastIdUser ? Number(LastIdUser.UserId) + 1 : 1;
+  // Active free package 
+  const freePackage = await freepackageModel.findOne({ status: 'Active' })
 
-    // Active free package 
-    const freePackage = await freepackageModel.findOne({ status: 'Active' })
+  // Prepare user object
+  const user = new userModel({
+    // Login credentials
+    UserId,
+    loginEmail,
+    loginNumber,
+    password,
+    CreatedBy: "user",
+    franchiseUnder,
 
-    // Prepare user object
-    const user = new userModel({
-      // Login credentials
-      UserId,
-      loginEmail,
-      loginNumber,
-      password,
-      CreatedBy: "user",
-      franchiseUnder,
+    // Personal Info
+    firstName,
+    lastName,
+    midname,
+    gender,
+    dob,
+    timeOfBirth,
+    placeOfBirth,
+    maritalStatus,
+    children: typeof children === 'string' ? JSON.parse(children) : '',
+    height,
+    occupation,
+    monthlyIncome,
+    nationality: nationality || ["India"],
+    // caste: JSON.parse(caste) || '', // assumed to be { religion, caste, subCaste } 
+    motherTongue,
+    divyang,
+    mothersName,
+    fathersName,
+    mamkul,
+    parentsResidence,
+    parentsCity,
+    parentsContact,
+    whatsApp,
+    alternateNumber,
+    brothersCount,
+    brothers,
+    sisters,
+    sistersExactCount,
+    otherInfo,
+    nativeVillage,
+    nativeCity, // { country, state, city }
+    workAbroad: req.body.workAbroad || "No",
 
-      // Personal Info
-      firstName,
-      lastName,
-      midname,
-      gender,
-      dob,
-      timeOfBirth,
-      placeOfBirth,
-      maritalStatus,
-      children: typeof children === 'string' ? JSON.parse(children) : '',
-      height,
-      occupation,
-      monthlyIncome,
-      nationality: nationality || ["India"],
-      caste: JSON.parse(caste) || '', // assumed to be { religion, caste, subCaste } 
-      motherTongue,
-      divyang,
-      mothersName,
-      fathersName,
-      mamkul,
-      parentsResidence,
-      parentsCity,
-      parentsContact,
-      whatsApp,
-      alternateNumber,
-      brothersCount,
-      brothers,
-      sisters,
-      sistersExactCount,
-      otherInfo,
-      nativeVillage,
-      nativeCity, // { country, state, city }
-      workAbroad: req.body.workAbroad || "No",
+    // Education & Career
+    education,
+    companyName,
+    designation,
+    candidateNumber,
+    candidateEmail,
+    workLocation,
+    isWorking: isWorking !== undefined ? isWorking : true,
 
-      // Education & Career
-      education,
-      companyName,
-      designation,
-      candidateNumber,
-      candidateEmail,
-      workLocation,
-      isWorking: isWorking !== undefined ? isWorking : true,
+    // Expectations
+    ageFrom,
+    ageTo,
+    heightFrom,
+    heightTo,
+    expectedEducation,
+    expectedOccupation,
+    expectedMonthlyIncome,
+    expectedWorkAbroad,
+    divyangPrefer,
+    expectedMaritalStatus,
+    expectedNationality,
+    childAccepted,
 
-      // Expectations
-      ageFrom,
-      ageTo,
-      heightFrom,
-      heightTo,
-      expectedEducation,
-      expectedOccupation,
-      expectedMonthlyIncome,
-      expectedWorkAbroad,
-      divyangPrefer,
-      expectedMaritalStatus,
-      expectedNationality,
-      childAccepted,
+    expectedReligion: typeof expectedReligion === 'string' ? JSON.parse(expectedReligion) : expectedReligion,
 
-      expectedReligion: typeof expectedReligion === 'string' ? JSON.parse(expectedReligion) : expectedReligion,
+    expectedNativeLocation: typeof expectedNativeLocation === "string" ? JSON.parse(expectedNativeLocation) : expectedNativeLocation,
 
-      expectedNativeLocation: typeof expectedNativeLocation === "string" ? JSON.parse(expectedNativeLocation) : expectedNativeLocation,
+    expectedWorkingLocation: typeof expectedWorkingLocation === "string" ? JSON.parse(expectedWorkingLocation) : expectedWorkingLocation,
 
-      expectedWorkingLocation: typeof expectedWorkingLocation === "string" ? JSON.parse(expectedWorkingLocation) : expectedWorkingLocation,
+    // Photos
+    profilePic,
+    userPhotoOne,
+    userPhotoTwo,
+    userPhotoThree,
+    userPhotoFour,
 
-      // Photos
-      profilePic,
-      userPhotoOne,
-      userPhotoTwo,
-      userPhotoThree,
-      userPhotoFour,
+    // Special Info
+    sect,
+    manglik,
+    gotra,
+    foodPreference,
+    specs,
+    bloodGroup,
+    numberOfAddresses: freePackage.NumOfFreeAddress
+  });
 
-      // Special Info
-      sect,
-      manglik,
-      gotra,
-      foodPreference,
-      specs,
-      bloodGroup,
-      numberOfAddresses: freePackage.NumOfFreeAddress
-    });
+  const SavedNewUser = await user.save();
 
-    const SavedNewUser = await user.save();
-
-    const newPackageLog = new userPackageTrackModel({
-      userId: SavedNewUser._id,
-      freeAddresses: freePackage.NumOfFreeAddress,
-      freePackage: freePackage._id
-    })
-    await newPackageLog.save()
-    // send mail to user
-    sendMail({
-      to: user.loginEmail,
-      subject: "Welcome to ManoMilan – Your Registration Details",
-      text: "Thank you for registering at ManoMilan.",
-      html: `
+  const newPackageLog = new userPackageTrackModel({
+    userId: SavedNewUser._id,
+    freeAddresses: freePackage.NumOfFreeAddress,
+    freePackage: freePackage._id
+  })
+  await newPackageLog.save()
+  // send mail to user
+  sendMail({
+    to: user.loginEmail,
+    subject: "Welcome to ManoMilan – Your Registration Details",
+    text: "Thank you for registering at ManoMilan.",
+    html: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -316,15 +316,15 @@ export const registerUser = async (req, res) => {
 </body>
 </html>
 `
-    })
+  })
 
-    const franchise = await franchiseModel.findOne({ franchiseName: SavedNewUser.franchiseUnder });
-    // send mail to franchise 
-    sendMail({
-      to: franchise.email,
-      subject: `New User Registered - ${user.loginEmail}`,
-      text: `A new user has registered.\n\nName:${user.loginEmail}\nPassword: ${password}`,
-      html: `
+  const franchise = await franchiseModel.findOne({ franchiseName: SavedNewUser.franchiseUnder });
+  // send mail to franchise 
+  sendMail({
+    to: franchise.email,
+    subject: `New User Registered - ${user.loginEmail}`,
+    text: `A new user has registered.\n\nName:${user.loginEmail}\nPassword: ${password}`,
+    html: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -412,20 +412,20 @@ export const registerUser = async (req, res) => {
 </body>
 </html>
 `
-    });
+  });
 
-    return res.status(200).send({
-      status: true,
-      message: "User registered successfully.",
-      user: SavedNewUser,
-      packageLog: newPackageLog,
-    });
-  } catch (error) {
-    return res.status(500).send({
-      status: false,
-      message: "Server Error",
-    });
-  }
+  return res.status(200).send({
+    status: true,
+    message: "User registered successfully.",
+    user: SavedNewUser,
+    packageLog: newPackageLog,
+  });
+  // } catch (error) {
+  //   return res.status(500).send({
+  //     status: false,
+  //     message: "Server Error",
+  //   });
+  // }
 };
 
 export const login = async (req, res) => {
@@ -723,8 +723,7 @@ export const verifyOtpAndChangeUserPassword = async (req, res) => {
   if (parseInt(otp) !== otpEntry.otp)
     return res.send({ status: false, message: "Incorrect OTP." });
 
-  const hashedPassword = await bcrypt.hash(newPassword.toString(), 10);
-  await userModel.findByIdAndUpdate(id, { password: hashedPassword });
+  await userModel.findByIdAndUpdate(id, { password: Number(newPassword) });
   await otpModel.deleteMany({ id });
 
   return res.send({ status: true, message: "Password updated successfully." });
