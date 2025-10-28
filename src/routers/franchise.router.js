@@ -16,7 +16,8 @@ import {
     updateOfficeInformation,
     getOtpForFranchise,
     verifyOtpAndChangeFranchisePassword,
-    InactivateUser
+    InactivateUser,
+    getReportsFranchise
 } from "../controllers/franchise.controller.js";
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
 import { getFranchisePointsLog } from "../controllers/distributor.controller.js";
@@ -37,6 +38,9 @@ router.get('/view-members', franchiseAuth, viewMember);
 router.get('/get-single-user/:userId', franchiseAuth, getSingleUser);
 router.get('/getCurrentUser/:userId', getCurrentUser)
 router.post('/inactivate-user', InactivateUser)
+
+// Reports
+router.post("/reports", franchiseAuth, getReportsFranchise);
 
 // === OFFICE INFO ===
 router.put('/update-user-profile', uploadMiddleware, updateOfficeInformation)

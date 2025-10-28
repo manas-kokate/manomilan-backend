@@ -990,6 +990,93 @@ export const InactivateUser = async (req, res) => {
     return res.send({ status: false, message: 'Server error' })
   }
 }
+
+// Reports 
+export const getReportsFranchise = async (req, res) => {
+  try {
+    const franchiseId = req.id; // franchise JWT id
+    const { filters = {}, fields = [] } = req.body;
+
+    const currentFranchise = await franchiseModel.findById(franchiseId);
+    if (!currentFranchise) {
+      return res.status(403).json({ success: false, message: "Invalid franchise" });
+    }
+
+    let query = {
+      CreatedBy: currentFranchise.franchiseName // 🔒 HARD SCOPE SECURITY
+    };
+
+    // SAME FILTER LOGIC AS ADMIN & DISTRIBUTOR
+    if (filters.nativeCountry) query["nativeCity.country"] = filters.nativeCountry;
+    if (filters.nativeState) query["nativeCity.state"] = filters.nativeState;
+    if (filters.nativeCity) query["nativeCity.city"] = filters.nativeCity;
+
+    if (filters.workCountry) query["workLocation.country"] = filters.workCountry;
+    if (filters.workState) query["workLocation.state"] = filters.workState;
+    if (filters.workCity) query["workLocation.city"] = filters.workCity;
+
+    if (filters.religion) query["caste.religion"] = filters.religion;
+    if (filters.caste) query["caste.caste"] = filters.caste;
+    if (filters.subCaste) query["caste.subCaste"] = filters.subCaste;
+    if (filters.motherTongue) query["motherTongue"] = filters.motherTongue;
+
+    if (filters.education) {
+      query["education"] = Array.isArray(filters.education)
+        ? { $in: filters.education }
+        : filters.education;
+    }
+    if (filters.occupation) query["occupation"] = filters.occupation;
+    if (filters.monthlyIncome) {
+      const income = Number(filters.monthlyIncome);
+      if (!isNaN(income)) query["monthlyIncome"] = { $gte: income };
+    }
+
+    if (filters.maritalStatus) query["maritalStatus"] = filters.maritalStatus;
+    if (filters.divyang) query["divyang"] = filters.divyang;
+
+    // MANDATORY OUTPUT FIELDS
+    const mandatoryFields = [
+      "_id",
+      "UserId",
+      "firstName",
+      "lastName",
+      "loginEmail",
+      "userPhotoStatus",
+      "loginNumber",
+      "whatsApp",
+      "createdAt",
+      "updatedAt",
+      "ActiveStatus"
+    ];
+
+    let projection = {};
+    [...new Set([...mandatoryFields, ...fields])].forEach(field => {
+      if (field !== "password") projection[field] = 1;
+    });
+
+    // FETCH DATA
+    const users = await userModel.find(query, projection);
+    const sanitizedUsers = users.map(u => {
+      const obj = u.toObject();
+      delete obj.password;
+      return obj;
+    });
+
+    res.status(200).json({
+      success: true,
+      count: sanitizedUsers.length,
+      data: sanitizedUsers
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server Error. Check request.",
+      error: error.message
+    });
+  }
+};
+
 // === MESSAGES === 
 
 export const getDistributorAndAdmin = async (req, res) => {

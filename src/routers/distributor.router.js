@@ -17,7 +17,8 @@ import {
     getOtpForDistributor,
     verifyOtpAndChangeDistributorPassword,
     changeTransactionPassword,
-    inactivateFranchise
+    inactivateFranchise,
+    getReportsDistributor
 } from "../controllers/distributor.controller.js";
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
@@ -38,6 +39,9 @@ router.get('/get-single-user', getSingleUser);
 router.post('/get-current-distributor', getCurrentDistributor); //send Id in req.body
 router.post('/get-single-franchise', distributorAuth, getSingleFranchise)
 router.get('/getCurrentUser/:userId', getCurrentUser)
+
+// Reports
+router.post("/reports", distributorAuth, getReportsDistributor);
 
 //Inactivate franchise
 router.put('/inactivate-franchise', distributorAuth, inactivateFranchise)

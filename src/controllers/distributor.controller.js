@@ -606,6 +606,105 @@ export const getSingleUser = async (req, res) => {
     }
 }
 
+// REPORTS 
+// REPORT API FOR DISTRIBUTOR (scoped version of admin getReports)
+export const getReportsDistributor = async (req, res) => {
+    try {
+        const distributorId = req.id;
+        const { filters = {}, fields = [] } = req.body;
+        let query = {};
+
+        // First, LIMIT visibility
+        const currentDistributor = await distributorModel.findById(distributorId);
+        const franchisesUnder = await franchiseModel.find({
+            distributorUnder: currentDistributor.distributorName
+        });
+
+        if (franchisesUnder.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No franchises found under you. Kindly create/register a franchise."
+            });
+        }
+
+        const allowedFranchises = franchisesUnder.map(f => f.franchiseName);
+        query["franchiseUnder"] = { $in: allowedFranchises }; // ENFORCED SCOPE ✅
+
+        // SAME FILTER LOGIC AS ADMIN
+        if (filters.nativeCountry) query["nativeCity.country"] = filters.nativeCountry;
+        if (filters.nativeState) query["nativeCity.state"] = filters.nativeState;
+        if (filters.nativeCity) query["nativeCity.city"] = filters.nativeCity;
+
+        if (filters.workCountry) query["workLocation.country"] = filters.workCountry;
+        if (filters.workState) query["workLocation.state"] = filters.workState;
+        if (filters.workCity) query["workLocation.city"] = filters.workCity;
+
+        if (filters.religion) query["caste.religion"] = filters.religion;
+        if (filters.caste) query["caste.caste"] = filters.caste;
+        if (filters.subCaste) query["caste.subCaste"] = filters.subCaste;
+        if (filters.motherTongue) query["motherTongue"] = filters.motherTongue;
+
+        if (filters.education) {
+            query["education"] = Array.isArray(filters.education)
+                ? { $in: filters.education }
+                : filters.education;
+        }
+        if (filters.occupation) query["occupation"] = filters.occupation;
+        if (filters.monthlyIncome) {
+            const income = Number(filters.monthlyIncome);
+            if (!isNaN(income)) query["monthlyIncome"] = { $gte: income };
+        }
+
+        if (filters.maritalStatus) query["maritalStatus"] = filters.maritalStatus;
+        if (filters.divyang) query["divyang"] = filters.divyang;
+
+        // 🚨 distributor / franchise filters ARE IGNORED FROM BODY
+        // distributor CANNOT override scope manually
+
+        // Mandatory fields (shared with admin API)
+        const mandatoryFields = [
+            "_id",
+            "UserId",
+            "firstName",
+            "lastName",
+            "loginEmail",
+            "franchiseUnder",
+            "userPhotoStatus",
+            "loginNumber",
+            "whatsApp",
+            "createdAt",
+            "updatedAt",
+            "ActiveStatus"
+        ];
+
+        let projection = {};
+        [...new Set([...mandatoryFields, ...fields])].forEach(f => {
+            if (f !== "password") projection[f] = 1;
+        });
+
+        const users = await userModel.find(query, projection);
+
+        const sanitizedUsers = users.map(user => {
+            const obj = user.toObject();
+            delete obj.password;
+            return obj;
+        });
+
+        res.status(200).json({
+            success: true,
+            count: sanitizedUsers.length,
+            data: sanitizedUsers
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server Error. Check your request body.",
+            error: error.message
+        });
+    }
+};
+
 // === POINTS ===
 export const givePointsToFranchise = async (req, res) => {
     try {
