@@ -2061,7 +2061,7 @@ export const addFreePackage = async (req, res) => {
         }
         const newPackage = new freepackageModel({
             NumOfFreeAddress,
-            validity,
+            validity: Number(validity),
             packageId,
             status: 'Active'
         })
