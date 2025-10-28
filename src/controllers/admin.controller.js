@@ -670,7 +670,29 @@ export const deleteUser = async (req, res) => {
     }
 }
 
-// update user details api added.
+export const changeFranchiseEmail = async (req, res) => {
+    const { franchiseId, newEmail } = req.body
+    if (!franchiseId || !newEmail) {
+        return res.send({ status: false, message: "franchise Id and email required." })
+    }
+    const franchise = await franchiseModel.findById(franchiseId)
+    franchise.email = newEmail;
+    await franchise.save();
+    return res.send({ status: true, message: "Franchise Email updated successfully." })
+}
+
+export const changeDistributorEmail = async (req, res) => {
+    const { distributorId, newEmail } = req.body
+    if (!distributorId || !newEmail) {
+        return res.send({ status: false, message: "Distributor Id and email required." })
+    }
+    const distributor = await distributorModel.findById(distributorId)
+    distributor.email = newEmail;
+    await distributor.save();
+    return res.send({ status: true, message: "Distributor Email updated successfully." })
+}
+
+
 export const updateUserDetails = async (req, res) => {
     try {
         const { userID, updateDetails } = req.body;

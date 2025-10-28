@@ -500,7 +500,8 @@ export const inactivateFranchise = async (req, res) => {
     if (!franchise) {
         return res.send({ status: false, messsage: "Wrong ID franchise not found." })
     }
-    await franchise.updateOne({ Status: 'inactive' })
+    franchise.Status = "inactive"
+    await franchise.save()
     return res.send({ status: true, message: "Franchise inactivated successfully." })
 }
 
@@ -607,7 +608,6 @@ export const getSingleUser = async (req, res) => {
 }
 
 // REPORTS 
-// REPORT API FOR DISTRIBUTOR (scoped version of admin getReports)
 export const getReportsDistributor = async (req, res) => {
     try {
         const distributorId = req.id;

@@ -94,7 +94,9 @@ import {
     changeGivePointsPassword,
     getSingleUser,
     inactivateDistributor,
-    updateUserDetails
+    updateUserDetails,
+    changeFranchiseEmail,
+    changeDistributorEmail
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
@@ -112,6 +114,10 @@ router.post('/forgot-password-otp', getOtp);
 router.post('/change-password', verifyOtpAndChangePassword)
 router.post('/change-transactionPassword', changeTransactionPassword)
 router.post('/change-givePointsPassword', changeGivePointsPassword)
+
+// change emails
+router.put('/change-franchise-email', adminAuth, changeFranchiseEmail)
+router.put('change-distributor-email', adminAuth, changeDistributorEmail)
 
 // === USER ==== 
 router.get('/get-users', getUsers);

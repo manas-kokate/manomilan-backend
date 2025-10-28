@@ -12,6 +12,9 @@ const freePackageSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ['Active', 'Inactive']
+    },
+    validity: {
+        type: Number
     }
 }, { timestamps: true });
 

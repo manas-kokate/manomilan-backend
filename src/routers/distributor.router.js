@@ -22,7 +22,7 @@ import {
 } from "../controllers/distributor.controller.js";
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
-import { getDistributorPointsLog } from "../controllers/admin.controller.js";
+import { getAllVipPackages, getDistributorPointsLog } from "../controllers/admin.controller.js";
 import { getCurrentUser } from "../controllers/user.controller.js";
 
 const router = express.Router()
@@ -63,7 +63,10 @@ router.get('/get/pointsLog/:distributorId', getDistributorPointsLog)
 router.post('/give-points-to-franchise', distributorAuth, givePointsToFranchise)
 router.get('/get/franchiseLogs/:franchiseId', getFranchisePointsLog)
 
-// === PACKAGEs ===
+// === PACKAGES ===
 router.post('/give-package-to-franchise', distributorAuth, givePackageToFranchise);
+
+
+
 
 export default router

@@ -80,7 +80,7 @@ const distributorSchema = new mongoose.Schema({
         enum: ['Active', 'Inactive'],
         default: 'Active'
     }
-});
+}, { timestamps: true });
 
 distributorSchema.pre("save", async function (next) {
     if (this.isModified('transactionPassword')) {
