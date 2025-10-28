@@ -492,18 +492,26 @@ export const getOtpForDistributor = async (req, res) => {
 };
 
 export const inactivateFranchise = async (req, res) => {
-    const { franchiseId } = req.body;
-    if (!franchiseId) {
-        return res.send({ status: false, message: "Franchise Id not found" })
+    try {
+        const { franchiseId } = req.body;
+        if (!franchiseId) {
+            return res.send({ status: false, message: "Franchise Id not found" });
+        }
+
+        const franchise = await franchiseModel.findById(franchiseId);
+        if (!franchise) {
+            return res.send({ status: false, message: "Wrong ID — franchise not found." });
+        }
+
+        franchise.Status = "inactive";
+        await franchise.save();
+
+        return res.send({ status: true, message: "Franchise inactivated successfully." });
+    } catch (error) {
+        console.error("Error inactivateFranchise:", error);
+        return res.status(500).send({ status: false, message: "Internal server error." });
     }
-    const franchise = await franchiseModel.findById(franchiseId);
-    if (!franchise) {
-        return res.send({ status: false, messsage: "Wrong ID franchise not found." })
-    }
-    franchise.Status = "inactive"
-    await franchise.save()
-    return res.send({ status: true, message: "Franchise inactivated successfully." })
-}
+};
 
 // VERIFY OTP AND CHANGE PASSWORD
 export const verifyOtpAndChangeDistributorPassword = async (req, res) => {

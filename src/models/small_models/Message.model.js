@@ -24,8 +24,12 @@ const messagesSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: ['sent', 'drafted'],
+    },
+    readStatus: {
+        type: String,
+        default: "unread",
+        enum: ['read', 'unread'],
     }
-
 }, { timestamps: true })
 
 export default mongoose.models.message || mongoose.model('message', messagesSchema);

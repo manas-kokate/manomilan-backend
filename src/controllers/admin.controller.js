@@ -671,27 +671,48 @@ export const deleteUser = async (req, res) => {
 }
 
 export const changeFranchiseEmail = async (req, res) => {
-    const { franchiseId, newEmail } = req.body
-    if (!franchiseId || !newEmail) {
-        return res.send({ status: false, message: "franchise Id and email required." })
+    try {
+        const { franchiseId, newEmail } = req.body;
+        if (!franchiseId || !newEmail) {
+            return res.send({ status: false, message: "Franchise ID and email required." });
+        }
+
+        const franchise = await franchiseModel.findById(franchiseId);
+        if (!franchise) {
+            return res.send({ status: false, message: "Franchise not found." });
+        }
+
+        franchise.email = newEmail;
+        await franchise.save();
+
+        return res.send({ status: true, message: "Franchise email updated successfully." });
+    } catch (error) {
+        console.error("Error changeFranchiseEmail:", error);
+        return res.status(500).send({ status: false, message: "Internal server error." });
     }
-    const franchise = await franchiseModel.findById(franchiseId)
-    franchise.email = newEmail;
-    await franchise.save();
-    return res.send({ status: true, message: "Franchise Email updated successfully." })
-}
+};
 
 export const changeDistributorEmail = async (req, res) => {
-    const { distributorId, newEmail } = req.body
-    if (!distributorId || !newEmail) {
-        return res.send({ status: false, message: "Distributor Id and email required." })
-    }
-    const distributor = await distributorModel.findById(distributorId)
-    distributor.email = newEmail;
-    await distributor.save();
-    return res.send({ status: true, message: "Distributor Email updated successfully." })
-}
+    try {
+        const { distributorId, newEmail } = req.body;
+        if (!distributorId || !newEmail) {
+            return res.send({ status: false, message: "Distributor ID and email required." });
+        }
 
+        const distributor = await distributorModel.findById(distributorId);
+        if (!distributor) {
+            return res.send({ status: false, message: "Distributor not found." });
+        }
+
+        distributor.email = newEmail;
+        await distributor.save();
+
+        return res.send({ status: true, message: "Distributor email updated successfully." });
+    } catch (error) {
+        console.error("Error changeDistributorEmail:", error);
+        return res.status(500).send({ status: false, message: "Internal server error." });
+    }
+};
 
 export const updateUserDetails = async (req, res) => {
     try {
@@ -2042,6 +2063,19 @@ export const getDistributorPointsLog = async (req, res) => {
 }
 
 // === PACKAGES ===
+
+export const getAllPackages = async (req, res) => {
+    try {
+        const vipPackages = await vipPackageModel.find();
+        const freepackages = await freepackageModel.find();
+        const mainPackages = await mainPackageModel.find();
+        const addOnPackages = await addOnPackageModel.find();
+        return res.send({ status: true, vipPackages, freepackages, mainPackages, addOnPackages })
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" })
+    }
+}
+
 export const addFreePackage = async (req, res) => {
     try {
         const {
@@ -2429,6 +2463,29 @@ export const getUsersUnderFranchise = async (req, res) => {
         return res.send({ status: false, message: "Server Error" });
     }
 }
+
+export const setRead = async (req, res) => {
+    try {
+        const { messageId, readStatus } = req.body;
+        // readStatus should be "read"
+        if (!messageId || !readStatus) {
+            return res.send({ status: false, message: "messageId and readStatus required." });
+        }
+
+        const message = await MessageModel.findById(messageId);
+        if (!message) {
+            return res.send({ status: false, message: "Message not found." });
+        }
+
+        message.readStatus = "read"; // enforce "read" regardless of user input
+        await message.save();
+
+        return res.send({ status: true, message: "Message set to read." });
+    } catch (error) {
+        console.error("Error in setRead:", error);
+        return res.status(500).send({ status: false, message: "Internal server error." });
+    }
+};
 
 export const sendMessageFromAdmin = async (req, res) => {
     try {

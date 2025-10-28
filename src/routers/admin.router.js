@@ -96,7 +96,9 @@ import {
     inactivateDistributor,
     updateUserDetails,
     changeFranchiseEmail,
-    changeDistributorEmail
+    changeDistributorEmail,
+    setRead,
+    getAllPackages
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
@@ -234,6 +236,7 @@ router.get('/get-single-franchise/:id', adminAuth, getSingleFranchise);
 router.get('/get-single-distributor/:id', adminAuth, getSingleDistributor);
 
 // === PACKAGES === 
+router.get('get-all-packages', getAllPackages)
 // Free Package Routes
 router.post('/add-free-packages', addFreePackage);
 router.get('/get-free-packages', getFreepackages);
@@ -254,6 +257,8 @@ router.get('/get-addon-packages', getAddOnPackages);
 
 // === MESSAGES ===
 router.get('/get-Users-Under/:id', getUsersUnderFranchise)
+
+router.put('/set-read', setRead)
 
 router.post('/message/send', adminAuth, sendMessageFromAdmin);
 router.get('/message/get-sendMessages', adminAuth, getSentMessagesForAdmin);
