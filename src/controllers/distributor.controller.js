@@ -491,6 +491,19 @@ export const getOtpForDistributor = async (req, res) => {
     return res.send({ status: true, message: "OTP sent to email." });
 };
 
+export const inactivateFranchise = async (req, res) => {
+    const { franchiseId } = req.body;
+    if (!franchiseId) {
+        return res.send({ status: false, message: "Franchise Id not found" })
+    }
+    const franchise = await franchiseModel.findById(franchiseId);
+    if (!franchise) {
+        return res.send({ status: false, messsage: "Wrong ID franchise not found." })
+    }
+    await franchise.updateOne({ Status: 'inactive' })
+    return res.send({ status: true, message: "Franchise inactivated successfully." })
+}
+
 // VERIFY OTP AND CHANGE PASSWORD
 export const verifyOtpAndChangeDistributorPassword = async (req, res) => {
     try {

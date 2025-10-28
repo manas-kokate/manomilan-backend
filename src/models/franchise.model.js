@@ -71,6 +71,10 @@ const franchiseSchema = new mongoose.Schema({
         twitter: { type: String },
         linkedin: { type: String },
         website: { type: String }
+    },
+    Status: {
+        type: String,
+        default: 'active'
     }
 }, { timestamps: true });
 

@@ -670,6 +670,59 @@ export const deleteUser = async (req, res) => {
     }
 }
 
+// update user details api added.
+export const updateUserDetails = async (req, res) => {
+    try {
+        const { userID, updateDetails } = req.body;
+
+        if (!userID) {
+            return res.status(400).json({ message: "userID is required" });
+        }
+        if (!updateDetails || typeof updateDetails !== "object") {
+            return res.status(400).json({ message: "updateDetails must be a valid object" });
+        }
+
+        // Parse only those that could arrive as JSON string
+        const safeParse = (val) => {
+            if (typeof val === "string") {
+                try { return JSON.parse(val); } catch { return val; }
+            }
+            return val;
+        };
+
+        const cleanData = {
+            ...updateDetails,
+            expectedReligion: safeParse(updateDetails.expectedReligion),
+            expectedNativeLocation: safeParse(updateDetails.expectedNativeLocation),
+            expectedWorkingLocation: safeParse(updateDetails.expectedWorkingLocation),
+            children: safeParse(updateDetails.children),
+        };
+
+        const updatedUser = await userModel.findOneAndUpdate(
+            { UserId: userID },
+            { $set: cleanData },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res.status(200).json({
+            message: "User updated successfully",
+            user: updatedUser,
+        });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            message: "Something went wrong",
+            error: err.message,
+        });
+    }
+};
+
+
 // ==== COUNTRY ====  
 export const getCountry = async (req, res) => {
     try {

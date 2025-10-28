@@ -93,7 +93,8 @@ import {
     changeTransactionPassword,
     changeGivePointsPassword,
     getSingleUser,
-    inactivateDistributor
+    inactivateDistributor,
+    updateUserDetails
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
@@ -115,6 +116,7 @@ router.post('/change-givePointsPassword', changeGivePointsPassword)
 // === USER ==== 
 router.get('/get-users', getUsers);
 router.put('/update-userpfp', adminAuth, updateUserPfp);
+router.put('/update-user', adminAuth, updateUserDetails)
 router.get('/get-single-user/:id', getSingleUser)
 
 // === COUNTRY === 
