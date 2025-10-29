@@ -1118,6 +1118,21 @@ export const editExpectaions = async (req, res) => {
   }
 }
 
+export const inActivateUser = async (req, res) => {
+  try {
+    const userId = req.id;
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.send({ status: false, message: "User not found." })
+    }
+    user.ActiveStatus = false;
+    await user.save();
+    return res.send({ status: true, message: "User deactivated successfully." })
+  }
+  catch (error) {
+    return res.send({ status: false, message: "Server error" })
+  }
+}
 // === SUBSCRIBE ===
 export const subscribe = async (req, res) => {
   try {

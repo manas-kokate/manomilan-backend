@@ -236,7 +236,8 @@ router.get('/get-single-franchise/:id', adminAuth, getSingleFranchise);
 router.get('/get-single-distributor/:id', adminAuth, getSingleDistributor);
 
 // === PACKAGES === 
-router.get('get-all-packages', getAllPackages)
+router.get('/get-all-packages', getAllPackages)
+
 // Free Package Routes
 router.post('/add-free-packages', addFreePackage);
 router.get('/get-free-packages', getFreepackages);

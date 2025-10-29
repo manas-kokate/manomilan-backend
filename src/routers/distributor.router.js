@@ -22,7 +22,7 @@ import {
 } from "../controllers/distributor.controller.js";
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
-import { getAllVipPackages, getDistributorPointsLog } from "../controllers/admin.controller.js";
+import { getAllPackages, getAllVipPackages, getDistributorPointsLog } from "../controllers/admin.controller.js";
 import { getCurrentUser } from "../controllers/user.controller.js";
 
 const router = express.Router()
@@ -41,7 +41,7 @@ router.post('/get-single-franchise', distributorAuth, getSingleFranchise)
 router.get('/getCurrentUser/:userId', getCurrentUser)
 
 // Reports
-router.post("/reports", distributorAuth, getReportsDistributor);
+router.post("/reports", getReportsDistributor);
 
 //Inactivate franchise
 router.put('/inactivate-franchise', distributorAuth, inactivateFranchise)
@@ -65,6 +65,7 @@ router.get('/get/franchiseLogs/:franchiseId', getFranchisePointsLog)
 
 // === PACKAGES ===
 router.post('/give-package-to-franchise', distributorAuth, givePackageToFranchise);
+router.get('/get-all-packages', getAllPackages)
 
 
 

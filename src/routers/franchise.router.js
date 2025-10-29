@@ -22,6 +22,7 @@ import {
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
 import { getFranchisePointsLog } from "../controllers/distributor.controller.js";
 import { getCurrentUser } from "../controllers/user.controller.js";
+import { getAllPackages } from "../controllers/admin.controller.js";
 
 
 const router = express.Router();
@@ -40,7 +41,7 @@ router.get('/getCurrentUser/:userId', getCurrentUser)
 router.post('/inactivate-user', InactivateUser)
 
 // Reports
-router.post("/reports", franchiseAuth, getReportsFranchise);
+router.post("/reports", getReportsFranchise);
 
 // === OFFICE INFO ===
 router.put('/update-user-profile', uploadMiddleware, updateOfficeInformation)
@@ -60,6 +61,7 @@ router.get('/get-current-franchise', franchiseAuth, getCurrentFranchise)
 router.get('/get-packages/:franchiseId', getPackages)
 router.post('/allot-main-addOnpackage', allotMainAddOnPackage)
 router.post('/allot-vip-package', allotVipPackage)
+router.get('/get-all-packages', getAllPackages)
 
 // === POINTS ===
 router.get('/get/franchiseLogs/:franchiseId', getFranchisePointsLog)
