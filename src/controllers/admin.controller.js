@@ -1885,8 +1885,7 @@ export const inactivateDistributor = async (req, res) => {
         if (!distributor) {
             return res.send({ status: false, message: 'Distributor not found. Check Id properly.' })
         }
-        distributor.status == 'Inactive';
-        await distributor.save()
+        await distributorModel.findByIdAndUpdate(distributorId, { status: 'Inactive' })
         return res.send({ status: true, message: 'Distributor inactivated.' })
     } catch (error) {
         return res.send({ status: false, message: 'Server error.' })
