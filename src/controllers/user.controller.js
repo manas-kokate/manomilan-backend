@@ -1374,4 +1374,23 @@ export const getAvailablePackages = async (req, res) => {
   }
 }
 
+export const checkUserExists = async (req, res) => {
+  try {
+    const { email, dob, name } = req.body;
+    if (!email || !dob || !name) {
+      return res.send({ status: false, message: "All fields are required" })
+    }
+    const fname = name.split(' ')[0]
+    const mname = name.split(' ')[1]
+    const lname = name.split(' ')[2]
+    if (await userModel.findOne({ loginEmail: email, dob: new Date(dob), firstName: fname, midname: mname, lastName: lname })) {
+      return res.send({ status: true, message: "User exists" })
+    }
+    return res.send({ status: false, message: "User not found" })
+  }
+  catch (error) {
+    return res.send({ status: false, message: "Server error" })
+  }
+}
+
 
