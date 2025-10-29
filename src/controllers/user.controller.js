@@ -784,6 +784,7 @@ export const getCurrentUserWithoutAuth = async (req, res) => {
   }
 }
 
+
 export const mutualMatching = async (req, res) => {
   try {
     const userId = req.id;
@@ -1123,16 +1124,68 @@ export const editExpectaions = async (req, res) => {
 
 export const inActivateUser = async (req, res) => {
   try {
-    const userId = req.id;
+    const { reason, adminId, userId } = req.body;
     const user = await userModel.findById(userId);
     if (!user) {
       return res.send({ status: false, message: "User not found." })
     }
+    if (!reason) {
+      return res.send({ status: false, message: "Please provide reason for deactivating account." })
+    }
+    const admin = await adminModel.findById(adminId);
     user.ActiveStatus = false;
     await user.save();
+    sendMail({
+      to: admin.email,
+      subject: "User Account Self-Deactivation Notice – ManoMilan",
+      text: "A user has deactivated their ManoMilan account.",
+      html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Self-Deactivated Account</title>
+  <style>
+    /* --- same styles unchanged --- */
+    body { margin:0; padding:0; background:linear-gradient(135deg,#7d0a0a 0%,#a81313 100%); font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+    .email-container { max-width:600px; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 20px 40px rgba(0, 0, 0, 0.15); margin:20px; }
+    .header { background:linear-gradient(135deg,#7d0a0a 0%,#a81313 100%); padding:30px; text-align:center; color:white; }
+    .header h1 { margin:0; font-size:26px; font-weight:600; }
+    .content { padding:40px 30px; text-align:center; }
+    .content p { font-size:16px; color:#444; line-height:1.5; margin-bottom:20px; }
+    .credentials-box { background:#f8f8f8; padding:20px; border-radius:12px; margin-bottom:30px; border:1px dashed #7d0a0a; }
+    .credentials-box p { margin:6px 0; font-weight:600; }
+    .footer { background:#f9f9f9; padding:20px; text-align:center; font-size:14px; color:#999; }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>User Self-Deactivated Account</h1>
+    </div>
+    <div class="content">
+      <p><strong>${user.firstName} ${user.midname} ${user.lastName}</strong> has voluntarily deactivated their ManoMilan account.</p>
+      
+      <div class="credentials-box">
+        <p><strong>User Email:</strong> ${user.loginEmail}</p>
+        <p><strong>Reason Provided:</strong>${reason}</p> <!-- req.body.reason goes here -->
+      </div>
+
+      <p>This is for your information. No action is required unless follow-up is needed.</p>
+    </div>
+    <div class="footer">
+      &copy; 2025 ManoMilan Matrimony
+    </div>
+  </div>
+</body>
+</html>
+`
+    })
     return res.send({ status: true, message: "User deactivated successfully." })
   }
   catch (error) {
+    console.log(error)
     return res.send({ status: false, message: "Server error" })
   }
 }

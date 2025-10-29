@@ -109,4 +109,5 @@ router.get('/get-available-packages', getAvailablePackages)
 // check user status
 router.post('/user-exists/:userId', checkUserExists)
 
+
 export default router
