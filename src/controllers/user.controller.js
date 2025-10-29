@@ -7,6 +7,9 @@ import MessageModel from "../models/small_models/Message.model.js";
 import adminModel from "../models/admin.model.js";
 import distributorModel from "../models/distributor.model.js";
 import freepackageModel from "../models/small_models/freepackage.model.js";
+import vipPackageModel from "../models/small_models/vipPackage.model.js";
+import addOnPackageModel from "../models/small_models/addOnPackage.model.js";
+import mainPackageModel from "../models/small_models/mainPackage.model.js";
 import userPackageTrackModel from "../models/small_models/userPackageTrack.model.js";
 import otpModel from "../models/small_models/otp.model.js";
 
@@ -1355,6 +1358,19 @@ export const getUserPackages = async (req, res) => {
 
   } catch (error) {
     return res.send({ status: false, message: "server error" })
+  }
+}
+
+export const getAvailablePackages = async (req, res) => {
+  try {
+    const packages = [];
+    const mainPackages = await mainPackageModel.find({ status: 'Active' });
+    const vipPackages = await vipPackageModel.find({ status: 'Active' });
+    const addOnPackages = await addOnPackageModel.find({ status: 'Active' });
+    packages.push({ ...mainPackages, ...vipPackages, ...addOnPackages });
+    return res.send({ status: true, packages });
+  } catch (error) {
+    return res.send({ status: false, message: "Server error" });
   }
 }
 
