@@ -18,12 +18,13 @@ import {
     verifyOtpAndChangeDistributorPassword,
     changeTransactionPassword,
     inactivateFranchise,
-    getReportsDistributor
+    getReportsDistributor,
+    editProfileDistributor
 } from "../controllers/distributor.controller.js";
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
 import { getAllPackages, getAllVipPackages, getDistributorPointsLog } from "../controllers/admin.controller.js";
-import { getCurrentUser } from "../controllers/user.controller.js";
+import { editProfile, getCurrentUser } from "../controllers/user.controller.js";
 
 const router = express.Router()
 
@@ -39,6 +40,8 @@ router.get('/get-single-user', getSingleUser);
 router.post('/get-current-distributor', getCurrentDistributor); //send Id in req.body
 router.post('/get-single-franchise', distributorAuth, getSingleFranchise)
 router.get('/getCurrentUser/:userId', getCurrentUser)
+
+router.put('/edit-profile', distributorAuth, editProfileDistributor);
 
 // Reports
 router.post("/reports", getReportsDistributor);

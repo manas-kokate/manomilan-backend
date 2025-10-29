@@ -263,6 +263,20 @@ export const changeTransactionPassword = async (req, res) => {
     }
 };
 
+export const editProfileDistributor = async (req, res) => {
+    try {
+        const distributorId = req.id;
+        const { updateData } = req.body;
+        const distributor = await distributorModel.findByIdAndUpdate(distributorId, updateData, { new: true });
+        if (!distributor) {
+            return res.send({ status: false, message: "Distributor not found." });
+        }
+        return res.send({ status: true, message: "Profile updated successfully.", distributor });
+    } catch (error) {
+        return res.send({ status: false, message: "Server error" });
+    }
+};
+
 
 export const getOtpForDistributor = async (req, res) => {
     const { id } = req.body;
