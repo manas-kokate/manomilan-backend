@@ -2390,18 +2390,16 @@ export const addAddOnPackage = async (req, res) => {
             numberOfAddresses,
             memberCost,
             distributorShare,
-            franchiseShare,
-            validity,
+            franchiseShare
         } = req.body
 
         if (!packageName ||
             !numberOfAddresses ||
             !memberCost ||
-            !validity ||
             !distributorShare ||
             !franchiseShare
         ) {
-            return res.send({ status: false, message: 'NumOfFreeAddress , validity,memberCost,distributorShare,franchiseShare  required' })
+            return res.send({ status: false, message: 'NumOfFreeAddress ,memberCost,distributorShare,franchiseShare  required' })
         }
 
         let packageId = 1;
@@ -2417,7 +2415,6 @@ export const addAddOnPackage = async (req, res) => {
             adminShare: parseInt(memberCost) - parseInt(distributorShare) - parseInt(franchiseShare),
             distributorShare,
             franchiseShare,
-            validity,
             status: 'Active'
         })
         await addOnPackageModel.updateMany({}, { $set: { status: 'Inactive' } });
