@@ -144,7 +144,7 @@ export const registerUser = async (req, res) => {
     occupation,
     monthlyIncome,
     nationality: nationality || ["India"],
-    // caste: JSON.parse(caste) || '', // assumed to be { religion, caste, subCaste } 
+    caste: JSON.parse(caste) || '', // assumed to be { religion, caste, subCaste } 
     motherTongue,
     divyang,
     mothersName,
@@ -161,7 +161,7 @@ export const registerUser = async (req, res) => {
     sistersExactCount,
     otherInfo,
     nativeVillage,
-    nativeCity, // { country, state, city }
+    nativeCity: JSON.parse(nativeCity) || '', // { country, state, city }
     workAbroad: req.body.workAbroad || "No",
 
     // Education & Career
@@ -1429,14 +1429,14 @@ export const getAvailablePackages = async (req, res) => {
 
 export const checkUserExists = async (req, res) => {
   try {
-    const { email, dob, name } = req.body;
-    if (!email || !dob || !name) {
+    const { mobileNo, dob, name } = req.body;
+    if (!mobileNo || !dob || !name) {
       return res.send({ status: false, message: "All fields are required" })
     }
     const fname = name.split(' ')[0]
     const mname = name.split(' ')[1]
     const lname = name.split(' ')[2]
-    if (await userModel.findOne({ loginEmail: email, dob: new Date(dob), firstName: fname, midname: mname, lastName: lname })) {
+    if (await userModel.findOne({ loginEmail: mobileNo, dob: new Date(dob), firstName: fname, midname: mname, lastName: lname })) {
       return res.send({ status: true, message: "User exists" })
     }
     return res.send({ status: false, message: "User not found" })

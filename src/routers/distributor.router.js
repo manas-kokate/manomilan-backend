@@ -19,7 +19,8 @@ import {
     changeTransactionPassword,
     inactivateFranchise,
     getReportsDistributor,
-    editProfileDistributor
+    editProfileDistributor,
+    deleteMessage
 } from "../controllers/distributor.controller.js";
 import { distributorAuth } from "../middlewares/auth.js";
 import { uploadMiddleware } from "../utils/upload.js";
@@ -60,6 +61,8 @@ router.post('/message/draft', distributorAuth, draftMessageFromDistributor);
 router.get('/message/get-draftedMessages', distributorAuth, getDraftedMessagesForDistributor);
 
 router.get('/message/replies', distributorAuth, getRepliesForDistributor);
+
+router.delete('/delete-message', deleteMessage);
 
 //=== POINTS ===
 router.get('/get/pointsLog/:distributorId', getDistributorPointsLog)

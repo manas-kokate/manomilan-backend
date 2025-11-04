@@ -102,7 +102,7 @@ import {
 
 } from '../controllers/admin.controller.js';
 import { adminAuth } from '../middlewares/auth.js';
-import { getFranchisePointsLog } from '../controllers/distributor.controller.js';
+import { deleteMessage, getFranchisePointsLog } from '../controllers/distributor.controller.js';
 
 
 const router = express.Router();
@@ -268,6 +268,8 @@ router.post('/message/draft', adminAuth, draftMessageFromAdmin);
 router.get('/message/get-draftedMessages', adminAuth, getDraftedMessagesForAdmin);
 
 router.get('/message/replies', adminAuth, getRepliesForAdmin);
+
+router.delete('/delete-message', deleteMessage);
 
 // === REPORTS ===
 router.post('/get-reports', getReports);

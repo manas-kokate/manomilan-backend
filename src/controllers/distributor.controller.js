@@ -956,6 +956,19 @@ export const getRepliesForDistributor = async (req, res) => {
     }
 };
 
+export const deleteMessage = async (req, res) => {
+    try {
+        const { messageId } = req.body;
+        if (!messageId) {
+            return res.send({ status: false, message: "Message ID required" });
+        }
+        await MessageModel.findByIdAndDelete(messageId);
+        return res.send({ status: true, message: "Message deleted successfully" });
+    } catch (error) {
+        return res.send({ status: false, message: "Error deleting message", error });
+    }
+};
+
 // === PACKAGES ===
 export const givePackageToFranchise = async (req, res) => {
     try {

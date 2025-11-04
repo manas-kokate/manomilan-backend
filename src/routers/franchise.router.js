@@ -20,7 +20,7 @@ import {
     getReportsFranchise
 } from "../controllers/franchise.controller.js";
 import { distributorAuth, franchiseAuth } from "../middlewares/auth.js";
-import { getFranchisePointsLog } from "../controllers/distributor.controller.js";
+import { deleteMessage, getFranchisePointsLog } from "../controllers/distributor.controller.js";
 import { getCurrentUser } from "../controllers/user.controller.js";
 import { getAllPackages } from "../controllers/admin.controller.js";
 
@@ -34,7 +34,7 @@ router.post('/verify-otp-reset-password', verifyOtpAndChangeFranchisePassword);
 
 
 router.put('/update/:franchiseId', uploadMiddleware, updateFranchiseProfile);
-router.post('/create-member', franchiseAuth, uploadMiddleware, createMember);
+router.post('/create-member', uploadMiddleware, createMember);
 router.get('/view-members', franchiseAuth, viewMember);
 router.get('/get-single-user/:userId', franchiseAuth, getSingleUser);
 router.get('/getCurrentUser/:userId', getCurrentUser)
@@ -57,6 +57,9 @@ router.get('/message/get-draftedMessages', franchiseAuth, getDraftedMessagesForF
 
 router.get('/message/replies', franchiseAuth, getRepliesForFranchise);
 router.get('/get-current-franchise', franchiseAuth, getCurrentFranchise)
+
+router.delete('/delete-message', deleteMessage);
+
 // === PACKAGES ===
 router.get('/get-packages/:franchiseId', getPackages)
 router.post('/allot-main-addOnpackage', allotMainAddOnPackage)

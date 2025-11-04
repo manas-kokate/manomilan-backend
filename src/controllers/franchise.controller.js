@@ -11,6 +11,7 @@ import franchisePointsLogModel from "../models/small_models/franchisePointsLog.m
 import distributorpointslogModel from "../models/small_models/distributorpointslog.model.js";
 import sendMail from "../utils/mail.js";
 import otpModel from "../models/small_models/otp.model.js";
+import freepackageModel from "../models/small_models/freepackage.model.js";
 
 export const registerFranchise = async (req, res) => {
   const distributorId = req.id;
@@ -666,7 +667,7 @@ export const createMember = async (req, res) => {
       sistersExactCount,
       otherInfo,
       nativeVillage,
-      nativeCity, // { country, state, city }
+      nativeCity: JSON.parse(nativeCity) || '', // { country, state, city }
       workAbroad: req.body.workAbroad || "No",
 
       // Education & Career

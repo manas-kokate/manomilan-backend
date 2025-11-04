@@ -20,6 +20,7 @@ import {
     getAllLocations,
     getSubCasteEntry,
 } from "../controllers/admin.controller.js";
+import { deleteMessage } from "../controllers/distributor.controller.js";
 
 
 
@@ -102,12 +103,14 @@ router.get('/message/get-draftedMessages', userAuth, getDraftedMessagesForUser);
 
 router.get('/message/replies', userAuth, getRepliesForUser);
 
+router.delete('/delete-message', deleteMessage);
+
 // === PACKAGE ===
 router.get('/get-packages/:userId', getUserPackages)
 router.get('/get-available-packages', getAvailablePackages)
 
 // check user status
-router.post('/user-exists/:userId', checkUserExists)
+router.post('/user-exists', checkUserExists)
 
 
 export default router
